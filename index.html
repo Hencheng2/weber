@@ -42,12 +42,19 @@
         #main-content {
             display: flex;
             flex-direction: row;
+            gap: 20px;
         }
         #menu {
             width: 250px;
             background-color: #2d2d2d;
             padding: 20px;
             border-right: 1px solid #444;
+        }
+        #properties {
+            width: 250px;
+            background-color: #2d2d2d;
+            padding: 20px;
+            border-left: 1px solid #444;
         }
         details {
             margin-bottom: 10px;
@@ -81,7 +88,6 @@
             border: 1px solid #444;
             position: relative;
             overflow: auto;
-            margin-left: 20px;
         }
         #code {
             margin-top: 20px;
@@ -97,12 +103,6 @@
             padding: 10px;
             font-family: monospace;
             resize: vertical;
-        }
-        #properties {
-            margin-top: 20px;
-            background-color: #3c3c3c;
-            padding: 10px;
-            border-radius: 4px;
         }
         #properties label {
             display: block;
@@ -261,8 +261,7 @@
                         <li draggable="true" data-type="article" data-class="utility article" data-width="300" data-height="150">Article</li>
                         <li draggable="true" data-type="aside" data-class="utility aside" data-width="150" data-height="200">Aside</li>
                         <li draggable="true" data-type="p" data-class="utility paragraph" data-content="Paragraph text" data-width="200" data-height="50">Paragraph</li>
-                        <li draggable="true" data-type="div" data-class="utility card" data-width="200" data-height="150">Card</li>
-                        <li draggable="true" data-type="hr" data-class="utility divider" data-width="200" data-height="2">Divider</li>
+                        <li draggable="true" data-type="div" data-class="utility card" data-width="200" dataเรา
                     </ul>
                 </details>
                 <details id="creatives">
@@ -274,13 +273,13 @@
                         <li draggable="true" data-type="div" data-class="creative carousel" data-width="300" data-height="200">Carousel</li>
                     </ul>
                 </details>
-                <div id="properties">
-                    <h3>Properties</h3>
-                    <div id="prop-content"></div>
-                    <button id="delete-btn" style="display: none; background-color: #dc3545; border: none; color: white; padding: 10px; cursor: pointer;">Delete Selected</button>
-                </div>
             </div>
             <div id="workspace" class="edit-mode"></div>
+            <div id="properties">
+                <h3>Properties</h3>
+                <div id="prop-content"></div>
+                <button id="delete-btn" style="display: none; background-color: #dc3545; border: none; color: white; padding: 10px; cursor: pointer;">Delete Selected</button>
+            </div>
         </div>
     </div>
     <div id="code">
@@ -316,10 +315,11 @@
             if (mode === 'view') {
                 if (selected) {
                     selected.style.border = '';
-                    selected = null;
-                    propContent.innerHTML = '';
-                    deleteBtn.style.display = 'none';
+                    selected.classList.remove('selected');
                 }
+                selected = null;
+                propContent.innerHTML = '';
+                deleteBtn.style.display = 'none';
                 document.querySelectorAll('#menu li').forEach(item => item.setAttribute('draggable', 'false'));
                 document.getElementById('menu').style.pointerEvents = 'none';
                 document.getElementById('properties').style.display = 'none';
