@@ -418,8 +418,35 @@
             laptopBtn.classList.toggle('active', device === 'laptop');
         }
 
+        // Save page state
+        function savePageState(pageId) {
+            pages[pageId].elements = Array.from(workspace.children).map(el => {
+                const clone = el.cloneNode(true);
+                const styles = { ...el.style };
+                const attributes = {};
+                Array.from(el.attributes).forEach(attr => {
+                    if (attr.name !== 'style' && attr.name !== 'class') {
+                        attributes[attr.name] = attr.value;
+                    }
+                });
+                return {
+                    element: clone,
+                    style: styles,
+                    attributes: attributes,
+                    innerHTML: el.innerHTML,
+                    textContent: el.textContent,
+                    classList: Array.from(el.classList)
+                };
+            });
+            pages[pageId].html = htmlArea.value;
+            pages[pageId].css = cssArea.value;
+            pages[pageId].js = jsArea.value;
+            pages[pageId].name = pageNameInput.value;
+        }
+
         // Page management
         function newPage() {
+            savePageState(currentPage);
             pageCount++;
             const newPageId = `page${pageCount}`;
             const pageName = `page${pageCount}.html`;
@@ -436,15 +463,7 @@
         function switchPage(pageId) {
             if (pageId === currentPage) return;
             // Save current page state
-            pages[currentPage].elements = Array.from(workspace.children).map(el => ({
-                element: el.cloneNode(true),
-                style: { ...el.style }
-            }));
-            pages[currentPage].html = htmlArea.value;
-            pages[currentPage].css = cssArea.value;
-            pages[currentPage].js = jsArea.value;
-            pages[currentPage].name = pageNameInput.value;
-
+            savePageState(currentPage);
             // Update selector text
             pageSelector.querySelector(`option[value="${currentPage}"]`).textContent = pageNameInput.value;
             pageSelector.querySelector(`option[value="${currentPage}"]`).dataset.name = pageNameInput.value;
@@ -452,9 +471,15 @@
             // Switch to new page
             currentPage = pageId;
             workspace.innerHTML = '';
-            pages[pageId].elements.forEach(({ element, style }) => {
-                const newEl = element.cloneNode(true);
+            pages[pageId].elements.forEach(({ element, style, attributes, innerHTML, textContent, classList }) => {
+                const newEl = element.cloneNode(false);
+                newEl.innerHTML = innerHTML;
+                newEl.textContent = textContent;
+                newEl.className = classList.join(' ');
                 Object.assign(newEl.style, style);
+                Object.entries(attributes).forEach(([name, value]) => {
+                    newEl.setAttribute(name, value);
+                });
                 workspace.appendChild(newEl);
                 if (newEl.tagName === 'FORM') {
                     newEl.addEventListener('submit', (ev) => {
@@ -649,6 +674,7 @@
 
             workspace.appendChild(elem);
             resizeObserver.observe(elem);
+            savePageState(currentPage);
             updateCode();
         });
 
@@ -688,6 +714,7 @@
 
         document.addEventListener('mouseup', () => {
             if (dragging) {
+                savePageState(currentPage);
                 updateCode();
                 dragging = null;
             }
@@ -722,6 +749,7 @@
             selected = null;
             propContent.innerHTML = '';
             deleteBtn.style.display = 'none';
+            savePageState(currentPage);
             updateCode();
         });
 
@@ -733,6 +761,7 @@
             selected = null;
             propContent.innerHTML = '';
             deleteBtn.style.display = 'none';
+            savePageState(currentPage);
             updateCode();
         });
 
@@ -802,63 +831,77 @@
             // Event listeners for properties
             document.getElementById('prop-left').addEventListener('input', (e) => {
                 selected.style.left = e.target.value + 'px';
+                savePageState(currentPage);
                 updateCode();
             });
             document.getElementById('prop-top').addEventListener('input', (e) => {
                 selected.style.top = e.target.value + 'px';
+                savePageState(currentPage);
                 updateCode();
             });
             document.getElementById('prop-width').addEventListener('input', (e) => {
                 selected.style.width = e.target.value + 'px';
+                savePageState(currentPage);
                 updateCode();
             });
             document.getElementById('prop-height').addEventListener('input', (e) => {
                 selected.style.height = e.target.value + 'px';
+                savePageState(currentPage);
                 updateCode();
             });
             document.getElementById('prop-bgcolor').addEventListener('input', (e) => {
                 selected.style.backgroundColor = e.target.value;
+                savePageState(currentPage);
                 updateCode();
             });
             document.getElementById('prop-color').addEventListener('input', (e) => {
                 selected.style.color = e.target.value;
+                savePageState(currentPage);
                 updateCode();
             });
             document.getElementById('prop-fontsize').addEventListener('input', (e) => {
                 selected.style.fontSize = e.target.value + 'px';
+                savePageState(currentPage);
                 updateCode();
             });
             document.getElementById('prop-borderradius').addEventListener('input', (e) => {
                 selected.style.borderRadius = e.target.value;
+                savePageState(currentPage);
                 updateCode();
             });
             document.getElementById('prop-borderwidth').addEventListener('input', (e) => {
                 selected.style.borderWidth = e.target.value;
+                savePageState(currentPage);
                 updateCode();
             });
             document.getElementById('prop-bordercolor').addEventListener('input', (e) => {
                 selected.style.borderColor = e.target.value;
+                savePageState(currentPage);
                 updateCode();
             });
             document.getElementById('prop-borderstyle').addEventListener('change', (e) => {
                 selected.style.borderStyle = e.target.value;
+                savePageState(currentPage);
                 updateCode();
             });
             if (contentEditable) {
                 document.getElementById('prop-text').addEventListener('input', (e) => {
                     selected.textContent = e.target.value;
+                    savePageState(currentPage);
                     updateCode();
                 });
             }
             if (isMedia) {
                 document.getElementById('prop-src').addEventListener('input', (e) => {
                     selected.src = e.target.value;
+                    savePageState(currentPage);
                     updateCode();
                 });
             }
             if (isLink) {
                 document.getElementById('prop-href').addEventListener('input', (e) => {
                     selected.href = e.target.value;
+                    savePageState(currentPage);
                     updateCode();
                 });
                 document.getElementById('prop-page-link').addEventListener('change', (e) => {
@@ -869,12 +912,14 @@
                         delete selected.dataset.pageLink;
                         selected.href = document.getElementById('prop-href').value || '';
                     }
+                    savePageState(currentPage);
                     updateCode();
                 });
             }
             if (isInput) {
                 document.getElementById('prop-placeholder').addEventListener('input', (e) => {
                     selected.placeholder = e.target.value;
+                    savePageState(currentPage);
                     updateCode();
                 });
             }
@@ -895,6 +940,7 @@
                             }
                         });
                     });
+                    savePageState(currentPage);
                     updateCode();
                 });
             }
