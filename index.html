@@ -88,6 +88,7 @@
             border: 1px solid #444;
             position: relative;
             overflow: auto;
+            transition: width 0.3s;
         }
         #code {
             margin-top: 20px;
@@ -145,6 +146,34 @@
         #workspace.view-mode > *.selected {
             border: none;
         }
+        #workspace.phone {
+            width: 375px;
+            margin: 0 auto;
+        }
+        #workspace.tablet {
+            width: 768px;
+            margin: 0 auto;
+        }
+        #workspace.laptop {
+            width: 1024px;
+            margin: 0 auto;
+        }
+        #page-nav {
+            margin-top: 10px;
+            display: flex;
+            gap: 10px;
+        }
+        #page-nav select, #page-nav button {
+            background-color: #3c3c3c;
+            border: none;
+            color: #fff;
+            padding: 8px 16px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        #page-nav select:hover, #page-nav button:hover {
+            background-color: #4a4a4a;
+        }
     </style>
 </head>
 <body>
@@ -152,6 +181,9 @@
         <div id="top-menu">
             <button id="edit-mode-btn" class="active" onclick="setMode('edit')">Edit Mode</button>
             <button id="view-mode-btn" onclick="setMode('view')">View Mode</button>
+            <button id="phone-btn" onclick="setPreview('phone')" style="display: none;">Phone</button>
+            <button id="tablet-btn" onclick="setPreview('tablet')" style="display: none;">Tablet</button>
+            <button id="laptop-btn" onclick="setPreview('laptop')" style="display: none;">Laptop</button>
             <button onclick="openCategory('shapes')">Add Shape</button>
             <button onclick="openCategory('icons')">Add Icon</button>
             <button onclick="openCategory('social-icons')">Add Social Icon</button>
@@ -161,6 +193,12 @@
             <button onclick="openCategory('forms')">Add Form</button>
             <button onclick="openCategory('utilities')">Add Utility</button>
             <button onclick="openCategory('creatives')">Add Creative</button>
+        </div>
+        <div id="page-nav">
+            <button onclick="newPage()">New Page</button>
+            <select id="page-selector" onchange="switchPage(this.value)">
+                <option value="page1">Page 1</option>
+            </select>
         </div>
         <div id="main-content">
             <div id="menu">
@@ -261,7 +299,8 @@
                         <li draggable="true" data-type="article" data-class="utility article" data-width="300" data-height="150">Article</li>
                         <li draggable="true" data-type="aside" data-class="utility aside" data-width="150" data-height="200">Aside</li>
                         <li draggable="true" data-type="p" data-class="utility paragraph" data-content="Paragraph text" data-width="200" data-height="50">Paragraph</li>
-                        <li draggable="true" data-type="div" data-class="utility card" data-width="200" dataเรา
+                        <li draggable="true" data-type="div" data-class="utility card" data-width="200" data-height="150">Card</li>
+                        <li draggable="true" data-type="hr" data-class="utility divider" data-width="200" data-height="2">Divider</li>
                     </ul>
                 </details>
                 <details id="creatives">
@@ -297,12 +336,19 @@
         const deleteBtn = document.getElementById('delete-btn');
         const editModeBtn = document.getElementById('edit-mode-btn');
         const viewModeBtn = document.getElementById('view-mode-btn');
+        const phoneBtn = document.getElementById('phone-btn');
+        const tabletBtn = document.getElementById('tablet-btn');
+        const laptopBtn = document.getElementById('laptop-btn');
+        const pageSelector = document.getElementById('page-selector');
 
         let dragging = null;
         let offsetX = 0;
         let offsetY = 0;
         let selected = null;
         let mode = 'edit';
+        let currentPage = 'page1';
+        let pages = { 'page1': { html: '', css: '', js: '', elements: [] } };
+        let pageCount = 1;
         const resizeObserver = new ResizeObserver(() => updateCode());
 
         // Mode switching
@@ -312,6 +358,11 @@
             workspace.classList.add(`${mode}-mode`);
             editModeBtn.classList.toggle('active', mode === 'edit');
             viewModeBtn.classList.toggle('active', mode === 'view');
+            phoneBtn.style.display = mode === 'view' ? 'inline-block' : 'none';
+            tabletBtn.style.display = mode === 'view' ? 'inline-block' : 'none';
+            laptopBtn.style.display = mode === 'view' ? 'inline-block' : 'none';
+            document.getElementById('menu').style.display = mode === 'edit' ? 'block' : 'none';
+            document.getElementById('properties').style.display = mode === 'edit' ? 'block' : 'none';
             if (mode === 'view') {
                 if (selected) {
                     selected.style.border = '';
@@ -322,11 +373,105 @@
                 deleteBtn.style.display = 'none';
                 document.querySelectorAll('#menu li').forEach(item => item.setAttribute('draggable', 'false'));
                 document.getElementById('menu').style.pointerEvents = 'none';
-                document.getElementById('properties').style.display = 'none';
+                setPreview('laptop'); // Default to laptop view
             } else {
                 document.querySelectorAll('#menu li').forEach(item => item.setAttribute('draggable', 'true'));
                 document.getElementById('menu').style.pointerEvents = 'auto';
-                document.getElementById('properties').style.display = 'block';
+                workspace.classList.remove('phone', 'tablet', 'laptop');
+                workspace.style.width = '';
+                workspace.style.margin = '';
+            }
+            updateCode();
+        }
+
+        // Preview mode
+        function setPreview(device) {
+            if (mode !== 'view') return;
+            workspace.classList.remove('phone', 'tablet', 'laptop');
+            workspace.classList.add(device);
+            phoneBtn.classList.toggle('active', device === 'phone');
+            tabletBtn.classList.toggle('active', device === 'tablet');
+            laptopBtn.classList.toggle('active', device === 'laptop');
+        }
+
+        // Page management
+        function newPage() {
+            pageCount++;
+            const newPageId = `page${pageCount}`;
+            pages[newPageId] = { html: '', css: '', js: '', elements: [] };
+            const option = document.createElement('option');
+            option.value = newPageId;
+            option.textContent = `Page ${pageCount}`;
+            pageSelector.appendChild(option);
+            switchPage(newPageId);
+        }
+
+        function switchPage(pageId) {
+            if (pageId === currentPage) return;
+            // Save current page state
+            pages[currentPage].elements = Array.from(workspace.children).map(el => ({
+                element: el.cloneNode(true),
+                style: { ...el.style }
+            }));
+            pages[currentPage].html = htmlArea.value;
+            pages[currentPage].css = cssArea.value;
+            pages[currentPage].js = jsArea.value;
+
+            // Switch to new page
+            currentPage = pageId;
+            workspace.innerHTML = '';
+            pages[pageId].elements.forEach(({ element, style }) => {
+                const newEl = element.cloneNode(true);
+                Object.assign(newEl.style, style);
+                workspace.appendChild(newEl);
+                if (newEl.tagName === 'FORM') {
+                    newEl.addEventListener('submit', (ev) => {
+                        ev.preventDefault();
+                        console.log('Form submitted:', new FormData(newEl));
+                        alert('Form submitted! Check console for data.');
+                    });
+                }
+                if (newEl.tagName === 'BUTTON' || newEl.className.includes('button')) {
+                    newEl.addEventListener('click', () => {
+                        if (mode === 'view') {
+                            console.log('Button clicked!');
+                            alert('Button clicked!');
+                        }
+                    });
+                }
+                if (newEl.querySelectorAll('a').length > 0 || newEl.tagName === 'A') {
+                    if (newEl.tagName === 'A') {
+                        newEl.addEventListener('click', (ev) => {
+                            if (mode === 'view') {
+                                ev.preventDefault();
+                                console.log('Link clicked:', newEl.href);
+                                alert(`Link clicked: ${newEl.href}`);
+                            }
+                        });
+                    } else {
+                        newEl.querySelectorAll('a').forEach(a => {
+                            a.addEventListener('click', (ev) => {
+                                if (mode === 'view') {
+                                    ev.preventDefault();
+                                    console.log('Link clicked:', a.href);
+                                    alert(`Link clicked: ${a.href}`);
+                                }
+                            });
+                        });
+                    }
+                }
+                resizeObserver.observe(newEl);
+            });
+            htmlArea.value = pages[pageId].html || '';
+            cssArea.value = pages[pageId].css || '';
+            jsArea.value = pages[pageId].js || '// No JS generated yet';
+            pageSelector.value = pageId;
+            if (selected) {
+                selected.style.border = '';
+                selected.classList.remove('selected');
+                selected = null;
+                propContent.innerHTML = '';
+                deleteBtn.style.display = 'none';
             }
         }
 
@@ -746,6 +891,11 @@
             htmlArea.value = html;
             cssArea.value = css;
             jsArea.value = js || '// No JS generated yet';
+
+            // Save to current page
+            pages[currentPage].html = html;
+            pages[currentPage].css = css;
+            pages[currentPage].js = js;
         }
 
         // Initialize edit mode
