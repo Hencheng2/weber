@@ -99,24 +99,28 @@
             border: 2px solid #007bff;
             width: 1024px;
             min-height: 768px;
+            margin: 20px;
         }
         #page.view-mode.phone {
             width: 375px;
             height: 667px;
             border: 2px solid #555;
             box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            margin: 20px auto;
         }
         #page.view-mode.tablet {
             width: 768px;
             height: 1024px;
             border: 2px solid #555;
             box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            margin: 20px auto;
         }
         #page.view-mode.laptop {
             width: 1024px;
             height: 768px;
             border: 2px solid #555;
             box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            margin: 20px auto;
         }
         #properties {
             width: 300px;
@@ -428,7 +432,7 @@
                 { type: 'img', class: 'media image', width: '150', height: '150', name: 'Image' },
                 { type: 'video', class: 'media video', width: '320', height: '240', name: 'Video' },
                 { type: 'audio', class: 'media audio', width: '200', height: '30', name: 'Audio' },
-                { type: 'iframe', class: 'media iframe', width: '300', height: '200', name: 'Iframe' },
+                { type: 'iframe', class: 'media iframe', width: '300', height '200', name: 'Iframe' },
                 { type: 'picture', class: 'media picture', width: '150', height: '150', name: 'Picture' },
                 { type: 'video', class: 'media video-loop', width: '320', height: '240', name: 'Looping Video' }
             ],
@@ -464,7 +468,7 @@
                 { type: 'div', class: 'creative parallax', width: '300', height: '200', name: 'Parallax Section' }
             ],
             'modals': [
-                { type: 'div', class: 'modal basic', content: '<h2>Modal Title</h2><p>Modal content goes here.</p><button>Close</button>', width: '300', height: '200', name: 'Basic Modal' },
+                { type: 'div', class: 'modal basic', content: '<h2>Modal Title</2><p>Modal content goes here.</p><button>Close</button>', width: '300', height: '200', name: 'Basic Modal' },
                 { type: 'div', class: 'modal centered', content: '<h2>Centered Modal</h2><p>Centered modal content.</p><button>Close</button>', width: '300', height: '200', name: 'Centered Modal' },
                 { type: 'div', class: 'modal fullscreen', content: '<h2>Fullscreen Modal</h2><p>Fullscreen content.</p><button>Close</button>', width: '400', height: '300', name: 'Fullscreen Modal' }
             ],
@@ -524,7 +528,7 @@
                 pageContainer.classList.remove('phone', 'tablet', 'laptop');
                 pageContainer.style.width = '1024px';
                 pageContainer.style.height = '768px';
-                pageContainer.style.margin = '';
+                pageContainer.style.margin = '20px';
                 applyCode();
             }
         }
@@ -539,7 +543,7 @@
             laptopBtn.classList.toggle('active', device === 'laptop');
             pageContainer.style.width = device === 'phone' ? '375px' : device === 'tablet' ? '768px' : '1024px';
             pageContainer.style.height = device === 'phone' ? '667px' : device === 'tablet' ? '1024px' : '768px';
-            pageContainer.style.margin = '10px auto';
+            pageContainer.style.margin = '20px auto';
         }
 
         // Save page state
@@ -586,6 +590,9 @@
             pageSelector.appendChild(option);
             switchPage(newPageId);
             pageNameInput.value = pageName;
+            pageContainer.style.width = '1024px';
+            pageContainer.style.height = '768px';
+            pageContainer.style.margin = '20px';
         }
 
         function newPage() {
@@ -607,6 +614,9 @@
             pageSelector.appendChild(option);
             switchPage(newPageId);
             pageNameInput.value = pageName;
+            pageContainer.style.width = '1024px';
+            pageContainer.style.height = '768px';
+            pageContainer.style.margin = '20px';
         }
 
         function switchPage(pageId) {
@@ -645,6 +655,9 @@
             }
             closeDropdown();
             setMode(mode);
+            pageContainer.style.width = '1024px';
+            pageContainer.style.height = '768px';
+            pageContainer.style.margin = mode === 'edit' ? '20px' : '20px auto';
         }
 
         // Update page name
@@ -1219,7 +1232,7 @@
                 }
                 const style = document.createElement('style');
                 style.setAttribute('data-dynamic', 'true');
-                style.textContent = `#page { position: relative; background-color: #fff; width: 1024px; min-height: 768px; } #page ${css}`;
+                style.textContent = `#page { position: relative; background-color: #fff; width: 1024px; min-height: 768px; margin: 20px; } #page ${css}`;
                 document.head.appendChild(style);
                 try {
                     const script = document.createElement('script');
