@@ -14,7 +14,6 @@
             font-family: 'Roboto', sans-serif;
             margin: 0;
             padding: 20px;
-            box-sizing: border-box;
         }
         #container {
             display: flex;
@@ -26,8 +25,8 @@
             padding: 10px;
             border-radius: 4px;
             display: flex;
-            flex-wrap: wrap;
             gap: 10px;
+            flex-wrap: wrap;
             position: relative;
         }
         #top-menu button {
@@ -37,9 +36,6 @@
             padding: 8px 16px;
             cursor: pointer;
             border-radius: 4px;
-            flex: 1 1 120px; /* Responsive button sizing */
-            min-width: 100px;
-            font-size: 14px;
         }
         #top-menu button:hover {
             background-color: #4a4a4a;
@@ -50,7 +46,6 @@
         .dropdown {
             position: absolute;
             top: 100%;
-            left: 0;
             background-color: #2d2d2d;
             border: 1px solid #444;
             border-radius: 4px;
@@ -58,7 +53,6 @@
             max-height: 300px;
             overflow-y: auto;
             display: none;
-            width: 200px;
         }
         .dropdown ul {
             list-style: none;
@@ -72,7 +66,6 @@
             cursor: grab;
             border-radius: 4px;
             user-select: none;
-            font-size: 14px;
         }
         .dropdown li:hover {
             background-color: #4a4a4a;
@@ -81,7 +74,6 @@
             display: flex;
             flex-direction: row;
             gap: 20px;
-            flex-wrap: wrap;
         }
         #workspace {
             flex: 1;
@@ -90,13 +82,10 @@
             border: 1px solid #444;
             position: relative;
             overflow: auto;
-            display: block; /* Removed flex centering */
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
             transition: all 0.3s;
-            /* Subtle grid for visual precision */
-            background-image: linear-gradient(to right, rgba(68, 68, 68, 0.3) 1px, transparent 1px),
-                              linear-gradient(to bottom, rgba(68, 68, 68, 0.3) 1px, transparent 1px);
-            background-size: 20px 20px;
-            background-position: 0 0;
         }
         #page {
             background-color: #fff;
@@ -107,33 +96,31 @@
             box-sizing: border-box;
         }
         #page.edit-mode {
-            border: 2px solid #007bff;
             width: 1024px;
             min-height: 768px;
-            position: relative;
-            margin: 10px 0 0 10px; /* Starts at top-left */
-            box-sizing: border-box;
+            border: 2px solid #007bff;
+            margin: 20px;
         }
         #page.view-mode.phone {
             width: 375px;
             height: 667px;
-            margin: 10px auto;
             border: 2px solid #555;
             box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            margin: 20px auto;
         }
         #page.view-mode.tablet {
             width: 768px;
             height: 1024px;
-            margin: 10px auto;
             border: 2px solid #555;
             box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            margin: 20px auto;
         }
         #page.view-mode.laptop {
             width: 1024px;
             height: 768px;
-            margin: 10px auto;
             border: 2px solid #555;
             box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            margin: 20px auto;
         }
         #properties {
             width: 300px;
@@ -142,7 +129,6 @@
             border-left: 1px solid #444;
             max-height: 600px;
             overflow-y: auto;
-            flex-shrink: 0;
         }
         #properties label {
             display: block;
@@ -154,24 +140,18 @@
             border: 1px solid #444;
             width: 100%;
             padding: 5px;
-            box-sizing: border-box;
         }
         #code {
             margin-top: 20px;
             display: flex;
-            flex-wrap: wrap;
+            justify-content: space-between;
             gap: 10px;
         }
         #code div {
-            width: 100%;
+            width: 32%;
             display: flex;
             flex-direction: column;
             gap: 5px;
-        }
-        @media (min-width: 768px) {
-            #code div {
-                width: 32%;
-            }
         }
         #code textarea {
             width: 100%;
@@ -182,7 +162,6 @@
             padding: 10px;
             font-family: monospace;
             resize: vertical;
-            box-sizing: border-box;
         }
         #code button {
             background-color: #3c3c3c;
@@ -249,7 +228,6 @@
         #page-nav {
             margin-top: 10px;
             display: flex;
-            flex-wrap: wrap;
             gap: 10px;
         }
         #page-nav input, #page-nav select, #page-nav button {
@@ -259,8 +237,6 @@
             padding: 8px 16px;
             cursor: pointer;
             border-radius: 4px;
-            flex: 1 1 120px;
-            min-width: 100px;
         }
         #page-nav input:hover, #page-nav select:hover, #page-nav button:hover {
             background-color: #4a4a4a;
@@ -373,31 +349,19 @@
         const pageSelector = document.getElementById('page-selector');
         const pageNameInput = document.getElementById('page-name');
         const applyCodeBtn = document.getElementById('apply-code-btn');
+
         let dragging = null;
         let offsetX = 0;
         let offsetY = 0;
         let selected = null;
         let mode = 'edit';
         let currentPage = 'page1';
-        let pages = { 'page1': { name: 'index.html', html: '<div id="page"></div>', css: '#page {
-  position: relative;
-  background-color: #fff;
-  width: 1024px;
-  min-height: 768px;
-}
-', js: '// No JS generated yet', elements: [] } };
+        let pages = { 'page1': { name: 'index.html', html: '<div id="page"></div>', css: '#page {\n  position: relative;\n  background-color: #fff;\n  width: 1024px;\n  min-height: 768px;\n}\n', js: '// No JS generated yet', elements: [] } };
         let pageCount = 1;
         let activeDropdown = null;
         const resizeObserver = new ResizeObserver(() => updateCode());
 
-        // Snap to grid (optional)
-        const GRID = 20;
-        function snap(value) {
-            return Math.round(value / GRID) * GRID;
-        }
-
         const elementCategories = {
-            // (All categories remain unchanged – kept for brevity)
             'shapes': [
                 { type: 'div', class: 'shape rectangle', width: '100', height: '50', name: 'Rectangle' },
                 { type: 'div', class: 'shape square', width: '100', height: '100', name: 'Square' },
@@ -533,6 +497,7 @@
             ]
         };
 
+        // Mode switching
         function setMode(newMode) {
             mode = newMode;
             pageContainer.classList.remove('edit-mode', 'view-mode', 'phone', 'tablet', 'laptop');
@@ -562,11 +527,14 @@
             } else {
                 pageContainer.classList.remove('phone', 'tablet', 'laptop');
                 pageContainer.style.width = '1024px';
-                pageContainer.style.height = '768px';
+                pageContainer.style.minHeight = '768px';
+                pageContainer.style.margin = '20px';
+                workspace.style.backgroundColor = '#333';
                 applyCode();
             }
         }
 
+        // Preview mode
         function setPreview(device) {
             if (mode !== 'view') return;
             pageContainer.classList.remove('phone', 'tablet', 'laptop');
@@ -576,9 +544,10 @@
             laptopBtn.classList.toggle('active', device === 'laptop');
             pageContainer.style.width = device === 'phone' ? '375px' : device === 'tablet' ? '768px' : '1024px';
             pageContainer.style.height = device === 'phone' ? '667px' : device === 'tablet' ? '1024px' : '768px';
-            pageContainer.style.margin = '10px auto';
+            pageContainer.style.margin = '20px auto';
         }
 
+        // Save page state
         function savePageState(pageId) {
             pages[pageId].elements = Array.from(pageContainer.children).map(el => {
                 const attributes = {};
@@ -602,6 +571,7 @@
             pages[pageId].name = pageNameInput.value;
         }
 
+        // Page management
         function createPage() {
             savePageState(currentPage);
             pageCount++;
@@ -610,15 +580,7 @@
             pages[newPageId] = {
                 name: pageName,
                 html: '<div id="page"></div>',
-                css: `#page {
-  position: relative;
-  background-color: #fff;
-  width: 1024px;
-  min-height: 768px;
-  margin: 10px 0 0 10px;
-  box-sizing: border-box;
-}
-`,
+                css: '#page {\n  position: relative;\n  background-color: #fff;\n  width: 1024px;\n  min-height: 768px;\n}\n',
                 js: '// No JS generated yet',
                 elements: []
             };
@@ -629,11 +591,35 @@
             pageSelector.appendChild(option);
             switchPage(newPageId);
             pageNameInput.value = pageName;
-            setMode('edit');
+            pageContainer.innerHTML = '';
+            pageContainer.style.width = '1024px';
+            pageContainer.style.minHeight = '768px';
+            pageContainer.style.margin = '20px';
         }
 
         function newPage() {
-            createPage();
+            savePageState(currentPage);
+            pageCount++;
+            const newPageId = `page${pageCount}`;
+            const pageName = `page${pageCount}.html`;
+            pages[newPageId] = {
+                name: pageName,
+                html: '<div id="page"></div>',
+                css: '#page {\n  position: relative;\n  background-color: #fff;\n  width: 1024px;\n  min-height: 768px;\n}\n',
+                js: '// No JS generated yet',
+                elements: []
+            };
+            const option = document.createElement('option');
+            option.value = newPageId;
+            option.textContent = pageName;
+            option.dataset.name = pageName;
+            pageSelector.appendChild(option);
+            switchPage(newPageId);
+            pageNameInput.value = pageName;
+            pageContainer.innerHTML = '';
+            pageContainer.style.width = '1024px';
+            pageContainer.style.minHeight = '768px';
+            pageContainer.style.margin = '20px';
         }
 
         function switchPage(pageId) {
@@ -641,6 +627,7 @@
             savePageState(currentPage);
             pageSelector.querySelector(`option[value="${currentPage}"]`).textContent = pageNameInput.value;
             pageSelector.querySelector(`option[value="${currentPage}"]`).dataset.name = pageNameInput.value;
+
             currentPage = pageId;
             pageContainer.innerHTML = '';
             pages[pageId].elements.forEach(({ element, style, attributes, innerHTML, classList }) => {
@@ -658,13 +645,7 @@
                 }
             });
             htmlArea.value = pages[pageId].html || '<div id="page"></div>';
-            cssArea.value = pages[pageId].css || '#page {
-  position: relative;
-  background-color: #fff;
-  width: 1024px;
-  min-height: 768px;
-}
-';
+            cssArea.value = pages[pageId].css || '#page {\n  position: relative;\n  background-color: #fff;\n  width: 1024px;\n  min-height: 768px;\n}\n';
             jsArea.value = pages[pageId].js || '// No JS generated yet';
             pageSelector.value = pageId;
             pageNameInput.value = pages[pageId].name;
@@ -679,6 +660,7 @@
             setMode(mode);
         }
 
+        // Update page name
         pageNameInput.addEventListener('input', () => {
             pages[currentPage].name = pageNameInput.value;
             pageSelector.querySelector(`option[value="${currentPage}"]`).textContent = pageNameInput.value;
@@ -686,6 +668,7 @@
             savePageState(currentPage);
         });
 
+        // Dropdown management
         function openCategory(categoryId, button) {
             if (mode !== 'edit') return;
             closeDropdown();
@@ -735,6 +718,7 @@
             }
         }
 
+        // Textarea controls
         function pasteCode(type) {
             navigator.clipboard.readText().then(text => {
                 document.getElementById(type).value = text;
@@ -754,6 +738,7 @@
             alert(`${type.toUpperCase()} copied to clipboard!`);
         }
 
+        // Attach event listeners to elements
         function attachEventListeners(el) {
             if (el.tagName === 'FORM') {
                 el.addEventListener('submit', (ev) => {
@@ -806,17 +791,13 @@
             }
         }
 
+        // Add element to workspace
         function addElementToWorkspace(item, position) {
             const elem = document.createElement(item.type);
             elem.className = item.class;
             elem.style.position = 'absolute';
-
-            const pageRect = pageContainer.getBoundingClientRect();
-            const x = position.offsetX - pageRect.left;
-            const y = position.offsetY - pageRect.top;
-
-            elem.style.left = `${snap(x - (parseInt(item.width) / 2))}px`;
-            elem.style.top = `${snap(y - (parseInt(item.height) / 2))}px`;
+            elem.style.left = `${position.offsetX - (parseInt(item.width) / 2)}px`;
+            elem.style.top = `${position.offsetY - (parseInt(item.height) / 2)}px`;
             elem.style.width = `${item.width}px`;
             elem.style.height = `${item.height}px`;
 
@@ -824,28 +805,22 @@
             if (item['input-type']) elem.type = item['input-type'];
             if (item.placeholder) elem.placeholder = item.placeholder;
             if (item.nameAttr) elem.name = item.nameAttr;
-
             if (item.class.includes('font')) {
-                const fontMap = {
-                    'roboto': 'Roboto',
-                    'open-sans': 'Open Sans',
-                    'montserrat': 'Montserrat',
-                    'lato': 'Lato',
-                    'poppins': 'Poppins',
-                    'nunito': 'Nunito'
-                };
-                for (const [key, value] of Object.entries(fontMap)) {
-                    if (item.class.includes(key)) {
-                        elem.style.fontFamily = value;
-                        break;
-                    }
-                }
+                if (item.class.includes('roboto')) elem.style.fontFamily = 'Roboto';
+                if (item.class.includes('open-sans')) elem.style.fontFamily = 'Open Sans';
+                if (item.class.includes('montserrat')) elem.style.fontFamily = 'Montserrat';
+                if (item.class.includes('lato')) elem.style.fontFamily = 'Lato';
+                if (item.class.includes('poppins')) elem.style.fontFamily = 'Poppins';
+                if (item.class.includes('nunito')) elem.style.fontFamily = 'Nunito';
             }
-
             if (item.class.includes('circle') || item.class.includes('oval')) {
                 elem.style.borderRadius = '50%';
             }
-
+            if (item.class.includes('rectangle') || item.class.includes('square') || item.class.includes('container') || item.class.includes('card') || item.class.includes('rounded-rectangle')) {
+                elem.style.backgroundColor = '#444';
+                elem.style.border = '1px solid #666';
+                if (item.class.includes('rounded-rectangle')) elem.style.borderRadius = '10px';
+            }
             if (item.class.includes('triangle')) {
                 elem.style.width = '0';
                 elem.style.height = '0';
@@ -855,30 +830,25 @@
                 elem.style.backgroundColor = 'transparent';
                 elem.style.resize = 'none';
             }
-
             if (item.class.includes('icon') || item.class.includes('social-icon') || item.class.includes('material-icons')) {
                 elem.style.display = 'inline-block';
                 if (item.content && item.class.includes('material-icons')) {
                     elem.textContent = item.content;
                 }
             }
-
             if (item.type === 'button') {
                 elem.textContent = item.content || 'Button';
             }
-
             if (item.type === 'video' || item.type === 'audio') {
                 elem.controls = true;
+                elem.src = '';
             }
-
             if (item.type === 'img' || item.type === 'iframe' || item.type === 'picture') {
                 elem.src = '';
             }
-
             if (item.class.includes('modal')) {
                 elem.style.zIndex = '1000';
             }
-
             attachEventListeners(elem);
             pageContainer.appendChild(elem);
             resizeObserver.observe(elem);
@@ -886,10 +856,10 @@
             updateCode();
         }
 
+        // Drag from dropdown to page
         pageContainer.addEventListener('dragover', (e) => {
             if (mode === 'edit') e.preventDefault();
         });
-
         pageContainer.addEventListener('drop', (e) => {
             if (mode !== 'edit') return;
             e.preventDefault();
@@ -901,8 +871,8 @@
             const inputType = e.dataTransfer.getData('input-type');
             const placeholder = e.dataTransfer.getData('placeholder');
             const name = e.dataTransfer.getData('name');
-            const rect = pageContainer.getBoundingClientRect();
 
+            const rect = pageContainer.getBoundingClientRect();
             addElementToWorkspace({
                 type,
                 class: className,
@@ -913,10 +883,10 @@
                 placeholder,
                 nameAttr: name
             }, { offsetX: e.clientX - rect.left, offsetY: e.clientY - rect.top });
-
             closeDropdown();
         });
 
+        // Dragging elements within page
         pageContainer.addEventListener('mousedown', (e) => {
             if (mode !== 'edit') return;
             if (e.target !== pageContainer && e.target.parentElement === pageContainer) {
@@ -942,6 +912,7 @@
             }
         });
 
+        // Selection for properties
         pageContainer.addEventListener('click', (e) => {
             if (mode !== 'edit') return;
             if (selected) {
@@ -962,6 +933,7 @@
             e.stopPropagation();
         });
 
+        // Delete button
         deleteBtn.addEventListener('click', () => {
             if (mode !== 'edit' || !selected) return;
             resizeObserver.unobserve(selected);
@@ -973,6 +945,7 @@
             updateCode();
         });
 
+        // Keyboard delete
         document.addEventListener('keydown', (e) => {
             if (mode !== 'edit' || e.key !== 'Delete' || !selected) return;
             resizeObserver.unobserve(selected);
@@ -999,11 +972,10 @@
             const borderWidth = compStyle.borderWidth || '0px';
             const borderColor = rgbToHex(compStyle.borderColor);
             const borderStyle = compStyle.borderStyle || 'none';
-
-            const contentEditable = ['P', 'SPAN', 'BUTTON'].includes(selected.tagName) || selected.className.includes('paragraph');
-            const isMedia = ['IMG', 'VIDEO', 'AUDIO', 'IFRAME', 'PICTURE'].includes(selected.tagName);
-            const isLink = ['A', 'BUTTON'].includes(selected.tagName) || selected.className.includes('button');
-            const isInput = ['INPUT', 'TEXTAREA'].includes(selected.tagName);
+            const contentEditable = selected.tagName === 'P' || selected.tagName === 'SPAN' || selected.tagName === 'BUTTON' || selected.className.includes('paragraph');
+            const isMedia = selected.tagName === 'IMG' || selected.tagName === 'VIDEO' || selected.tagName === 'AUDIO' || selected.tagName === 'IFRAME' || selected.tagName === 'PICTURE';
+            const isLink = selected.tagName === 'A' || selected.tagName === 'BUTTON' || selected.className.includes('button');
+            const isInput = selected.tagName === 'INPUT' || selected.tagName === 'TEXTAREA';
             const isNav = selected.className.includes('navigation');
             const isModal = selected.className.includes('modal');
 
@@ -1052,8 +1024,7 @@
                 content += `<label>Placeholder: <input type="text" id="prop-placeholder" value="${selected.placeholder || ''}"></label>`;
             }
             if (isNav) {
-                const items = Array.from(selected.querySelectorAll('li')).map(li => li.innerHTML).join('
-');
+                const items = Array.from(selected.querySelectorAll('li')).map(li => li.innerHTML).join('\n');
                 content += `<label>Nav Items: <textarea id="prop-navitems">${items}</textarea></label>`;
             }
             if (isModal) {
@@ -1062,27 +1033,58 @@
 
             propContent.innerHTML = content;
 
-            // Bind input listeners...
             document.getElementById('prop-left').addEventListener('input', (e) => {
                 selected.style.left = e.target.value + 'px';
                 savePageState(currentPage);
                 updateCode();
             });
-            // ... (rest of property listeners unchanged)
-            ['top', 'width', 'height', 'bgcolor', 'color', 'fontsize', 'borderradius', 'borderwidth', 'bordercolor'].forEach(prop => {
-                const el = document.getElementById(`prop-${prop}`);
-                if (el) el.addEventListener('input', (e) => {
-                    if (prop === 'bgcolor' || prop === 'color' || prop === 'bordercolor') {
-                        selected.style[prop === 'bgcolor' ? 'backgroundColor' : prop] = e.target.value;
-                    } else {
-                        selected.style[prop === 'fontsize' ? 'fontSize' : prop] = e.target.value + (prop === 'fontsize' ? 'px' : '');
-                    }
-                    savePageState(currentPage);
-                    updateCode();
-                });
+            document.getElementById('prop-top').addEventListener('input', (e) => {
+                selected.style.top = e.target.value + 'px';
+                savePageState(currentPage);
+                updateCode();
+            });
+            document.getElementById('prop-width').addEventListener('input', (e) => {
+                selected.style.width = e.target.value + 'px';
+                savePageState(currentPage);
+                updateCode();
+            });
+            document.getElementById('prop-height').addEventListener('input', (e) => {
+                selected.style.height = e.target.value + 'px';
+                savePageState(currentPage);
+                updateCode();
+            });
+            document.getElementById('prop-bgcolor').addEventListener('input', (e) => {
+                selected.style.backgroundColor = e.target.value;
+                savePageState(currentPage);
+                updateCode();
+            });
+            document.getElementById('prop-color').addEventListener('input', (e) => {
+                selected.style.color = e.target.value;
+                savePageState(currentPage);
+                updateCode();
+            });
+            document.getElementById('prop-fontsize').addEventListener('input', (e) => {
+                selected.style.fontSize = e.target.value + 'px';
+                savePageState(currentPage);
+                updateCode();
             });
             document.getElementById('prop-fontfamily').addEventListener('change', (e) => {
                 selected.style.fontFamily = e.target.value;
+                savePageState(currentPage);
+                updateCode();
+            });
+            document.getElementById('prop-borderradius').addEventListener('input', (e) => {
+                selected.style.borderRadius = e.target.value;
+                savePageState(currentPage);
+                updateCode();
+            });
+            document.getElementById('prop-borderwidth').addEventListener('input', (e) => {
+                selected.style.borderWidth = e.target.value;
+                savePageState(currentPage);
+                updateCode();
+            });
+            document.getElementById('prop-bordercolor').addEventListener('input', (e) => {
+                selected.style.borderColor = e.target.value;
                 savePageState(currentPage);
                 updateCode();
             });
@@ -1091,14 +1093,14 @@
                 savePageState(currentPage);
                 updateCode();
             });
-            if (contentEditable && document.getElementById('prop-text')) {
+            if (contentEditable) {
                 document.getElementById('prop-text').addEventListener('input', (e) => {
                     selected.textContent = e.target.value;
                     savePageState(currentPage);
                     updateCode();
                 });
             }
-            if (isMedia && document.getElementById('prop-src')) {
+            if (isMedia) {
                 document.getElementById('prop-src').addEventListener('input', (e) => {
                     selected.src = e.target.value;
                     savePageState(currentPage);
@@ -1123,21 +1125,35 @@
                     updateCode();
                 });
             }
-            if (isInput && document.getElementById('prop-placeholder')) {
+            if (isInput) {
                 document.getElementById('prop-placeholder').addEventListener('input', (e) => {
                     selected.placeholder = e.target.value;
                     savePageState(currentPage);
                     updateCode();
                 });
             }
-            if (isNav && document.getElementById('prop-navitems')) {
+            if (isNav) {
                 document.getElementById('prop-navitems').addEventListener('input', (e) => {
                     selected.innerHTML = e.target.value;
+                    selected.querySelectorAll('a').forEach(a => {
+                        a.addEventListener('click', (ev) => {
+                            if (mode === 'view') {
+                                ev.preventDefault();
+                                if (a.dataset.pageLink) {
+                                    switchPage(a.dataset.pageLink);
+                                    setMode('view');
+                                } else {
+                                    console.log('Link clicked:', a.href);
+                                    alert(`Link clicked: ${a.href}`);
+                                }
+                            }
+                        });
+                    });
                     savePageState(currentPage);
                     updateCode();
                 });
             }
-            if (isModal && document.getElementById('prop-zindex')) {
+            if (isModal) {
                 document.getElementById('prop-zindex').addEventListener('input', (e) => {
                     selected.style.zIndex = e.target.value;
                     savePageState(currentPage);
@@ -1147,127 +1163,173 @@
         }
 
         function rgbToHex(rgb) {
-            if (!rgb || rgb === 'rgba(0, 0, 0, 0)' || rgb === 'transparent') return '#000000';
-            const match = rgb.match(/\d+/g);
-            if (!match || match.length < 3) return '#000000';
-            const [r, g, b] = match.map(Number);
+            if (!rgb || rgb === 'rgba(0, 0, 0, 0)') return '#000000';
+            const [r, g, b] = rgb.match(/\d+/g).map(Number);
             return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
         }
 
+        // Apply external code
         function applyCode() {
             pageContainer.innerHTML = '';
             const html = htmlArea.value;
             const css = cssArea.value;
             const js = jsArea.value;
 
-            document.querySelectorAll('style[data-dynamic], script[data-dynamic]').forEach(el => el.remove());
+            // Remove existing dynamic styles and scripts
+            document.querySelectorAll('style[data-dynamic]').forEach(style => style.remove());
+            document.querySelectorAll('script[data-dynamic]').forEach(script => script.remove());
 
             if (mode === 'view') {
+                // View mode: Render raw HTML/CSS/JS, scope CSS to #page
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(html, 'text/html');
-                const page = doc.querySelector('#page') || doc.body;
-                Array.from(page.children).forEach(child => {
-                    pageContainer.appendChild(child);
-                    attachEventListeners(child);
-                });
+                const page = doc.querySelector('div#page') || doc.body;
+                if (page) {
+                    Array.from(page.children).forEach(child => {
+                        pageContainer.appendChild(child);
+                        attachEventListeners(child);
+                    });
+                }
                 const style = document.createElement('style');
                 style.setAttribute('data-dynamic', 'true');
                 style.textContent = `#page { position: relative; background-color: #fff; } #page ${css}`;
                 document.head.appendChild(style);
                 try {
-                    const scriptEl = document.createElement('script');
-                    scriptEl.setAttribute('data-dynamic', 'true');
-                    scriptEl.textContent = js;
-                    document.body.appendChild(scriptEl);
+                    const script = document.createElement('script');
+                    script.setAttribute('data-dynamic', 'true');
+                    script.textContent = js;
+                    document.body.appendChild(script);
                 } catch (e) {
-                    console.error('JS Error:', e);
+                    console.error('Error executing JS:', e);
                 }
+                savePageState(currentPage);
             } else {
+                // Edit mode: Parse and make elements editable
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(html, 'text/html');
-                const page = doc.querySelector('#page') || doc.body;
-                Array.from(page.children).forEach((child, i) => {
-                    const compStyle = getComputedStyle(child);
-                    child.style.position = 'absolute';
-                    child.style.left = compStyle.left !== 'auto' ? compStyle.left : `${i * 20}px`;
-                    child.style.top = compStyle.top !== 'auto' ? compStyle.top : `${i * 20}px`;
-                    child.style.width = compStyle.width !== 'auto' ? compStyle.width : '100px';
-                    child.style.height = compStyle.height !== 'auto' ? compStyle.height : '50px';
-                    if (['IMG', 'VIDEO', 'AUDIO', 'IFRAME', 'PICTURE'].includes(child.tagName)) {
-                        child.src = child.src || '';
-                    }
-                    if (['INPUT', 'TEXTAREA'].includes(child.tagName)) {
-                        child.placeholder = child.placeholder || '';
-                    }
-                    if (['A', 'BUTTON'].includes(child.tagName)) {
-                        child.href = child.href || '';
-                    }
-                    pageContainer.appendChild(child);
-                    attachEventListeners(child);
-                    resizeObserver.observe(child);
-                });
+                const page = doc.querySelector('div#page') || doc.body;
+                if (page) {
+                    Array.from(page.children).forEach((child, i) => {
+                        const compStyle = getComputedStyle(child);
+                        child.style.position = 'absolute';
+                        child.style.left = compStyle.left !== 'auto' ? compStyle.left : `${i * 20}px`;
+                        child.style.top = compStyle.top !== 'auto' ? compStyle.top : `${i * 20}px`;
+                        child.style.width = compStyle.width !== 'auto' ? compStyle.width : '100px';
+                        child.style.height = compStyle.height !== 'auto' ? compStyle.height : '50px';
+                        if (child.tagName === 'IMG' || child.tagName === 'VIDEO' || child.tagName === 'AUDIO' || child.tagName === 'IFRAME' || child.tagName === 'PICTURE') {
+                            child.src = child.src || '';
+                        }
+                        if (child.tagName === 'INPUT' || child.tagName === 'TEXTAREA') {
+                            child.placeholder = child.placeholder || '';
+                        }
+                        if (child.tagName === 'A' || child.tagName === 'BUTTON') {
+                            child.href = child.href || '';
+                        }
+                        pageContainer.appendChild(child);
+                        attachEventListeners(child);
+                        resizeObserver.observe(child);
+                    });
+                }
                 const style = document.createElement('style');
                 style.setAttribute('data-dynamic', 'true');
-                style.textContent = `#page { position: relative; background-color: #fff; width: 1024px; min-height: 768px; } #page ${css}`;
+                style.textContent = `#page { position: relative; background-color: #fff; width: 1024px; min-height: 768px; margin: 20px; } #page ${css}`;
                 document.head.appendChild(style);
+                try {
+                    const script = document.createElement('script');
+                    script.setAttribute('data-dynamic', 'true');
+                    script.textContent = js;
+                    document.body.appendChild(script);
+                } catch (e) {
+                    console.error('Error executing JS:', e);
+                }
+                updateCode();
             }
-            savePageState(currentPage);
         }
 
+        // Update code function
         function updateCode() {
             if (mode === 'view') return;
-            let html = '<div id="page">
-';
-            let css = '#page {
-  position: relative;
-  background-color: #fff;
-  width: 1024px;
-  min-height: 768px;
-}
-';
-            let js = '// Dynamic JS
-';
-            Array.from(pageContainer.children).forEach((el, i) => {
+            let html = '<div id="page">\n';
+            let css = '#page {\n  position: relative;\n  background-color: #fff;\n  width: 1024px;\n  min-height: 768px;\n}\n';
+            let js = '// Dynamic JS for interactions\n';
+            const children = Array.from(pageContainer.children);
+            let hasForm = false;
+            let hasButton = false;
+            let hasLink = false;
+
+            children.forEach((el, i) => {
                 const uniqueClass = `elem${i + 1}`;
                 el.dataset.uniqueClass = uniqueClass;
-                if (!el.classList.contains(uniqueClass)) el.classList.add(uniqueClass);
-                const clone = el.cloneNode(true);
-                ['position', 'left', 'top', 'width', 'height'].forEach(p => clone.style[p] = '');
-                clone.classList.remove('selected');
-                if (['IMG', 'VIDEO', 'AUDIO', 'IFRAME', 'PICTURE'].includes(clone.tagName)) clone.src = el.src || '';
-                if (['INPUT', 'TEXTAREA'].includes(clone.tagName)) clone.placeholder = el.placeholder || '';
-                if (['A', 'BUTTON'].includes(clone.tagName)) {
-                    clone.href = el.href || '';
-                    if (el.dataset.pageLink) clone.dataset.pageLink = el.dataset.pageLink;
+                if (!el.classList.contains(uniqueClass)) {
+                    el.classList.add(uniqueClass);
                 }
-                html += `  ${clone.outerHTML}
-`;
+
+                const clone = el.cloneNode(true);
+                if (mode === 'edit') {
+                    clone.style.position = '';
+                    clone.style.left = '';
+                    clone.style.top = '';
+                }
+                clone.classList.remove('selected');
+                if (clone.tagName === 'BUTTON') {
+                    clone.textContent = el.textContent;
+                }
+                if (clone.tagName === 'IMG' || clone.tagName === 'VIDEO' || clone.tagName === 'AUDIO' || clone.tagName === 'IFRAME' || clone.tagName === 'PICTURE') {
+                    clone.src = el.src || '';
+                }
+                if (clone.tagName === 'INPUT' || clone.tagName === 'TEXTAREA') {
+                    clone.placeholder = el.placeholder || '';
+                }
+                if (clone.tagName === 'A' || clone.tagName === 'BUTTON') {
+                    clone.href = el.href || '';
+                    if (el.dataset.pageLink) {
+                        clone.dataset.pageLink = el.dataset.pageLink;
+                    }
+                }
+                html += `  ${clone.outerHTML}\n`;
+
                 const compStyle = getComputedStyle(el);
-                css += `.${uniqueClass} {
-  position: absolute;
-  left: ${compStyle.left};
-  top: ${compStyle.top};
-  width: ${compStyle.width};
-  height: ${compStyle.height};
-  background-color: ${compStyle.backgroundColor};
-  color: ${compStyle.color};
-  font-size: ${compStyle.fontSize};
-  font-family: ${compStyle.fontFamily};
-  border: ${compStyle.border};
-  border-radius: ${compStyle.borderRadius};
-  z-index: ${compStyle.zIndex};
-}
-`;
+                css += `.${uniqueClass} {\n`;
+                const props = ['position', 'left', 'top', 'width', 'height', 'background-color', 'border', 'border-radius', 'border-width', 'border-color', 'border-style', 'color', 'font-size', 'font-family', 'display', 'padding', 'margin', 'z-index'];
+                props.forEach(prop => {
+                    const value = compStyle.getPropertyValue(prop);
+                    if (value && value !== 'auto' && value !== '0px' && value !== 'rgba(0, 0, 0, 0)') {
+                        css += `  ${prop}: ${value};\n`;
+                    }
+                });
+                if (el.className.includes('triangle')) {
+                    css += `  border-left: ${compStyle.borderLeft};\n`;
+                    css += `  border-right: ${compStyle.borderRight};\n`;
+                    css += `  border-bottom: ${compStyle.borderBottom};\n`;
+                }
+                css += '}\n';
+
+                if (el.tagName === 'FORM') hasForm = true;
+                if (el.tagName === 'BUTTON' || el.className.includes('button')) hasButton = true;
+                if (el.querySelectorAll('a').length > 0 || el.tagName === 'A') hasLink = true;
             });
             html += '</div>';
+
+            if (hasForm) {
+                js += `document.querySelector('form').addEventListener('submit', (e) => {\n  e.preventDefault();\n  console.log('Form submitted');\n});\n`;
+            }
+            if (hasButton) {
+                js += `document.querySelectorAll('button').forEach(btn => {\n  btn.addEventListener('click', () => {\n    if (btn.dataset.pageLink) {\n      // Page navigation handled by designer\n    } else {\n      console.log('Button clicked');\n    }\n  });\n});\n`;
+            }
+            if (hasLink) {
+                js += `document.querySelectorAll('a').forEach(a => {\n  a.addEventListener('click', (e) => {\n    e.preventDefault();\n    if (a.dataset.pageLink) {\n      // Page navigation handled by designer\n    } else {\n      console.log('Link clicked: ' + a.href);\n    }\n  });\n});\n`;
+            }
+
             htmlArea.value = html;
             cssArea.value = css;
-            jsArea.value = js;
+            jsArea.value = js || '// No JS generated yet';
+
             pages[currentPage].html = html;
             pages[currentPage].css = css;
             pages[currentPage].js = js;
         }
 
+        // Initialize page and edit mode
         switchPage('page1');
         setMode('edit');
     </script>
