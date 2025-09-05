@@ -22,18 +22,24 @@
             padding: 20px;
             border-right: 1px solid #444;
         }
-        #menu h3 {
-            margin-top: 0;
-            color: #ccc;
+        details {
+            margin-bottom: 10px;
+        }
+        summary {
+            cursor: pointer;
+            background-color: #3c3c3c;
+            padding: 10px;
+            border-radius: 4px;
         }
         #menu ul {
             list-style: none;
             padding: 0;
+            margin: 10px 0 0 0;
         }
         #menu li {
             padding: 10px;
             background-color: #3c3c3c;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
             cursor: grab;
             border-radius: 4px;
             user-select: none;
@@ -65,15 +71,43 @@
             font-family: monospace;
             resize: vertical;
         }
-        .shape.rectangle {
+        #properties {
+            margin-top: 20px;
+            background-color: #3c3c3c;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        #properties label {
+            display: block;
+            margin-bottom: 10px;
+        }
+        #properties input {
+            background-color: #2d2d2d;
+            color: #fff;
+            border: 1px solid #444;
+        }
+        .shape.rectangle, .shape.square {
             background-color: #007bff;
         }
-        .shape.circle {
+        .shape.circle, .shape.oval {
             background-color: #dc3545;
             border-radius: 50%;
         }
+        .shape.triangle {
+            width: 0;
+            height: 0;
+            border-left: 50px solid transparent;
+            border-right: 50px solid transparent;
+            border-bottom: 100px solid #28a745;
+            background-color: transparent;
+        }
         .icon {
             font-size: 24px;
+            display: inline-block;
+        }
+        #workspace > * {
+            resize: both;
+            overflow: auto;
         }
         /* Add more base styles as needed */
     </style>
@@ -81,42 +115,94 @@
 <body>
     <div id="container">
         <div id="menu">
-            <h3>Shapes</h3>
-            <ul>
-                <li draggable="true" data-type="div" data-class="shape rectangle" data-width="100" data-height="50">Rectangle</li>
-                <li draggable="true" data-type="div" data-class="shape circle" data-width="50" data-height="50">Circle</li>
-            </ul>
-            <h3>Icons</h3>
-            <ul>
-                <li draggable="true" data-type="span" data-class="icon smiley" data-content="😊" data-width="30" data-height="30">Smiley Icon</li>
-                <li draggable="true" data-type="span" data-class="icon heart" data-content="❤️" data-width="30" data-height="30">Heart Icon</li>
-            </ul>
-            <h3>Navigations</h3>
-            <ul>
-                <li draggable="true" data-type="nav" data-class="navigation bar" data-content='<ul><li><a href="#">Home</a></li><li><a href="#">About</a></li></ul>' data-width="300" data-height="40">Nav Bar</li>
-            </ul>
-            <h3>Menus</h3>
-            <ul>
-                <li draggable="true" data-type="select" data-class="menu dropdown" data-content='<option>Option 1</option><option>Option 2</option>' data-width="150" data-height="30">Dropdown Menu</li>
-            </ul>
-            <h3>Media</h3>
-            <ul>
-                <li draggable="true" data-type="img" data-class="media image" data-src="https://via.placeholder.com/150" data-width="150" data-height="150">Image</li>
-                <li draggable="true" data-type="video" data-class="media video" data-src="https://www.w3schools.com/html/mov_bbb.mp4" data-width="320" data-height="240">Video (Placeholder)</li>
-            </ul>
-            <h3>Forms</h3>
-            <ul>
-                <li draggable="true" data-type="input" data-class="form text" data-input-type="text" data-placeholder="Enter text" data-width="200" data-height="30">Text Input</li>
-                <li draggable="true" data-type="button" data-class="form button" data-content="Button" data-width="100" data-height="30">Button</li>
-            </ul>
-            <h3>Utilities</h3>
-            <ul>
-                <li draggable="true" data-type="div" data-class="utility container" data-width="200" data-height="100">Container Div</li>
-            </ul>
-            <h3>Creatives</h3>
-            <ul>
-                <li draggable="true" data-type="canvas" data-class="creative canvas" data-width="200" data-height="200">Canvas</li>
-            </ul>
+            <details>
+                <summary>Shapes</summary>
+                <ul>
+                    <li draggable="true" data-type="div" data-class="shape rectangle" data-width="100" data-height="50">Rectangle</li>
+                    <li draggable="true" data-type="div" data-class="shape square" data-width="100" data-height="100">Square</li>
+                    <li draggable="true" data-type="div" data-class="shape circle" data-width="50" data-height="50">Circle</li>
+                    <li draggable="true" data-type="div" data-class="shape oval" data-width="100" data-height="50">Oval</li>
+                    <li draggable="true" data-type="div" data-class="shape triangle" data-width="100" data-height="100">Triangle</li>
+                    <li draggable="true" data-type="div" data-class="shape pentagon" data-width="100" data-height="100">Pentagon (Placeholder)</li>
+                    <li draggable="true" data-type="div" data-class="shape hexagon" data-width="100" data-height="100">Hexagon (Placeholder)</li>
+                    <li draggable="true" data-type="div" data-class="shape star" data-width="100" data-height="100">Star (Placeholder)</li>
+                </ul>
+            </details>
+            <details>
+                <summary>Icons</summary>
+                <ul>
+                    <li draggable="true" data-type="span" data-class="icon smiley" data-content="😊" data-width="30" data-height="30">Smiley</li>
+                    <li draggable="true" data-type="span" data-class="icon heart" data-content="❤️" data-width="30" data-height="30">Heart</li>
+                    <li draggable="true" data-type="span" data-class="icon star" data-content="⭐" data-width="30" data-height="30">Star</li>
+                    <li draggable="true" data-type="span" data-class="icon check" data-content="✅" data-width="30" data-height="30">Check</li>
+                    <li draggable="true" data-type="span" data-class="icon thumbsup" data-content="👍" data-width="30" data-height="30">Thumbs Up</li>
+                    <li draggable="true" data-type="span" data-class="icon fire" data-content="🔥" data-width="30" data-height="30">Fire</li>
+                    <li draggable="true" data-type="span" data-class="icon globe" data-content="🌍" data-width="30" data-height="30">Globe</li>
+                    <li draggable="true" data-type="span" data-class="icon clock" data-content="⏰" data-width="30" data-height="30">Clock</li>
+                    <li draggable="true" data-type="span" data-class="icon email" data-content="✉️" data-width="30" data-height="30">Email</li>
+                    <li draggable="true" data-type="span" data-class="icon phone" data-content="📞" data-width="30" data-height="30">Phone</li>
+                </ul>
+            </details>
+            <details>
+                <summary>Navigations</summary>
+                <ul>
+                    <li draggable="true" data-type="nav" data-class="navigation bar" data-content='<ul><li><a href="#">Home</a></li><li><a href="#">About</a></li><li><a href="#">Contact</a></li></ul>' data-width="400" data-height="40">Horizontal Nav Bar</li>
+                    <li draggable="true" data-type="nav" data-class="navigation sidebar" data-content='<ul><li><a href="#">Home</a></li><li><a href="#">About</a></li><li><a href="#">Contact</a></li></ul>' data-width="150" data-height="200">Vertical Sidebar</li>
+                    <li draggable="true" data-type="footer" data-class="navigation footer" data-content='<p>Footer Content</p>' data-width="400" data-height="50">Footer Nav</li>
+                    <li draggable="true" data-type="header" data-class="navigation header" data-content='<h1>Header</h1>' data-width="400" data-height="50">Header Nav</li>
+                </ul>
+            </details>
+            <details>
+                <summary>Menus</summary>
+                <ul>
+                    <li draggable="true" data-type="select" data-class="menu dropdown" data-content='<option>Option 1</option><option>Option 2</option><option>Option 3</option>' data-width="150" data-height="30">Dropdown Menu</li>
+                    <li draggable="true" data-type="ul" data-class="menu list" data-content='<li>Item 1</li><li>Item 2</li><li>Item 3</li>' data-width="150" data-height="100">List Menu</li>
+                    <li draggable="true" data-type="input" data-class="menu radio" data-input-type="radio" data-name="group1" data-width="30" data-height="30">Radio Button</li>
+                    <li draggable="true" data-type="input" data-class="menu checkbox" data-input-type="checkbox" data-width="30" data-height="30">Checkbox</li>
+                </ul>
+            </details>
+            <details>
+                <summary>Media</summary>
+                <ul>
+                    <li draggable="true" data-type="img" data-class="media image" data-src="https://via.placeholder.com/150" data-width="150" data-height="150">Image</li>
+                    <li draggable="true" data-type="video" data-class="media video" data-src="https://www.w3schools.com/html/mov_bbb.mp4" data-width="320" data-height="240">Video</li>
+                    <li draggable="true" data-type="audio" data-class="media audio" data-src="https://www.w3schools.com/html/horse.mp3" data-width="200" data-height="30">Audio</li>
+                    <li draggable="true" data-type="iframe" data-class="media iframe" data-src="https://www.example.com" data-width="300" data-height="200">Iframe</li>
+                </ul>
+            </details>
+            <details>
+                <summary>Forms</summary>
+                <ul>
+                    <li draggable="true" data-type="input" data-class="form text" data-input-type="text" data-placeholder="Enter text" data-width="200" data-height="30">Text Input</li>
+                    <li draggable="true" data-type="input" data-class="form email" data-input-type="email" data-placeholder="Enter email" data-width="200" data-height="30">Email Input</li>
+                    <li draggable="true" data-type="input" data-class="form password" data-input-type="password" data-placeholder="Enter password" data-width="200" data-height="30">Password Input</li>
+                    <li draggable="true" data-type="textarea" data-class="form textarea" data-placeholder="Enter message" data-width="200" data-height="100">Textarea</li>
+                    <li draggable="true" data-type="button" data-class="form button" data-content="Submit" data-width="100" data-height="30">Button</li>
+                    <li draggable="true" data-type="input" data-class="form file" data-input-type="file" data-width="200" data-height="30">File Upload</li>
+                </ul>
+            </details>
+            <details>
+                <summary>Utilities</summary>
+                <ul>
+                    <li draggable="true" data-type="div" data-class="utility container" data-width="200" data-height="100">Container Div</li>
+                    <li draggable="true" data-type="section" data-class="utility section" data-width="300" data-height="150">Section</li>
+                    <li draggable="true" data-type="article" data-class="utility article" data-width="300" data-height="150">Article</li>
+                    <li draggable="true" data-type="aside" data-class="utility aside" data-width="150" data-height="200">Aside</li>
+                    <li draggable="true" data-type="p" data-class="utility paragraph" data-content="Paragraph text" data-width="200" data-height="50">Paragraph</li>
+                </ul>
+            </details>
+            <details>
+                <summary>Creatives</summary>
+                <ul>
+                    <li draggable="true" data-type="canvas" data-class="creative canvas" data-width="200" data-height="200">Canvas</li>
+                    <li draggable="true" data-type="svg" data-class="creative svg" data-content='<rect width="100" height="50" fill="blue"/>' data-width="200" data-height="200">SVG</li>
+                    <li draggable="true" data-type="div" data-class="creative animation" data-width="100" data-height="100">Animation Box (Placeholder)</li>
+                </ul>
+            </details>
+            <div id="properties">
+                <h3>Properties</h3>
+                <div id="prop-content"></div>
+            </div>
         </div>
         <div id="workspace"></div>
     </div>
@@ -131,11 +217,13 @@
         const htmlArea = document.getElementById('html');
         const cssArea = document.getElementById('css');
         const jsArea = document.getElementById('js');
+        const propContent = document.getElementById('prop-content');
 
         let dragging = null;
         let offsetX = 0;
         let offsetY = 0;
-        let elemCounter = 0;
+        let selected = null;
+        const resizeObserver = new ResizeObserver(() => updateCode());
 
         // Drag from menu to workspace
         workspace.addEventListener('dragover', (e) => e.preventDefault());
@@ -149,6 +237,7 @@
             const src = e.dataTransfer.getData('src');
             const inputType = e.dataTransfer.getData('input-type');
             const placeholder = e.dataTransfer.getData('placeholder');
+            const name = e.dataTransfer.getData('name');
 
             const elem = document.createElement(type);
             elem.className = className;
@@ -162,14 +251,24 @@
             if (src) elem.src = src;
             if (inputType) elem.type = inputType;
             if (placeholder) elem.placeholder = placeholder;
+            if (name) elem.name = name;
 
             // Apply base styles based on class
-            if (className.includes('circle')) {
+            if (className.includes('circle') || className.includes('oval')) {
                 elem.style.borderRadius = '50%';
             }
-            if (className.includes('rectangle') || className.includes('container')) {
+            if (className.includes('rectangle') || className.includes('square') || className.includes('container')) {
                 elem.style.backgroundColor = '#444';
                 elem.style.border = '1px solid #666';
+            }
+            if (className.includes('triangle')) {
+                elem.style.width = '0';
+                elem.style.height = '0';
+                elem.style.borderLeft = '50px solid transparent';
+                elem.style.borderRight = '50px solid transparent';
+                elem.style.borderBottom = '100px solid #28a745';
+                elem.style.backgroundColor = 'transparent';
+                elem.style.resize = 'none'; // Disable resize for triangle
             }
             if (className.includes('icon')) {
                 elem.style.display = 'inline-block';
@@ -177,11 +276,15 @@
             if (type === 'button') {
                 elem.textContent = content || 'Button';
             }
-            if (type === 'video') {
+            if (type === 'video' || type === 'audio') {
                 elem.controls = true;
+            }
+            if (type === 'iframe') {
+                elem.src = src;
             }
 
             workspace.appendChild(elem);
+            resizeObserver.observe(elem);
             updateCode();
         });
 
@@ -197,6 +300,7 @@
                 e.dataTransfer.setData('src', item.dataset.src || '');
                 e.dataTransfer.setData('input-type', item.dataset.inputType || '');
                 e.dataTransfer.setData('placeholder', item.dataset.placeholder || '');
+                e.dataTransfer.setData('name', item.dataset.name || '');
             });
         });
 
@@ -219,11 +323,75 @@
         });
 
         document.addEventListener('mouseup', () => {
-            if (dragging) {
-                updateCode();
-                dragging = null;
+            updateCode();
+            dragging = null;
+        });
+
+        // Selection for properties
+        workspace.addEventListener('click', (e) => {
+            if (selected) {
+                selected.style.border = '';
+            }
+            if (e.target === workspace) {
+                selected = null;
+                propContent.innerHTML = '';
+            } else {
+                selected = e.target;
+                selected.style.border = '1px dashed white';
+                showProperties();
             }
         });
+
+        function showProperties() {
+            if (!selected) return;
+            const width = parseInt(selected.style.width) || parseInt(getComputedStyle(selected).width);
+            const height = parseInt(selected.style.height) || parseInt(getComputedStyle(selected).height);
+            const left = parseInt(selected.style.left) || 0;
+            const top = parseInt(selected.style.top) || 0;
+            const bgColor = rgbToHex(getComputedStyle(selected).backgroundColor);
+            const textColor = rgbToHex(getComputedStyle(selected).color);
+
+            const content = `
+                <label>Left: <input type="number" id="prop-left" value="${left}"></label>
+                <label>Top: <input type="number" id="prop-top" value="${top}"></label>
+                <label>Width: <input type="number" id="prop-width" value="${width}"></label>
+                <label>Height: <input type="number" id="prop-height" value="${height}"></label>
+                <label>Background Color: <input type="color" id="prop-bgcolor" value="${bgColor}"></label>
+                <label>Text Color: <input type="color" id="prop-color" value="${textColor}"></label>
+            `;
+            propContent.innerHTML = content;
+
+            document.getElementById('prop-left').addEventListener('input', (e) => {
+                selected.style.left = e.target.value + 'px';
+                updateCode();
+            });
+            document.getElementById('prop-top').addEventListener('input', (e) => {
+                selected.style.top = e.target.value + 'px';
+                updateCode();
+            });
+            document.getElementById('prop-width').addEventListener('input', (e) => {
+                selected.style.width = e.target.value + 'px';
+                updateCode();
+            });
+            document.getElementById('prop-height').addEventListener('input', (e) => {
+                selected.style.height = e.target.value + 'px';
+                updateCode();
+            });
+            document.getElementById('prop-bgcolor').addEventListener('input', (e) => {
+                selected.style.backgroundColor = e.target.value;
+                updateCode();
+            });
+            document.getElementById('prop-color').addEventListener('input', (e) => {
+                selected.style.color = e.target.value;
+                updateCode();
+            });
+        }
+
+        function rgbToHex(rgb) {
+            if (!rgb || rgb === 'rgba(0, 0, 0, 0)') return '#000000';
+            const [r, g, b] = rgb.match(/\d+/g).map(Number);
+            return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
+        }
 
         // Update code function
         function updateCode() {
@@ -232,24 +400,29 @@
             const children = Array.from(workspace.children);
             children.forEach((el, i) => {
                 const uniqueClass = `elem${i + 1}`;
+                el.dataset.uniqueClass = uniqueClass;
                 if (!el.classList.contains(uniqueClass)) {
                     el.classList.add(uniqueClass);
                 }
 
                 const clone = el.cloneNode(true);
-                clone.removeAttribute('style'); // Remove inline styles for clean HTML
-
-                html += `  ${clone.outerHTML.replace(uniqueClass, `${el.className}`)}\n`; // Keep all classes
+                clone.removeAttribute('style');
+                html += `  ${clone.outerHTML}\n`;
 
                 const compStyle = getComputedStyle(el);
                 css += `.${uniqueClass} {\n`;
-                const props = ['position', 'left', 'top', 'width', 'height', 'background', 'background-color', 'border', 'border-radius', 'color', 'font-size', 'display', 'padding', 'margin'];
+                const props = ['position', 'left', 'top', 'width', 'height', 'background-color', 'border', 'border-radius', 'color', 'font-size', 'display', 'padding', 'margin'];
                 props.forEach(prop => {
                     const value = compStyle.getPropertyValue(prop);
-                    if (value && value !== 'auto' && value !== '0px') {
+                    if (value && value !== 'auto' && value !== '0px' && value !== 'rgba(0, 0, 0, 0)') {
                         css += `  ${prop}: ${value};\n`;
                     }
                 });
+                if (el.className.includes('triangle')) {
+                    css += `  border-left: ${compStyle.borderLeft};\n`;
+                    css += `  border-right: ${compStyle.borderRight};\n`;
+                    css += `  border-bottom: ${compStyle.borderBottom};\n`;
+                }
                 css += '}\n';
             });
             html += '</div>';
