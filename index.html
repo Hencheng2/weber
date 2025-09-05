@@ -10,38 +10,45 @@
     <style>
         body {
             background-color: #1e1e1e;
-            color: #ffffff;
+            color: #e0e0e0;
             font-family: 'Roboto', sans-serif;
             margin: 0;
-            padding: 20px;
+            padding: 0;
+            height: 100vh;
+            overflow: hidden;
         }
         #container {
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 10px;
         }
         #top-menu {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
             background-color: #2d2d2d;
             padding: 10px;
-            border-radius: 4px;
+            text-align: center;
+            z-index: 1000;
             display: flex;
+            justify-content: center;
             gap: 10px;
             flex-wrap: wrap;
-            position: relative;
         }
         #top-menu button {
-            background-color: #3c3c3c;
-            border: none;
-            color: #fff;
             padding: 8px 16px;
             cursor: pointer;
-            border-radius: 4px;
+            border: none;
+            background-color: #3b82f6;
+            color: #ffffff;
+            border-radius: 5px;
         }
         #top-menu button:hover {
-            background-color: #4a4a4a;
+            background-color: #2563eb;
         }
         #top-menu button.active {
-            background-color: #007bff;
+            background-color: #16a34a;
         }
         .dropdown {
             position: absolute;
@@ -71,25 +78,57 @@
             background-color: #4a4a4a;
         }
         #main-content {
+            position: fixed;
+            top: 60px;
+            bottom: 160px;
+            left: 20px;
+            right: 20px;
             display: flex;
-            flex-direction: row;
-            gap: 20px;
+            justify-content: center;
+            align-items: center;
+            overflow: visible;
         }
         #workspace {
-            flex: 1;
-            height: 600px;
+            border: 2px solid #3f3f3f;
+            background-color: #252525;
+            transition: width 0.3s ease, height 0.3s ease;
+            max-width: 100%;
+            max-height: 100%;
+            overflow: auto;
+        }
+        #workspace.edit-mode {
+            position: relative;
             background-color: #333;
             border: 1px solid #444;
-            position: relative;
-            overflow: auto;
-            transition: width 0.3s;
+        }
+        #workspace.view-mode {
+            width: 1366px;
+            height: 768px;
+        }
+        #workspace.view-mode iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background-color: #ffffff;
+        }
+        #workspace.phone {
+            width: 360px;
+            height: 640px;
+        }
+        #workspace.tablet {
+            width: 768px;
+            height: 1024px;
+        }
+        #workspace.laptop {
+            width: 1366px;
+            height: 768px;
         }
         #properties {
             width: 300px;
             background-color: #2d2d2d;
             padding: 20px;
             border-left: 1px solid #444;
-            max-height: 600px;
+            max-height: calc(100vh - 220px);
             overflow-y: auto;
         }
         #properties label {
@@ -104,37 +143,85 @@
             padding: 5px;
         }
         #code {
-            margin-top: 20px;
-            display: flex;
-            justify-content: space-between;
-            gap: 10px;
-        }
-        #code div {
-            width: 32%;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 10px;
+            background-color: #2d2d2d;
+            border-top: 2px solid #3f3f3f;
+            z-index: 1000;
             display: flex;
             flex-direction: column;
             gap: 5px;
         }
+        #code .textarea-group {
+            display: flex;
+            gap: 10px;
+        }
+        #code .textarea-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        #code h3 {
+            margin: 0;
+            font-size: 12px;
+            text-align: center;
+            color: #e0e0e0;
+        }
         #code textarea {
             width: 100%;
-            height: 300px;
-            background-color: #2d2d2d;
-            color: #ffffff;
-            border: 1px solid #444;
-            padding: 10px;
+            height: 60px;
             font-family: monospace;
-            resize: vertical;
+            font-size: 12px;
+            padding: 8px;
+            border: 1px solid #3f3f3f;
+            border-radius: 5px;
+            resize: none;
+            background-color: #1e1e1e;
+            color: #e0e0e0;
+        }
+        #code textarea::placeholder {
+            color: #6b7280;
+        }
+        #code .button-group {
+            display: flex;
+            gap: 5px;
+            justify-content: center;
         }
         #code button {
-            background-color: #3c3c3c;
-            border: none;
-            color: #fff;
-            padding: 5px 10px;
+            padding: 6px 12px;
             cursor: pointer;
-            border-radius: 4px;
+            border: none;
+            border-radius: 5px;
+            color: #ffffff;
+            width: 80px;
         }
-        #code button:hover {
-            background-color: #4a4a4a;
+        #code button.clear {
+            background-color: #dc2626;
+        }
+        #code button.clear:hover {
+            background-color: #b91c1c;
+        }
+        #code button.paste {
+            background-color: #16a34a;
+        }
+        #code button.paste:hover {
+            background-color: #15803d;
+        }
+        #code button.copy {
+            background-color: #f59e0b;
+        }
+        #code button.copy:hover {
+            background-color: #d97706;
+        }
+        #code button.distinguish {
+            background-color: #8b5cf6;
+        }
+        #code button.distinguish:hover {
+            background-color: #7c3aed;
         }
         .shape.rectangle, .shape.square, .shape.rounded-rectangle {
             background-color: #007bff;
@@ -176,33 +263,26 @@
             padding: 10px;
             border-radius: 4px;
         }
-        #workspace > * {
+        #workspace.edit-mode > * {
+            position: absolute;
             resize: both;
             overflow: auto;
         }
         #workspace.view-mode > * {
+            position: static;
             resize: none;
             cursor: default;
         }
         #workspace.view-mode > *.selected {
             border: none;
         }
-        #workspace.phone {
-            width: 375px !important;
-            margin: 0 auto;
-        }
-        #workspace.tablet {
-            width: 768px !important;
-            margin: 0 auto;
-        }
-        #workspace.laptop {
-            width: 1024px !important;
-            margin: 0 auto;
-        }
         #page-nav {
-            margin-top: 10px;
+            position: fixed;
+            top: 60px;
+            left: 20px;
             display: flex;
             gap: 10px;
+            z-index: 900;
         }
         #page-nav input, #page-nav select, #page-nav button {
             background-color: #3c3c3c;
@@ -220,7 +300,6 @@
             padding: 8px 16px;
             border-radius: 4px;
             cursor: pointer;
-            display: none;
         }
         #apply-code-btn:hover {
             background-color: #218838;
@@ -232,9 +311,9 @@
         <div id="top-menu">
             <button id="edit-mode-btn" class="active" onclick="setMode('edit')">Edit Mode</button>
             <button id="view-mode-btn" onclick="setMode('view')">View Mode</button>
-            <button id="phone-btn" onclick="setPreview('phone')" style="display: none;">Phone</button>
-            <button id="tablet-btn" onclick="setPreview('tablet')" style="display: none;">Tablet</button>
-            <button id="laptop-btn" onclick="setPreview('laptop')" style="display: none;">Laptop</button>
+            <button id="phone-btn" onclick="setPreview('phone')" style="display: none;">Phone (360x640)</button>
+            <button id="tablet-btn" onclick="setPreview('tablet')" style="display: none;">Tablet (768x1024)</button>
+            <button id="laptop-btn" onclick="setPreview('laptop')" style="display: none;">Laptop (1366x768)</button>
             <button id="add-shape-btn" onclick="openCategory('shapes', this)">Add Shape</button>
             <button id="add-icon-btn" onclick="openCategory('icons', this)">Add Icon</button>
             <button id="add-social-icon-btn" onclick="openCategory('social-icons', this)">Add Social Icon</button>
@@ -257,7 +336,7 @@
             <select id="page-selector" onchange="switchPage(this.value)">
                 <option value="page1" data-name="index.html">index.html</option>
             </select>
-            <button id="apply-code-btn" onclick="applyCode()">Apply Code</button>
+            <button id="apply-code-btn" onclick="applyCode()" style="display: none;">Apply Code</button>
         </div>
         <div id="main-content">
             <div id="workspace" class="edit-mode"></div>
@@ -267,31 +346,37 @@
                 <button id="delete-btn" style="display: none; background-color: #dc3545; border: none; color: white; padding: 10px; cursor: pointer;">Delete Selected</button>
             </div>
         </div>
-    </div>
-    <div id="code">
-        <div>
-            <div>
-                <button onclick="pasteCode('html')">Paste</button>
-                <button onclick="clearCode('html')">Clear</button>
-                <button onclick="copyCode('html')">Copy</button>
+        <div id="code">
+            <div class="textarea-group">
+                <div class="textarea-container">
+                    <h3>HTML</h3>
+                    <textarea id="html" placeholder="Enter your HTML code here..."></textarea>
+                    <div class="button-group">
+                        <button class="clear" onclick="clearCode('html')">Clear</button>
+                        <button class="paste" onclick="pasteCode('html')">Paste</button>
+                        <button class="copy" onclick="copyCode('html')">Copy</button>
+                        <button class="distinguish" onclick="distinguishCode()">Distinguish</button>
+                    </div>
+                </div>
+                <div class="textarea-container">
+                    <h3>CSS</h3>
+                    <textarea id="css" placeholder="Enter your CSS code here..."></textarea>
+                    <div class="button-group">
+                        <button class="clear" onclick="clearCode('css')">Clear</button>
+                        <button class="paste" onclick="pasteCode('css')">Paste</button>
+                        <button class="copy" onclick="copyCode('css')">Copy</button>
+                    </div>
+                </div>
+                <div class="textarea-container">
+                    <h3>JavaScript</h3>
+                    <textarea id="js" placeholder="Enter your JavaScript code here...">// No JS generated yet</textarea>
+                    <div class="button-group">
+                        <button class="clear" onclick="clearCode('js')">Clear</button>
+                        <button class="paste" onclick="pasteCode('js')">Paste</button>
+                        <button class="copy" onclick="copyCode('js')">Copy</button>
+                    </div>
+                </div>
             </div>
-            <textarea id="html" placeholder="Generated HTML"></textarea>
-        </div>
-        <div>
-            <div>
-                <button onclick="pasteCode('css')">Paste</button>
-                <button onclick="clearCode('css')">Clear</button>
-                <button onclick="copyCode('css')">Copy</button>
-            </div>
-            <textarea id="css" placeholder="Generated CSS"></textarea>
-        </div>
-        <div>
-            <div>
-                <button onclick="pasteCode('js')">Paste</button>
-                <button onclick="clearCode('js')">Clear</button>
-                <button onclick="copyCode('js')">Copy</button>
-            </div>
-            <textarea id="js" placeholder="Generated JS">// No JS generated yet</textarea>
         </div>
     </div>
 
@@ -474,6 +559,7 @@
                 }
             });
             document.getElementById('properties').style.display = mode === 'edit' ? 'block' : 'none';
+            pageNav.style.display = mode === 'edit' ? 'flex' : 'none';
             applyCodeBtn.style.display = mode === 'view' ? 'inline-block' : 'none';
             if (mode === 'view') {
                 if (selected) {
@@ -485,11 +571,22 @@
                 deleteBtn.style.display = 'none';
                 closeDropdown();
                 setPreview('laptop');
+                updatePreview();
             } else {
                 workspace.classList.remove('phone', 'tablet', 'laptop');
-                workspace.style.width = '';
-                workspace.style.margin = '';
-                applyCode(); // Ensure elements are editable when switching to edit mode
+                workspace.innerHTML = '';
+                pages[currentPage].elements.forEach(({ element, style, attributes, innerHTML, classList }) => {
+                    const newEl = element.cloneNode(false);
+                    newEl.innerHTML = innerHTML;
+                    newEl.className = classList.join(' ');
+                    Object.assign(newEl.style, style);
+                    Object.entries(attributes).forEach(([name, value]) => {
+                        newEl.setAttribute(name, value);
+                    });
+                    workspace.appendChild(newEl);
+                    attachEventListeners(newEl);
+                    resizeObserver.observe(newEl);
+                });
             }
             updateCode();
         }
@@ -502,28 +599,55 @@
             phoneBtn.classList.toggle('active', device === 'phone');
             tabletBtn.classList.toggle('active', device === 'tablet');
             laptopBtn.classList.toggle('active', device === 'laptop');
-            workspace.style.width = device === 'phone' ? '375px' : device === 'tablet' ? '768px' : '1024px';
-            workspace.style.margin = '0 auto';
+            updatePreview();
+        }
+
+        // Update preview in view mode
+        function updatePreview() {
+            if (mode !== 'view') return;
+            workspace.innerHTML = '<iframe id="previewFrame"></iframe>';
+            const iframe = document.getElementById('previewFrame');
+            const htmlCode = htmlArea.value || '<html><body></body></html>';
+            const cssCode = cssArea.value || '';
+            const jsCode = jsArea.value || '';
+            const fullHtml = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <style>${cssCode}</style>
+                </head>
+                <body>
+                    ${htmlCode}
+                    <script>${jsCode}<\/script>
+                </body>
+                </html>
+            `;
+            const doc = iframe.contentDocument || iframe.contentWindow.document;
+            doc.open();
+            doc.write(fullHtml);
+            doc.close();
         }
 
         // Save page state
         function savePageState(pageId) {
-            pages[pageId].elements = Array.from(workspace.children).map(el => {
-                const attributes = {};
-                Array.from(el.attributes).forEach(attr => {
-                    attributes[attr.name] = attr.value;
+            if (mode === 'edit') {
+                pages[pageId].elements = Array.from(workspace.children).map(el => {
+                    const attributes = {};
+                    Array.from(el.attributes).forEach(attr => {
+                        attributes[attr.name] = attr.value;
+                    });
+                    const style = {};
+                    Object.assign(style, el.style);
+                    return {
+                        element: el.cloneNode(true),
+                        style: style,
+                        attributes: attributes,
+                        innerHTML: el.innerHTML,
+                        textContent: el.textContent,
+                        classList: Array.from(el.classList)
+                    };
                 });
-                const style = {};
-                Object.assign(style, el.style);
-                return {
-                    element: el.cloneNode(true),
-                    style: style,
-                    attributes: attributes,
-                    innerHTML: el.innerHTML,
-                    textContent: el.textContent,
-                    classList: Array.from(el.classList)
-                };
-            });
+            }
             pages[pageId].html = htmlArea.value;
             pages[pageId].css = cssArea.value;
             pages[pageId].js = jsArea.value;
@@ -554,20 +678,22 @@
 
             currentPage = pageId;
             workspace.innerHTML = '';
-            pages[pageId].elements.forEach(({ element, style, attributes, innerHTML, classList }) => {
-                const newEl = element.cloneNode(false);
-                newEl.innerHTML = innerHTML;
-                newEl.className = classList.join(' ');
-                Object.assign(newEl.style, style);
-                Object.entries(attributes).forEach(([name, value]) => {
-                    newEl.setAttribute(name, value);
-                });
-                workspace.appendChild(newEl);
-                attachEventListeners(newEl);
-                if (mode === 'edit') {
+            if (mode === 'edit') {
+                pages[pageId].elements.forEach(({ element, style, attributes, innerHTML, classList }) => {
+                    const newEl = element.cloneNode(false);
+                    newEl.innerHTML = innerHTML;
+                    newEl.className = classList.join(' ');
+                    Object.assign(newEl.style, style);
+                    Object.entries(attributes).forEach(([name, value]) => {
+                        newEl.setAttribute(name, value);
+                    });
+                    workspace.appendChild(newEl);
+                    attachEventListeners(newEl);
                     resizeObserver.observe(newEl);
-                }
-            });
+                });
+            } else {
+                updatePreview();
+            }
             htmlArea.value = pages[pageId].html || '';
             cssArea.value = pages[pageId].css || '';
             jsArea.value = pages[pageId].js || '// No JS generated yet';
@@ -646,20 +772,58 @@
         function pasteCode(type) {
             navigator.clipboard.readText().then(text => {
                 document.getElementById(type).value = text;
-                if (mode === 'view' || mode === 'edit') applyCode();
+                if (mode === 'view') updatePreview();
+                else applyCode();
+            }).catch(() => {
+                alert('Failed to paste content. Ensure clipboard access is allowed.');
             });
         }
 
         function clearCode(type) {
             document.getElementById(type).value = '';
-            if (mode === 'view' || mode === 'edit') applyCode();
+            if (mode === 'view') updatePreview();
+            else applyCode();
         }
 
         function copyCode(type) {
             const textarea = document.getElementById(type);
             textarea.select();
-            navigator.clipboard.writeText(textarea.value);
-            alert(`${type.toUpperCase()} copied to clipboard!`);
+            navigator.clipboard.writeText(textarea.value).then(() => {
+                alert(`${type.toUpperCase()} copied to clipboard!`);
+            }).catch(() => {
+                alert('Failed to copy content.');
+            });
+        }
+
+        function distinguishCode() {
+            let htmlContent = htmlArea.value;
+            let cssContent = '';
+            let jsContent = '';
+
+            // Extract CSS from <style> tags
+            const styleRegex = /<style[^>]*>([\s\S]*?)<\/style>/gi;
+            let styleMatch;
+            while ((styleMatch = styleRegex.exec(htmlContent)) !== null) {
+                cssContent += styleMatch[1].trim() + '\n';
+                htmlContent = htmlContent.replace(styleMatch[0], '');
+            }
+
+            // Extract JavaScript from <script> tags
+            const scriptRegex = /<script[^>]*>([\s\S]*?)<\/script>/gi;
+            let scriptMatch;
+            while ((scriptMatch = scriptRegex.exec(htmlContent)) !== null) {
+                jsContent += scriptMatch[1].trim() + '\n';
+                htmlContent = htmlContent.replace(scriptMatch[0], '');
+            }
+
+            // Update textareas
+            htmlArea.value = htmlContent.trim();
+            cssArea.value = cssContent.trim();
+            jsArea.value = jsContent.trim() || '// No JS generated yet';
+
+            if (mode === 'view') updatePreview();
+            else applyCode();
+            savePageState(currentPage);
         }
 
         // Attach event listeners to elements
@@ -1093,77 +1257,56 @@
 
         // Apply external code
         function applyCode() {
+            if (mode === 'view') {
+                updatePreview();
+                return;
+            }
             workspace.innerHTML = '';
             const html = htmlArea.value;
             const css = cssArea.value;
             const js = jsArea.value;
 
-            // Remove existing styles
+            // Remove existing styles and scripts
             document.querySelectorAll('style[data-dynamic]').forEach(style => style.remove());
             document.querySelectorAll('script[data-dynamic]').forEach(script => script.remove());
 
-            if (mode === 'view') {
-                // View mode: Render raw HTML/CSS/JS
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(html, 'text/html');
-                const page = doc.querySelector('div#page') || doc.body;
-                if (page) {
-                    Array.from(page.children).forEach(child => {
-                        workspace.appendChild(child);
-                        attachEventListeners(child);
-                    });
-                }
-                const style = document.createElement('style');
-                style.setAttribute('data-dynamic', 'true');
-                style.textContent = css;
-                document.head.appendChild(style);
-                try {
-                    const script = document.createElement('script');
-                    script.setAttribute('data-dynamic', 'true');
-                    script.textContent = js;
-                    document.body.appendChild(script);
-                } catch (e) {
-                    console.error('Error executing JS:', e);
-                }
-            } else {
-                // Edit mode: Parse and make elements editable
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(html, 'text/html');
-                const page = doc.querySelector('div#page') || doc.body;
-                if (page) {
-                    Array.from(page.children).forEach((child, i) => {
-                        const compStyle = getComputedStyle(child);
-                        child.style.position = 'absolute';
-                        child.style.left = compStyle.left !== 'auto' ? compStyle.left : `${i * 20}px`;
-                        child.style.top = compStyle.top !== 'auto' ? compStyle.top : `${i * 20}px`;
-                        child.style.width = compStyle.width !== 'auto' ? compStyle.width : '100px';
-                        child.style.height = compStyle.height !== 'auto' ? compStyle.height : '50px';
-                        if (child.tagName === 'IMG' || child.tagName === 'VIDEO' || child.tagName === 'AUDIO' || child.tagName === 'IFRAME' || child.tagName === 'PICTURE') {
-                            child.src = child.src || '';
-                        }
-                        if (child.tagName === 'INPUT' || child.tagName === 'TEXTAREA') {
-                            child.placeholder = child.placeholder || '';
-                        }
-                        if (child.tagName === 'A' || child.tagName === 'BUTTON') {
-                            child.href = child.href || '';
-                        }
-                        workspace.appendChild(child);
-                        attachEventListeners(child);
-                        resizeObserver.observe(child);
-                    });
-                }
-                const style = document.createElement('style');
-                style.setAttribute('data-dynamic', 'true');
-                style.textContent = css;
-                document.head.appendChild(style);
-                try {
-                    const script = document.createElement('script');
-                    script.setAttribute('data-dynamic', 'true');
-                    script.textContent = js;
-                    document.body.appendChild(script);
-                } catch (e) {
-                    console.error('Error executing JS:', e);
-                }
+            // Parse and make elements editable
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const page = doc.querySelector('div#page') || doc.body;
+            if (page) {
+                Array.from(page.children).forEach((child, i) => {
+                    const compStyle = getComputedStyle(child);
+                    child.style.position = 'absolute';
+                    child.style.left = compStyle.left !== 'auto' ? compStyle.left : `${i * 20}px`;
+                    child.style.top = compStyle.top !== 'auto' ? compStyle.top : `${i * 20}px`;
+                    child.style.width = compStyle.width !== 'auto' ? compStyle.width : '100px';
+                    child.style.height = compStyle.height !== 'auto' ? compStyle.height : '50px';
+                    if (child.tagName === 'IMG' || child.tagName === 'VIDEO' || child.tagName === 'AUDIO' || child.tagName === 'IFRAME' || child.tagName === 'PICTURE') {
+                        child.src = child.src || '';
+                    }
+                    if (child.tagName === 'INPUT' || child.tagName === 'TEXTAREA') {
+                        child.placeholder = child.placeholder || '';
+                    }
+                    if (child.tagName === 'A' || child.tagName === 'BUTTON') {
+                        child.href = child.href || '';
+                    }
+                    workspace.appendChild(child);
+                    attachEventListeners(child);
+                    resizeObserver.observe(child);
+                });
+            }
+            const style = document.createElement('style');
+            style.setAttribute('data-dynamic', 'true');
+            style.textContent = css;
+            document.head.appendChild(style);
+            try {
+                const script = document.createElement('script');
+                script.setAttribute('data-dynamic', 'true');
+                script.textContent = js;
+                document.body.appendChild(script);
+            } catch (e) {
+                console.error('Error executing JS:', e);
             }
             savePageState(currentPage);
             updateCode();
@@ -1174,7 +1317,7 @@
             let html = '<div id="page">\n';
             let css = '#page {\n  position: relative;\n}\n';
             let js = '// Dynamic JS for interactions\n';
-            const children = Array.from(workspace.children);
+            const children = Array.from(workspace.children).filter(el => el.id !== 'previewFrame');
             let hasForm = false;
             let hasButton = false;
             let hasLink = false;
@@ -1249,10 +1392,14 @@
             pages[currentPage].html = html;
             pages[currentPage].css = css;
             pages[currentPage].js = js;
+            if (mode === 'view') updatePreview();
         }
 
-        // Initialize edit mode
+        // Initialize
         setMode('edit');
+        [htmlArea, cssArea, jsArea].forEach(input => input.addEventListener('input', () => {
+            if (mode === 'view') updatePreview();
+        }));
     </script>
 </body>
 </html>
