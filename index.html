@@ -3,1335 +3,718 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Visual Web Designer Tool</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Open+Sans:wght@400;600&family=Montserrat:wght@400;700&family=Lato:wght@400;700&family=Poppins:wght@400;600&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+    <title>Web Editor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body {
-            background-color: #1e1e1e;
-            color: #ffffff;
-            font-family: 'Roboto', sans-serif;
-            margin: 0;
-            padding: 20px;
-        }
-        #container {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-        #top-menu {
-            background-color: #2d2d2d;
-            padding: 10px;
-            border-radius: 4px;
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            position: relative;
-        }
-        #top-menu button {
-            background-color: #3c3c3c;
-            border: none;
-            color: #fff;
-            padding: 8px 16px;
-            cursor: pointer;
-            border-radius: 4px;
-        }
-        #top-menu button:hover {
-            background-color: #4a4a4a;
-        }
-        #top-menu button.active {
-            background-color: #007bff;
-        }
-        .dropdown {
-            position: absolute;
-            top: 100%;
-            background-color: #2d2d2d;
-            border: 1px solid #444;
-            border-radius: 4px;
-            z-index: 1000;
-            max-height: 300px;
-            overflow-y: auto;
-            display: none;
-        }
-        .dropdown ul {
-            list-style: none;
-            padding: 10px;
-            margin: 0;
-        }
-        .dropdown li {
-            padding: 10px;
-            background-color: #3c3c3c;
-            margin-bottom: 5px;
-            cursor: grab;
-            border-radius: 4px;
-            user-select: none;
-        }
-        .dropdown li:hover {
-            background-color: #4a4a4a;
-        }
-        #main-content {
-            display: flex;
-            flex-direction: row;
-            gap: 20px;
-        }
-        #workspace {
-            flex: 1;
-            height: 600px;
-            background-color: #333;
-            border: 1px solid #444;
-            position: relative;
-            overflow: auto;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            transition: all 0.3s;
-        }
-        #page {
-            background-color: #fff;
-            color: #000;
-            position: relative;
-            min-height: 100px;
-            transition: all 0.3s;
-            box-sizing: border-box;
-        }
-        #page.edit-mode {
-            width: 1024px;
-            min-height: 768px;
-            border: 2px solid #007bff;
-            margin: 20px;
-        }
-        #page.view-mode.phone {
-            width: 375px;
-            height: 667px;
-            border: 2px solid #555;
-            box-shadow: 0 0 10px rgba(0,0,0,0.5);
-            margin: 20px auto;
-        }
-        #page.view-mode.tablet {
-            width: 768px;
-            height: 1024px;
-            border: 2px solid #555;
-            box-shadow: 0 0 10px rgba(0,0,0,0.5);
-            margin: 20px auto;
-        }
-        #page.view-mode.laptop {
-            width: 1024px;
-            height: 768px;
-            border: 2px solid #555;
-            box-shadow: 0 0 10px rgba(0,0,0,0.5);
-            margin: 20px auto;
-        }
-        #properties {
-            width: 300px;
-            background-color: #2d2d2d;
-            padding: 20px;
-            border-left: 1px solid #444;
-            max-height: 600px;
-            overflow-y: auto;
-        }
-        #properties label {
-            display: block;
-            margin-bottom: 10px;
-        }
-        #properties input, #properties select, #properties textarea {
-            background-color: #2d2d2d;
-            color: #fff;
-            border: 1px solid #444;
-            width: 100%;
-            padding: 5px;
-        }
-        #code {
-            margin-top: 20px;
-            display: flex;
-            justify-content: space-between;
-            gap: 10px;
-        }
-        #code div {
-            width: 32%;
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-        #code textarea {
-            width: 100%;
-            height: 300px;
-            background-color: #2d2d2d;
-            color: #ffffff;
-            border: 1px solid #444;
-            padding: 10px;
-            font-family: monospace;
-            resize: vertical;
-        }
-        #code button {
-            background-color: #3c3c3c;
-            border: none;
-            color: #fff;
-            padding: 5px 10px;
-            cursor: pointer;
-            border-radius: 4px;
-        }
-        #code button:hover {
-            background-color: #4a4a4a;
-        }
-        .shape.rectangle, .shape.square, .shape.rounded-rectangle {
-            background-color: #007bff;
-        }
-        .shape.circle, .shape.oval {
-            background-color: #dc3545;
-            border-radius: 50%;
-        }
-        .shape.triangle {
-            width: 0;
-            height: 0;
-            border-left: 50px solid transparent;
-            border-right: 50px solid transparent;
-            border-bottom: 100px solid #28a745;
-            background-color: transparent;
-        }
-        .shape.pentagon, .shape.hexagon, .shape.octagon {
-            background-color: #6610f2;
-        }
-        .icon, .social-icon {
-            font-size: 24px;
-            display: inline-block;
-        }
-        .modal {
-            background-color: #fff;
-            color: #000;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.5);
-        }
-        .card {
-            background-color: #444;
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-        }
-        .slider {
-            background-color: #555;
-            padding: 10px;
-            border-radius: 4px;
-        }
-        #page > * {
-            resize: both;
-            overflow: auto;
-        }
-        #page.view-mode > * {
-            resize: none;
-            cursor: default;
-        }
-        #page.view-mode > *.selected {
-            border: none;
-        }
-        #page-nav {
-            margin-top: 10px;
-            display: flex;
-            gap: 10px;
-        }
-        #page-nav input, #page-nav select, #page-nav button {
-            background-color: #3c3c3c;
-            border: none;
-            color: #fff;
-            padding: 8px 16px;
-            cursor: pointer;
-            border-radius: 4px;
-        }
-        #page-nav input:hover, #page-nav select:hover, #page-nav button:hover {
-            background-color: #4a4a4a;
-        }
-        #apply-code-btn {
-            background-color: #28a745;
-            padding: 8px 16px;
-            border-radius: 4px;
-            cursor: pointer;
-            display: none;
-        }
-        #apply-code-btn:hover {
-            background-color: #218838;
-        }
-        #create-page-btn {
-            background-color: #17a2b8;
-            padding: 8px 16px;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        #create-page-btn:hover {
-            background-color: #138496;
-        }
+        .dropdown-content { display: none; position: absolute; background-color: white; box-shadow: 0 8px 16px rgba(0,0,0,0.2); z-index: 1; }
+        .dropdown:hover .dropdown-content { display: block; }
+        .submenu-content { display: none; position: absolute; left: 100%; top: 0; background-color: white; box-shadow: 0 8px 16px rgba(0,0,0,0.2); }
+        .submenu:hover .submenu-content { display: block; }
+        .canvas { border: 1px solid #ccc; position: relative; }
+        .ruler { background: #f0f0f0; position: absolute; }
+        .ruler-x { height: 20px; width: 100%; top: 0; }
+        .ruler-y { width: 20px; height: 100%; left: 0; }
+        .layer-panel { max-height: 300px; overflow-y: auto; }
     </style>
 </head>
-<body>
-    <div id="container">
-        <div id="top-menu">
-            <button id="edit-mode-btn" class="active" onclick="setMode('edit')">Edit Mode</button>
-            <button id="view-mode-btn" onclick="setMode('view')">View Mode</button>
-            <button id="phone-btn" onclick="setPreview('phone')" style="display: none;">Phone</button>
-            <button id="tablet-btn" onclick="setPreview('tablet')" style="display: none;">Tablet</button>
-            <button id="laptop-btn" onclick="setPreview('laptop')" style="display: none;">Laptop</button>
-            <button id="add-shape-btn" onclick="openCategory('shapes', this)">Add Shape</button>
-            <button id="add-icon-btn" onclick="openCategory('icons', this)">Add Icon</button>
-            <button id="add-social-icon-btn" onclick="openCategory('social-icons', this)">Add Social Icon</button>
-            <button id="add-material-icon-btn" onclick="openCategory('material-icons', this)">Add Material Icon</button>
-            <button id="add-navigation-btn" onclick="openCategory('navigations', this)">Add Navigation</button>
-            <button id="add-menu-btn" onclick="openCategory('menus', this)">Add Menu</button>
-            <button id="add-media-btn" onclick="openCategory('media', this)">Add Media</button>
-            <button id="add-form-btn" onclick="openCategory('forms', this)">Add Form</button>
-            <button id="add-utility-btn" onclick="openCategory('utilities', this)">Add Utility</button>
-            <button id="add-creative-btn" onclick="openCategory('creatives', this)">Add Creative</button>
-            <button id="add-modal-btn" onclick="openCategory('modals', this)">Add Modal</button>
-            <button id="add-button-btn" onclick="openCategory('buttons', this)">Add Button</button>
-            <button id="add-card-btn" onclick="openCategory('cards', this)">Add Card</button>
-            <button id="add-slider-btn" onclick="openCategory('sliders', this)">Add Slider</button>
-            <button id="add-font-btn" onclick="openCategory('fonts', this)">Add Font</button>
-        </div>
-        <div id="page-nav">
-            <button id="create-page-btn" onclick="createPage()">Create Page</button>
-            <button onclick="newPage()">New Page</button>
-            <input id="page-name" type="text" placeholder="Enter page name" value="index.html">
-            <select id="page-selector" onchange="switchPage(this.value)">
-                <option value="page1" data-name="index.html">index.html</option>
-            </select>
-            <button id="apply-code-btn" onclick="applyCode()">Apply Code</button>
-        </div>
-        <div id="main-content">
-            <div id="workspace">
-                <div id="page" class="edit-mode"></div>
+<body class="bg-gray-100 font-sans">
+    <div class="flex flex-col h-screen">
+        <!-- Top Bar -->
+        <div class="bg-white p-4 shadow flex justify-between items-center">
+            <div class="flex space-x-4">
+                <div class="relative dropdown">
+                    <button class="bg-blue-500 text-white px-4 py-2 rounded">Edit Mode</button>
+                    <div class="dropdown-content">
+                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="setMode('edit')">Edit Mode</a>
+                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="setMode('view')">View Mode</a>
+                    </div>
+                </div>
+                <div class="relative dropdown">
+                    <button class="bg-blue-500 text-white px-4 py-2 rounded">Device Preview</button>
+                    <div class="dropdown-content">
+                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="setDevice('phone')">Phone</a>
+                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="setDevice('tablet')">Tablet</a>
+                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="setDevice('laptop')">Laptop</a>
+                    </div>
+                </div>
+                <div class="relative dropdown">
+                    <button class="bg-blue-500 text-white px-4 py-2 rounded">Library</button>
+                    <div class="dropdown-content">
+                        <!-- Icons -->
+                        <div class="relative submenu">
+                            <a href="#" class="block px-4 py-2 hover:bg-gray-200">Icons</a>
+                            <div class="submenu-content">
+                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('glyph-icon')">Glyph Icons</a>
+                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('material-icon')">Material Icons</a>
+                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('font-icon')">Font-Based Icons</a>
+                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('custom-icon')">Custom Icons</a>
+                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('emoji-icon')">Emoji Icons</a>
+                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('animated-icon')">Animated Icons</a>
+                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('social-icon')">Social Media Icons</a>
+                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('action-icon')">Action Icons</a>
+                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('status-icon')">Status Icons</a>
+                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('navigation-icon')">Navigation Icons</a>
+                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('duotone-icon')">Duotone Icons</a>
+                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('neumorphic-icon')">Neumorphic Icons</a>
+                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('weather-icon')">Weather Icons</a>
+                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('ecommerce-icon')">E-commerce Icons</a>
+                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('accessibility-icon')">Accessibility Icons</a>
+                            </div>
+                        </div>
+                        <!-- Navigation -->
+                        <div class="relative submenu">
+                            <a href="#" class="block px-4 py-2 hover:bg-gray-200">Navigation</a>
+                            <div class="submenu-content">
+                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('top-nav')">Top Navigation Bar</a>
+                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('hamburger-menu')">Hamburger Menu</a>
+                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('sidebar')">Sidebar</a>
+                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('bottom-nav')">Bottom Navigation Bar</a>
+                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('tab-bar')">Tab Bar</a>
+                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('breadcrumbs')">Breadcrumbs</a>
+                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('mega-menu')">Mega Menu</a>
+                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('fab')">Floating Action Button</a>
+                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('sticky-nav')">Sticky Navigation</a>
+                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('gesture-nav')">Gesture-Based Navigation</a>
+                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('voice-nav')">Voice Navigation</a>
+                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('pagination')">Pagination</a>
+                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('dropdown-menu')">Dropdown Menu</a>
+                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('accordion-menu')">Accordion Menu</a>
+                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('step-indicators')">Step Indicators</a>
+                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('back-to-top')">Back-to-Top Button</a>
+                            </div>
+                        </div>
+                        <!-- Fonts -->
+                        <div class="relative submenu">
+                            <a href="#" class="block px-4 py-2 hover:bg-gray-200">Fonts</a>
+                            <div class="submenu-content">
+                                <div class="relative submenu">
+                                    <a href="#" class="block px-4 py-2 hover:bg-gray-200">Sans-Serif Fonts</a>
+                                    <div class="submenu-content">
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addFont('Roboto')">Roboto</a>
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addFont('Open Sans')">Open Sans</a>
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addFont('Inter')">Inter</a>
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addFont('Montserrat')">Montserrat</a>
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addFont('Lato')">Lato</a>
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addFont('Poppins')">Poppins</a>
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addFont('Helvetica')">Helvetica</a>
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addFont('Arial')">Arial</a>
+                                    </div>
+                                </div>
+                                <div class="relative submenu">
+                                    <a href="#" class="block px-4 py-2 hover:bg-gray-200">Serif Fonts</a>
+                                    <div class="submenu-content">
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addFont('Georgia')">Georgia</a>
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addFont('Times New Roman')">Times New Roman</a>
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addFont('Playfair Display')">Playfair Display</a>
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addFont('Merriweather')">Merriweather</a>
+                                    </div>
+                                </div>
+                                <div class="relative submenu">
+                                    <a href="#" class="block px-4 py-2 hover:bg-gray-200">Monospace Fonts</a>
+                                    <div class="submenu-content">
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addFont('Fira Code')">Fira Code</a>
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addFont('JetBrains Mono')">JetBrains Mono</a>
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addFont('Courier New')">Courier New</a>
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addFont('Source Code Pro')">Source Code Pro</a>
+                                    </div>
+                                </div>
+                                <div class="relative submenu">
+                                    <a href="#" class="block px-4 py-2 hover:bg-gray-200">Display Fonts</a>
+                                    <div class="submenu-content">
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addFont('Bebas Neue')">Bebas Neue</a>
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addFont('Raleway')">Raleway</a>
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addFont('Oswald')">Oswald</a>
+                                    </div>
+                                </div>
+                                <div class="relative submenu">
+                                    <a href="#" class="block px-4 py-2 hover:bg-gray-200">Variable Fonts</a>
+                                    <div class="submenu-content">
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addFont('Inter Variable')">Inter Variable</a>
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addFont('Roboto Flex')">Roboto Flex</a>
+                                    </div>
+                                </div>
+                                <div class="relative submenu">
+                                    <a href="#" class="block px-4 py-2 hover:bg-gray-200">System Fonts</a>
+                                    <div class="submenu-content">
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addFont('San Francisco')">San Francisco</a>
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addFont('Segoe UI')">Segoe UI</a>
+                                    </div>
+                                </div>
+                                <div class="relative submenu">
+                                    <a href="#" class="block px-4 py-2 hover:bg-gray-200">Custom Fonts</a>
+                                    <div class="submenu-content">
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addFont('Netflix Sans')">Netflix Sans</a>
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addFont('Airbnb Cereal')">Airbnb Cereal</a>
+                                    </div>
+                                </div>
+                                <div class="relative submenu">
+                                    <a href="#" class="block px-4 py-2 hover:bg-gray-200">Non-Latin Fonts</a>
+                                    <div class="submenu-content">
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addFont('Amiri')">Amiri (Arabic)</a>
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addFont('Noto Serif CJK SC')">Noto Serif CJK SC (Chinese)</a>
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addFont('Noto Serif CJK JP')">Noto Serif CJK JP (Japanese)</a>
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addFont('Noto Serif Devanagari')">Noto Serif Devanagari (Hindi)</a>
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addFont('Noto Serif Bengali')">Noto Serif Bengali (Bengali)</a>
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addFont('Noto')">Noto (Russian)</a>
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addFont('Noto Serif CJK KR')">Noto Serif CJK KR (Korean)</a>
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addFont('DejaVu Sans')">DejaVu Sans (Hebrew, Greek)</a>
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addFont('Noto Serif Thai')">Noto Serif Thai (Thai)</a>
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addFont('Noto Serif Gurmukhi')">Noto Serif Gurmukhi (Punjabi)</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- UI Elements -->
+                        <div class="relative submenu">
+                            <a href="#" class="block px-4 py-2 hover:bg-gray-200">UI Elements</a>
+                            <div class="submenu-content">
+                                <div class="relative submenu">
+                                    <a href="#" class="block px-4 py-2 hover:bg-gray-200">Buttons</a>
+                                    <div class="submenu-content">
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('primary-button')">Primary Button</a>
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('secondary-button')">Secondary Button</a>
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('icon-button')">Icon Button</a>
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('toggle-button')">Toggle Button</a>
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('ghost-button')">Ghost Button</a>
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('split-button')">Split Button</a>
+                                    </div>
+                                </div>
+                                <div class="relative submenu">
+                                    <a href="#" class="block px-4 py-2 hover:bg-gray-200">Forms</a>
+                                    <div class="submenu-content">
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('text-input')">Text Input</a>
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('textarea')">Textarea</a>
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('dropdown')">Dropdown</a>
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('checkbox')">Checkbox</a>
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('radio')">Radio Button</a>
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('file-upload')">File Upload</a>
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('search-bar')">Search Bar</a>
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('slider')">Slider</a>
+                                    </div>
+                                </div>
+                                <div class="relative submenu">
+                                    <a href="#" class="block px-4 py-2 hover:bg-gray-200">Form Feedback</a>
+                                    <div class="submenu-content">
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('validation-indicator')">Validation Indicator</a>
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('tooltip')">Tooltip</a>
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('placeholder')">Placeholder Text</a>
+                                    </div>
+                                </div>
+                                <div class="relative submenu">
+                                    <a href="#" class="block px-4 py-2 hover:bg-gray-200">Cards</a>
+                                    <div class="submenu-content">
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('content-card')">Content Card</a>
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('profile-card')">Profile Card</a>
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('feature-card')">Feature Card</a>
+                                    </div>
+                                </div>
+                                <div class="relative submenu">
+                                    <a href="#" class="block px-4 py-2 hover:bg-gray-200">Modals</a>
+                                    <div class="submenu-content">
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('alert-modal')">Alert Modal</a>
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('form-modal')">Form Modal</a>
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('full-screen-modal')">Full-Screen Modal</a>
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('toast')">Toast Notification</a>
+                                    </div>
+                                </div>
+                                <div class="relative submenu">
+                                    <a href="#" class="block px-4 py-2 hover:bg-gray-200">Loaders</a>
+                                    <div class="submenu-content">
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('circular-spinner')">Circular Spinner</a>
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('progress-bar')">Progress Bar</a>
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('skeleton-loader')">Skeleton Loader</a>
+                                    </div>
+                                </div>
+                                <div class="relative submenu">
+                                    <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('avatar')">Avatars</a>
+                                    <div class="submenu-content">
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('circular-avatar')">Circular Avatar</a>
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('square-avatar')">Square Avatar</a>
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('initials-avatar')">Initials Avatar</a>
+                                    </div>
+                                </div>
+                                <div class="relative submenu">
+                                    <a href="#" class="block px-4 py-2 hover:bg-gray-200">Badges</a>
+                                    <div class="submenu-content">
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('status-badge')">Status Badge</a>
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('category-tag')">Category Tag</a>
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('notification-badge')">Notification Badge</a>
+                                    </div>
+                                </div>
+                                <div class="relative submenu">
+                                    <a href="#" class="block px-4 py-2 hover:bg-gray-200">Sliders</a>
+                                    <div class="submenu-content">
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('image-carousel')">Image Carousel</a>
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('content-slider')">Content Slider</a>
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('autoplay-slider')">Autoplay Slider</a>
+                                    </div>
+                                </div>
+                                <div class="relative submenu">
+                                    <a href="#" class="block px-4 py-2 hover:bg-gray-200">Progress</a>
+                                    <div class="submenu-content">
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('linear-progress')">Linear Progress Bar</a>
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('circular-progress')">Circular Progress Ring</a>
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('step-indicator')">Step Indicator</a>
+                                    </div>
+                                </div>
+                                <div class="relative submenu">
+                                    <a href="#" class="block px-4 py-2 hover:bg-gray-200">Toggles</a>
+                                    <div class="submenu-content">
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('mode-toggle')">Dark/Light Mode Toggle</a>
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('feature-toggle')">Feature Toggle</a>
+                                    </div>
+                                </div>
+                                <div class="relative submenu">
+                                    <a href="#" class="block px-4 py-2 hover:bg-gray-200">Micro-Interactions</a>
+                                    <div class="submenu-content">
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('hover-animation')">Hover Animation</a>
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('click-animation')">Click Animation</a>
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('scroll-animation')">Scroll Animation</a>
+                                    </div>
+                                </div>
+                                <div class="relative submenu">
+                                    <a href="#" class="block px-4 py-2 hover:bg-gray-200">Tables</a>
+                                    <div class="submenu-content">
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('data-table')">Data Table</a>
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('pricing-table')">Pricing Table</a>
+                                    </div>
+                                </div>
+                                <div class="relative submenu">
+                                    <a href="#" class="block px-4 py-2 hover:bg-gray-200">Alerts</a>
+                                    <div class="submenu-content">
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('success-alert')">Success Alert</a>
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('warning-alert')">Warning Alert</a>
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('error-alert')">Error Alert</a>
+                                    </div>
+                                </div>
+                                <div class="relative submenu">
+                                    <a href="#" class="block px-4 py-2 hover:bg-gray-200">Search Filters</a>
+                                    <div class="submenu-content">
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('filter-chip')">Filter Chip</a>
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('advanced-search')">Advanced Search Toggle</a>
+                                    </div>
+                                </div>
+                                <div class="relative submenu">
+                                    <a href="#" class="block px-4 py-2 hover:bg-gray-200">Footers</a>
+                                    <div class="submenu-content">
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('static-footer')">Static Footer</a>
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('interactive-footer')">Interactive Footer</a>
+                                    </div>
+                                </div>
+                                <div class="relative submenu">
+                                    <a href="#" class="block px-4 py-2 hover:bg-gray-200">Headers</a>
+                                    <div class="submenu-content">
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('hero-header')">Hero Header</a>
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('fixed-header')">Fixed Header</a>
+                                    </div>
+                                </div>
+                                <div class="relative submenu">
+                                    <a href="#" class="block px-4 py-2 hover:bg-gray-200">Dividers</a>
+                                    <div class="submenu-content">
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('horizontal-rule')">Horizontal Rule</a>
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('section-divider')">Section Divider</a>
+                                    </div>
+                                </div>
+                                <div class="relative submenu">
+                                    <a href="#" class="block px-4 py-2 hover:bg-gray-200">Typography</a>
+                                    <div class="submenu-content">
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('heading')">Heading</a>
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('body-text')">Body Text</a>
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('blockquote')">Blockquote</a>
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('caption')">Caption</a>
+                                    </div>
+                                </div>
+                                <div class="relative submenu">
+                                    <a href="#" class="block px-4 py-2 hover:bg-gray-200">Media</a>
+                                    <div class="submenu-content">
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('image-gallery')">Image Gallery</a>
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('video-player')">Video Player</a>
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('audio-player')">Audio Player</a>
+                                    </div>
+                                </div>
+                                <div class="relative submenu">
+                                    <a href="#" class="block px-4 py-2 hover:bg-gray-200">AR Elements</a>
+                                    <div class="submenu-content">
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('3d-preview')">3D Product Preview</a>
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('interactive-icon')">Interactive Icon</a>
+                                    </div>
+                                </div>
+                                <div class="relative submenu">
+                                    <a href="#" class="block px-4 py-2 hover:bg-gray-200">Gamification</a>
+                                    <div class="submenu-content">
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('progress-badge')">Progress Badge</a>
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('leaderboard')">Leaderboard</a>
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('reward-popup')">Reward Popup</a>
+                                    </div>
+                                </div>
+                                <div class="relative submenu">
+                                    <a href="#" class="block px-4 py-2 hover:bg-gray-200">Accessibility</a>
+                                    <div class="submenu-content">
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('skip-to-content')">Skip-to-Content Link</a>
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('aria-landmark')">ARIA Landmark</a>
+                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('focus-indicator')">Focus Indicator</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Design Systems -->
+                        <div class="relative submenu">
+                            <a href="#" class="block px-4 py-2 hover:bg-gray-200">Design Systems</a>
+                            <div class="submenu-content">
+                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="applyDesignSystem('material')">Material Design</a>
+                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="applyDesignSystem('human-interface')">Human Interface Guidelines</a>
+                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="applyDesignSystem('fluent')">Fluent Design</a>
+                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="applyDesignSystem('bootstrap')">Bootstrap</a>
+                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="applyDesignSystem('tailwind')">Tailwind CSS</a>
+                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="applyDesignSystem('ant')">Ant Design</a>
+                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="applyDesignSystem('mui')">MUI</a>
+                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="applyDesignSystem('chakra')">Chakra UI</a>
+                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="applyDesignSystem('bulma')">Bulma</a>
+                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="applyDesignSystem('semantic')">Semantic UI</a>
+                            </div>
+                        </div>
+                        <!-- Emerging Trends -->
+                        <div class="relative submenu">
+                            <a href="#" class="block px-4 py-2 hover:bg-gray-200">Emerging Trends</a>
+                            <div class="submenu-content">
+                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="applyTrend('glassmorphism')">Glassmorphism</a>
+                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="applyTrend('neumorphism')">Neumorphism</a>
+                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="applyTrend('3d-elements')">3D Elements</a>
+                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="applyTrend('ai-driven-ui')">AI-Driven UI</a>
+                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="applyTrend('voice-ui')">Voice UI</a>
+                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="applyTrend('minimalist-maximalism')">Minimalist Maximalism</a>
+                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="applyTrend('dynamic-color')">Dynamic Color Schemes</a>
+                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="applyTrend('micro-animation')">Micro-Animation Systems</a>
+                            </div>
+                        </div>
+                        <!-- New Features -->
+                        <div class="relative submenu">
+                            <a href="#" class="block px-4 py-2 hover:bg-gray-200">Tools</a>
+                            <div class="submenu-content">
+                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="toggleZoomControls()">Zoom Controls</a>
+                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="toggleRulers()">Rulers/Guides</a>
+                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="toggleLayerManagement()">Layer Management</a>
+                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="undo()">Undo</a>
+                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="redo()">Redo</a>
+                            </div>
+                        </div>
+                        <!-- Existing Elements -->
+                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('shape')">Add Shape</a>
+                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('icon')">Add Icon</a>
+                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('social-icon')">Add Social Icon</a>
+                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('material-icon')">Add Material Icon</a>
+                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('navigation')">Add Navigation</a>
+                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('menu')">Add Menu</a>
+                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('media')">Add Media</a>
+                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('form')">Add Form</a>
+                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('utility')">Add Utility</a>
+                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('creative')">Add Creative</a>
+                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('modal')">Add Modal</a>
+                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('button')">Add Button</a>
+                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('card')">Add Card</a>
+                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('slider')">Add Slider</a>
+                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addFont('default')">Add Font</a>
+                    </div>
+                </div>
             </div>
-            <div id="properties">
-                <h3>Properties</h3>
-                <div id="prop-content"></div>
-                <button id="delete-btn" style="display: none; background-color: #dc3545; border: none; color: white; padding: 10px; cursor: pointer;">Delete Selected</button>
-            </div>
-        </div>
-    </div>
-    <div id="code">
-        <div>
             <div>
-                <button onclick="pasteCode('html')">Paste</button>
-                <button onclick="clearCode('html')">Clear</button>
-                <button onclick="copyCode('html')">Copy</button>
+                <button class="bg-green-500 text-white px-4 py-2 rounded" onclick="createPage()">Create Page</button>
+                <button class="bg-blue-500 text-white px-4 py-2 rounded" onclick="newPage()">New Page</button>
+                <span class="text-gray-700">index.html</span>
+                <button class="bg-blue-500 text-white px-4 py-2 rounded" onclick="applyCode()">Apply Code</button>
             </div>
-            <textarea id="html" placeholder="Generated HTML"></textarea>
         </div>
-        <div>
-            <div>
-                <button onclick="pasteCode('css')">Paste</button>
-                <button onclick="clearCode('css')">Clear</button>
-                <button onclick="copyCode('css')">Copy</button>
+
+        <!-- Main Content -->
+        <div class="flex flex-1 overflow-hidden">
+            <!-- Left Sidebar -->
+            <div class="w-1/4 bg-white p-4 shadow">
+                <h2 class="text-lg font-bold mb-4">Properties</h2>
+                <div id="properties-panel">
+                    <p>Properties for selected element</p>
+                </div>
+                <button class="bg-red-500 text-white px-4 py-2 rounded mt-4" onclick="deleteSelected()">Delete Selected</button>
             </div>
-            <textarea id="css" placeholder="Generated CSS"></textarea>
-        </div>
-        <div>
-            <div>
-                <button onclick="pasteCode('js')">Paste</button>
-                <button onclick="clearCode('js')">Clear</button>
-                <button onclick="copyCode('js')">Copy</button>
+
+            <!-- Canvas -->
+            <div class="flex-1 p-4 relative">
+                <div id="zoom-controls" class="absolute top-4 right-4 hidden">
+                    <button class="bg-gray-200 px-2 py-1" onclick="zoomIn()">+</button>
+                    <button class="bg-gray-200 px-2 py-1" onclick="zoomOut()">-</button>
+                    <span id="zoom-level">100%</span>
+                </div>
+                <div id="ruler-x" class="ruler ruler-x hidden"></div>
+                <div id="ruler-y" class="ruler ruler-y hidden"></div>
+                <div id="canvas" class="canvas bg-white w-full h-full" ondrop="drop(event)" ondragover="allowDrop(event)">
+                    <!-- Canvas content -->
+                </div>
             </div>
-            <textarea id="js" placeholder="Generated JS">// No JS generated yet</textarea>
+
+            <!-- Right Sidebar -->
+            <div class="w-1/4 bg-white p-4 shadow">
+                <h2 class="text-lg font-bold mb-4">Layers</h2>
+                <div id="layer-panel" class="layer-panel hidden">
+                    <!-- Layer management content -->
+                </div>
+                <div class="mt-4">
+                    <button class="bg-gray-500 text-white px-4 py-2 rounded" onclick="paste()">Paste</button>
+                    <button class="bg-gray-500 text-white px-4 py-2 rounded" onclick="clear()">Clear</button>
+                    <button class="bg-gray-500 text-white px-4 py-2 rounded" onclick="copy()">Copy</button>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
-        const workspace = document.getElementById('workspace');
-        const pageContainer = document.getElementById('page');
-        const htmlArea = document.getElementById('html');
-        const cssArea = document.getElementById('css');
-        const jsArea = document.getElementById('js');
-        const propContent = document.getElementById('prop-content');
-        const deleteBtn = document.getElementById('delete-btn');
-        const editModeBtn = document.getElementById('edit-mode-btn');
-        const viewModeBtn = document.getElementById('view-mode-btn');
-        const phoneBtn = document.getElementById('phone-btn');
-        const tabletBtn = document.getElementById('tablet-btn');
-        const laptopBtn = document.getElementById('laptop-btn');
-        const pageSelector = document.getElementById('page-selector');
-        const pageNameInput = document.getElementById('page-name');
-        const applyCodeBtn = document.getElementById('apply-code-btn');
+        let currentMode = 'edit';
+        let currentDevice = 'laptop';
+        let zoomLevel = 1;
+        let elements = [];
+        let history = [];
+        let redoStack = [];
+        let selectedElement = null;
 
-        let dragging = null;
-        let offsetX = 0;
-        let offsetY = 0;
-        let selected = null;
-        let mode = 'edit';
-        let currentPage = 'page1';
-        let pages = { 'page1': { name: 'index.html', html: '<div id="page"></div>', css: '#page {\n  position: relative;\n  background-color: #fff;\n  width: 1024px;\n  min-height: 768px;\n}\n', js: '// No JS generated yet', elements: [] } };
-        let pageCount = 1;
-        let activeDropdown = null;
-        const resizeObserver = new ResizeObserver(() => updateCode());
+        function setMode(mode) {
+            currentMode = mode;
+            alert(`Switched to ${mode} mode`);
+        }
 
-        const elementCategories = {
-            'shapes': [
-                { type: 'div', class: 'shape rectangle', width: '100', height: '50', name: 'Rectangle' },
-                { type: 'div', class: 'shape square', width: '100', height: '100', name: 'Square' },
-                { type: 'div', class: 'shape rounded-rectangle', width: '100', height: '50', name: 'Rounded Rectangle' },
-                { type: 'div', class: 'shape circle', width: '50', height: '50', name: 'Circle' },
-                { type: 'div', class: 'shape oval', width: '100', height: '50', name: 'Oval' },
-                { type: 'div', class: 'shape triangle', width: '100', height: '100', name: 'Triangle' },
-                { type: 'div', class: 'shape pentagon', width: '100', height: '100', name: 'Pentagon' },
-                { type: 'div', class: 'shape hexagon', width: '100', height: '100', name: 'Hexagon' },
-                { type: 'div', class: 'shape octagon', width: '100', height: '100', name: 'Octagon' },
-                { type: 'div', class: 'shape trapezoid', width: '100', height: '50', name: 'Trapezoid' },
-                { type: 'div', class: 'shape diamond', width: '100', height: '100', name: 'Diamond' },
-                { type: 'div', class: 'shape star', width: '100', height: '100', name: 'Star' }
-            ],
-            'icons': [
-                { type: 'i', class: 'fas fa-home icon', width: '30', height: '30', name: 'Home Icon' },
-                { type: 'i', class: 'fas fa-user icon', width: '30', height: '30', name: 'User Icon' },
-                { type: 'i', class: 'fas fa-cog icon', width: '30', height: '30', name: 'Settings Icon' },
-                { type: 'i', class: 'fas fa-search icon', width: '30', height: '30', name: 'Search Icon' },
-                { type: 'i', class: 'fas fa-heart icon', width: '30', height: '30', name: 'Heart Icon' },
-                { type: 'i', class: 'fas fa-star icon', width: '30', height: '30', name: 'Star Icon' },
-                { type: 'i', class: 'fas fa-bell icon', width: '30', height: '30', name: 'Bell Icon' },
-                { type: 'i', class: 'fas fa-camera icon', width: '30', height: '30', name: 'Camera Icon' },
-                { type: 'i', class: 'fas fa-envelope icon', width: '30', height: '30', name: 'Email Icon' },
-                { type: 'i', class: 'fas fa-shopping-cart icon', width: '30', height: '30', name: 'Cart Icon' },
-                { type: 'i', class: 'fas fa-cloud icon', width: '30', height: '30', name: 'Cloud Icon' },
-                { type: 'i', class: 'fas fa-lock icon', width: '30', height: '30', name: 'Lock Icon' }
-            ],
-            'social-icons': [
-                { type: 'a', class: 'fab fa-facebook-f social-icon', width: '30', height: '30', name: 'Facebook' },
-                { type: 'a', class: 'fab fa-twitter social-icon', width: '30', height: '30', name: 'Twitter' },
-                { type: 'a', class: 'fab fa-instagram social-icon', width: '30', height: '30', name: 'Instagram' },
-                { type: 'a', class: 'fab fa-linkedin-in social-icon', width: '30', height: '30', name: 'LinkedIn' },
-                { type: 'a', class: 'fab fa-github social-icon', width: '30', height: '30', name: 'GitHub' },
-                { type: 'a', class: 'fab fa-youtube social-icon', width: '30', height: '30', name: 'YouTube' },
-                { type: 'a', class: 'fab fa-tiktok social-icon', width: '30', height: '30', name: 'TikTok' },
-                { type: 'a', class: 'fab fa-discord social-icon', width: '30', height: '30', name: 'Discord' },
-                { type: 'a', class: 'fab fa-pinterest social-icon', width: '30', height: '30', name: 'Pinterest' },
-                { type: 'a', class: 'fab fa-whatsapp social-icon', width: '30', height: '30', name: 'WhatsApp' }
-            ],
-            'material-icons': [
-                { type: 'i', class: 'material-icons icon', content: 'home', width: '30', height: '30', name: 'Home' },
-                { type: 'i', class: 'material-icons icon', content: 'person', width: '30', height: '30', name: 'Person' },
-                { type: 'i', class: 'material-icons icon', content: 'settings', width: '30', height: '30', name: 'Settings' },
-                { type: 'i', class: 'material-icons icon', content: 'search', width: '30', height: '30', name: 'Search' },
-                { type: 'i', class: 'material-icons icon', content: 'favorite', width: '30', height: '30', name: 'Favorite' },
-                { type: 'i', class: 'material-icons icon', content: 'star', width: '30', height: '30', name: 'Star' },
-                { type: 'i', class: 'material-icons icon', content: 'notifications', width: '30', height: '30', name: 'Notifications' },
-                { type: 'i', class: 'material-icons icon', content: 'camera_alt', width: '30', height: '30', name: 'Camera' }
-            ],
-            'navigations': [
-                { type: 'nav', class: 'navigation bar', content: '<ul><li><a href="#">Home</a></li><li><a href="#">About</a></li><li><a href="#">Contact</a></li></ul>', width: '400', height: '40', name: 'Horizontal Nav Bar' },
-                { type: 'nav', class: 'navigation sidebar', content: '<ul><li><a href="#">Home</a></li><li><a href="#">About</a></li><li><a href="#">Contact</a></li></ul>', width: '150', height: '200', name: 'Vertical Sidebar' },
-                { type: 'footer', class: 'navigation footer', content: '<p>Footer Content</p>', width: '400', height: '50', name: 'Footer Nav' },
-                { type: 'header', class: 'navigation header', content: '<h1>Header</h1>', width: '400', height: '50', name: 'Header Nav' },
-                { type: 'nav', class: 'navigation breadcrumb', content: '<ul><li><a href="#">Home</a></li><li><a href="#">Category</a></li><li><a href="#">Page</a></li></ul>', width: '400', height: '30', name: 'Breadcrumb' },
-                { type: 'nav', class: 'navigation sticky-nav', content: '<ul><li><a href="#">Home</a></li><li><a href="#">Services</a></li><li><a href="#">Contact</a></li></ul>', width: '400', height: '40', name: 'Sticky Nav' }
-            ],
-            'menus': [
-                { type: 'select', class: 'menu dropdown', content: '<option>Option 1</option><option>Option 2</option><option>Option 3</option>', width: '150', height: '30', name: 'Dropdown Menu' },
-                { type: 'ul', class: 'menu list', content: '<li>Item 1</li><li>Item 2</li><li>Item 3</li>', width: '150', height: '100', name: 'List Menu' },
-                { type: 'input', class: 'menu radio', 'input-type': 'radio', name: 'group1', width: '30', height: '30', name: 'Radio Button' },
-                { type: 'input', class: 'menu checkbox', 'input-type': 'checkbox', width: '30', height: '30', name: 'Checkbox' },
-                { type: 'select', class: 'menu multiselect', content: '<option>Option 1</option><option>Option 2</option><option>Option 3</option>', width: '150', height: '100', name: 'Multi-Select' },
-                { type: 'div', class: 'menu context-menu', content: '<ul><li>Option 1</li><li>Option 2</li><li>Option 3</li></ul>', width: '150', height: '100', name: 'Context Menu' }
-            ],
-            'media': [
-                { type: 'img', class: 'media image', width: '150', height: '150', name: 'Image' },
-                { type: 'video', class: 'media video', width: '320', height: '240', name: 'Video' },
-                { type: 'audio', class: 'media audio', width: '200', height: '30', name: 'Audio' },
-                { type: 'iframe', class: 'media iframe', width: '300', height: '200', name: 'Iframe' },
-                { type: 'picture', class: 'media picture', width: '150', height: '150', name: 'Picture' },
-                { type: 'video', class: 'media video-loop', width: '320', height: '240', name: 'Looping Video' }
-            ],
-            'forms': [
-                { type: 'form', class: 'form container', content: '<input type="text" placeholder="Name"><input type="email" placeholder="Email"><button>Submit</button>', width: '300', height: '150', name: 'Basic Form' },
-                { type: 'input', class: 'form text', 'input-type': 'text', placeholder: 'Enter text', width: '200', height: '30', name: 'Text Input' },
-                { type: 'input', class: 'form email', 'input-type': 'email', placeholder: 'Enter email', width: '200', height: '30', name: 'Email Input' },
-                { type: 'input', class: 'form password', 'input-type': 'password', placeholder: 'Enter password', width: '200', height: '30', name: 'Password Input' },
-                { type: 'textarea', class: 'form textarea', placeholder: 'Enter message', width: '200', height: '100', name: 'Textarea' },
-                { type: 'button', class: 'form button', content: 'Submit', width: '100', height: '30', name: 'Button' },
-                { type: 'input', class: 'form file', 'input-type': 'file', width: '200', height: '30', name: 'File Upload' },
-                { type: 'input', class: 'form number', 'input-type': 'number', placeholder: 'Enter number', width: '200', height: '30', name: 'Number Input' },
-                { type: 'input', class: 'form date', 'input-type': 'date', width: '200', height: '30', name: 'Date Input' },
-                { type: 'input', class: 'form range', 'input-type': 'range', width: '200', height: '30', name: 'Range Slider' },
-                { type: 'input', class: 'form color', 'input-type': 'color', width: '100', height: '30', name: 'Color Picker' }
-            ],
-            'utilities': [
-                { type: 'div', class: 'utility container', width: '200', height: '100', name: 'Container Div' },
-                { type: 'section', class: 'utility section', width: '300', height: '150', name: 'Section' },
-                { type: 'article', class: 'utility article', width: '300', height: '150', name: 'Article' },
-                { type: 'aside', class: 'utility aside', width: '150', height: '200', name: 'Aside' },
-                { type: 'p', class: 'utility paragraph', content: 'Paragraph text', width: '200', height: '50', name: 'Paragraph' },
-                { type: 'div', class: 'utility card', width: '200', height: '150', name: 'Card' },
-                { type: 'hr', class: 'utility divider', width: '200', height: '2', name: 'Divider' },
-                { type: 'div', class: 'utility grid', content: '<div>Grid Item 1</div><div>Grid Item 2</div><div>Grid Item 3</div>', width: '300', height: '150', name: 'Grid Container' },
-                { type: 'div', class: 'utility flexbox', content: '<div>Flex Item 1</div><div>Flex Item 2</div><div>Flex Item 3</div>', width: '300', height: '150', name: 'Flexbox Container' }
-            ],
-            'creatives': [
-                { type: 'canvas', class: 'creative canvas', width: '200', height: '200', name: 'Canvas' },
-                { type: 'svg', class: 'creative svg', content: '<rect width="100" height="50" fill="blue"/>', width: '200', height: '200', name: 'SVG' },
-                { type: 'div', class: 'creative animation', width: '100', height: '100', name: 'Animation Box' },
-                { type: 'div', class: 'creative carousel', content: '<div>Slide 1</div><div>Slide 2</div><div>Slide 3</div>', width: '300', height: '200', name: 'Carousel' },
-                { type: 'div', class: 'creative parallax', width: '300', height: '200', name: 'Parallax Section' }
-            ],
-            'modals': [
-                { type: 'div', class: 'modal basic', content: '<h2>Modal Title</h2><p>Modal content goes here.</p><button>Close</button>', width: '300', height: '200', name: 'Basic Modal' },
-                { type: 'div', class: 'modal centered', content: '<h2>Centered Modal</h2><p>Centered modal content.</p><button>Close</button>', width: '300', height: '200', name: 'Centered Modal' },
-                { type: 'div', class: 'modal fullscreen', content: '<h2>Fullscreen Modal</h2><p>Fullscreen content.</p><button>Close</button>', width: '400', height: '300', name: 'Fullscreen Modal' }
-            ],
-            'buttons': [
-                { type: 'button', class: 'button primary', content: 'Primary Button', width: '100', height: '40', name: 'Primary Button' },
-                { type: 'button', class: 'button secondary', content: 'Secondary Button', width: '100', height: '40', name: 'Secondary Button' },
-                { type: 'button', class: 'button outline', content: 'Outline Button', width: '100', height: '40', name: 'Outline Button' },
-                { type: 'button', class: 'button icon-button', content: '<i class="fas fa-play"></i>', width: '40', height: '40', name: 'Icon Button' }
-            ],
-            'cards': [
-                { type: 'div', class: 'card basic', content: '<h3>Card Title</h3><p>Card content goes here.</p>', width: '200', height: '150', name: 'Basic Card' },
-                { type: 'div', class: 'card image-card', content: '<img src="" alt="Card Image"><h3>Card Title</h3><p>Card content.</p>', width: '200', height: '200', name: 'Image Card' },
-                { type: 'div', class: 'card hover-card', content: '<h3>Hover Card</h3><p>Hover to see effect.</p>', width: '200', height: '150', name: 'Hover Card' }
-            ],
-            'sliders': [
-                { type: 'div', class: 'slider basic', content: '<div>Slide 1</div><div>Slide 2</div><div>Slide 3</div>', width: '300', height: '200', name: 'Basic Slider' },
-                { type: 'div', class: 'slider image-slider', content: '<img src="" alt="Slide 1"><img src="" alt="Slide 2"><img src="" alt="Slide 3">', width: '300', height: '200', name: 'Image Slider' }
-            ],
-            'fonts': [
-                { type: 'p', class: 'font roboto', content: 'Roboto Text', width: '200', height: '50', name: 'Roboto' },
-                { type: 'p', class: 'font open-sans', content: 'Open Sans Text', width: '200', height: '50', name: 'Open Sans' },
-                { type: 'p', class: 'font montserrat', content: 'Montserrat Text', width: '200', height: '50', name: 'Montserrat' },
-                { type: 'p', class: 'font lato', content: 'Lato Text', width: '200', height: '50', name: 'Lato' },
-                { type: 'p', class: 'font poppins', content: 'Poppins Text', width: '200', height: '50', name: 'Poppins' },
-                { type: 'p', class: 'font nunito', content: 'Nunito Text', width: '200', height: '50', name: 'Nunito' }
-            ]
-        };
-
-        // Mode switching
-        function setMode(newMode) {
-            mode = newMode;
-            pageContainer.classList.remove('edit-mode', 'view-mode', 'phone', 'tablet', 'laptop');
-            pageContainer.classList.add(`${mode}-mode`);
-            editModeBtn.classList.toggle('active', mode === 'edit');
-            viewModeBtn.classList.toggle('active', mode === 'view');
-            phoneBtn.style.display = mode === 'view' ? 'inline-block' : 'none';
-            tabletBtn.style.display = mode === 'view' ? 'inline-block' : 'none';
-            laptopBtn.style.display = mode === 'view' ? 'inline-block' : 'none';
-            document.querySelectorAll('#top-menu button[id$="-btn"]').forEach(btn => {
-                if (!['edit-mode-btn', 'view-mode-btn', 'phone-btn', 'tablet-btn', 'laptop-btn'].includes(btn.id)) {
-                    btn.style.display = mode === 'edit' ? 'inline-block' : 'none';
-                }
-            });
-            document.getElementById('properties').style.display = mode === 'edit' ? 'block' : 'none';
-            applyCodeBtn.style.display = mode === 'view' ? 'inline-block' : 'none';
-            if (mode === 'view') {
-                if (selected) {
-                    selected.style.border = '';
-                    selected.classList.remove('selected');
-                }
-                selected = null;
-                propContent.innerHTML = '';
-                deleteBtn.style.display = 'none';
-                closeDropdown();
-                setPreview('laptop');
+        function setDevice(device) {
+            currentDevice = device;
+            const canvas = document.getElementById('canvas');
+            if (device === 'phone') {
+                canvas.style.width = '375px';
+                canvas.style.height = '667px';
+            } else if (device === 'tablet') {
+                canvas.style.width = '768px';
+                canvas.style.height = '1024px';
             } else {
-                pageContainer.classList.remove('phone', 'tablet', 'laptop');
-                pageContainer.style.width = '1024px';
-                pageContainer.style.minHeight = '768px';
-                pageContainer.style.margin = '20px';
-                workspace.style.backgroundColor = '#333';
-                applyCode();
+                canvas.style.width = '100%';
+                canvas.style.height = '100%';
             }
         }
 
-        // Preview mode
-        function setPreview(device) {
-            if (mode !== 'view') return;
-            pageContainer.classList.remove('phone', 'tablet', 'laptop');
-            pageContainer.classList.add(device);
-            phoneBtn.classList.toggle('active', device === 'phone');
-            tabletBtn.classList.toggle('active', device === 'tablet');
-            laptopBtn.classList.toggle('active', device === 'laptop');
-            pageContainer.style.width = device === 'phone' ? '375px' : device === 'tablet' ? '768px' : '1024px';
-            pageContainer.style.height = device === 'phone' ? '667px' : device === 'tablet' ? '1024px' : '768px';
-            pageContainer.style.margin = '20px auto';
-        }
-
-        // Save page state
-        function savePageState(pageId) {
-            pages[pageId].elements = Array.from(pageContainer.children).map(el => {
-                const attributes = {};
-                Array.from(el.attributes).forEach(attr => {
-                    attributes[attr.name] = attr.value;
-                });
-                const style = {};
-                Object.assign(style, el.style);
-                return {
-                    element: el.cloneNode(true),
-                    style: style,
-                    attributes: attributes,
-                    innerHTML: el.innerHTML,
-                    textContent: el.textContent,
-                    classList: Array.from(el.classList)
-                };
-            });
-            pages[pageId].html = htmlArea.value;
-            pages[pageId].css = cssArea.value;
-            pages[pageId].js = jsArea.value;
-            pages[pageId].name = pageNameInput.value;
-        }
-
-        // Page management
         function createPage() {
-            savePageState(currentPage);
-            pageCount++;
-            const newPageId = `page${pageCount}`;
-            const pageName = `page${pageCount}.html`;
-            pages[newPageId] = {
-                name: pageName,
-                html: '<div id="page"></div>',
-                css: '#page {\n  position: relative;\n  background-color: #fff;\n  width: 1024px;\n  min-height: 768px;\n}\n',
-                js: '// No JS generated yet',
-                elements: []
-            };
-            const option = document.createElement('option');
-            option.value = newPageId;
-            option.textContent = pageName;
-            option.dataset.name = pageName;
-            pageSelector.appendChild(option);
-            switchPage(newPageId);
-            pageNameInput.value = pageName;
-            pageContainer.innerHTML = '';
-            pageContainer.style.width = '1024px';
-            pageContainer.style.minHeight = '768px';
-            pageContainer.style.margin = '20px';
+            alert('Page created');
         }
 
         function newPage() {
-            savePageState(currentPage);
-            pageCount++;
-            const newPageId = `page${pageCount}`;
-            const pageName = `page${pageCount}.html`;
-            pages[newPageId] = {
-                name: pageName,
-                html: '<div id="page"></div>',
-                css: '#page {\n  position: relative;\n  background-color: #fff;\n  width: 1024px;\n  min-height: 768px;\n}\n',
-                js: '// No JS generated yet',
-                elements: []
-            };
-            const option = document.createElement('option');
-            option.value = newPageId;
-            option.textContent = pageName;
-            option.dataset.name = pageName;
-            pageSelector.appendChild(option);
-            switchPage(newPageId);
-            pageNameInput.value = pageName;
-            pageContainer.innerHTML = '';
-            pageContainer.style.width = '1024px';
-            pageContainer.style.minHeight = '768px';
-            pageContainer.style.margin = '20px';
+            document.getElementById('canvas').innerHTML = '';
+            elements = [];
+            history = [];
+            redoStack = [];
+            updateLayerPanel();
         }
 
-        function switchPage(pageId) {
-            if (pageId === currentPage) return;
-            savePageState(currentPage);
-            pageSelector.querySelector(`option[value="${currentPage}"]`).textContent = pageNameInput.value;
-            pageSelector.querySelector(`option[value="${currentPage}"]`).dataset.name = pageNameInput.value;
-
-            currentPage = pageId;
-            pageContainer.innerHTML = '';
-            pages[pageId].elements.forEach(({ element, style, attributes, innerHTML, classList }) => {
-                const newEl = element.cloneNode(false);
-                newEl.innerHTML = innerHTML;
-                newEl.className = classList.join(' ');
-                Object.assign(newEl.style, style);
-                Object.entries(attributes).forEach(([name, value]) => {
-                    newEl.setAttribute(name, value);
-                });
-                pageContainer.appendChild(newEl);
-                attachEventListeners(newEl);
-                if (mode === 'edit') {
-                    resizeObserver.observe(newEl);
-                }
-            });
-            htmlArea.value = pages[pageId].html || '<div id="page"></div>';
-            cssArea.value = pages[pageId].css || '#page {\n  position: relative;\n  background-color: #fff;\n  width: 1024px;\n  min-height: 768px;\n}\n';
-            jsArea.value = pages[pageId].js || '// No JS generated yet';
-            pageSelector.value = pageId;
-            pageNameInput.value = pages[pageId].name;
-            if (selected) {
-                selected.style.border = '';
-                selected.classList.remove('selected');
-                selected = null;
-                propContent.innerHTML = '';
-                deleteBtn.style.display = 'none';
-            }
-            closeDropdown();
-            setMode(mode);
-        }
-
-        // Update page name
-        pageNameInput.addEventListener('input', () => {
-            pages[currentPage].name = pageNameInput.value;
-            pageSelector.querySelector(`option[value="${currentPage}"]`).textContent = pageNameInput.value;
-            pageSelector.querySelector(`option[value="${currentPage}"]`).dataset.name = pageNameInput.value;
-            savePageState(currentPage);
-        });
-
-        // Dropdown management
-        function openCategory(categoryId, button) {
-            if (mode !== 'edit') return;
-            closeDropdown();
-            const dropdown = document.createElement('div');
-            dropdown.className = 'dropdown';
-            const ul = document.createElement('ul');
-            elementCategories[categoryId].forEach(item => {
-                const li = document.createElement('li');
-                li.textContent = item.name;
-                li.setAttribute('draggable', 'true');
-                li.dataset.type = item.type;
-                li.dataset.class = item.class;
-                if (item.content) li.dataset.content = item.content;
-                if (item.width) li.dataset.width = item.width;
-                if (item.height) li.dataset.height = item.height;
-                if (item['input-type']) li.dataset.inputType = item['input-type'];
-                if (item.placeholder) li.dataset.placeholder = item.placeholder;
-                if (item.nameAttr) li.dataset.name = item.nameAttr;
-                li.addEventListener('dragstart', (e) => {
-                    e.dataTransfer.setData('type', li.dataset.type);
-                    e.dataTransfer.setData('class', li.dataset.class);
-                    e.dataTransfer.setData('content', li.dataset.content || '');
-                    e.dataTransfer.setData('width', li.dataset.width || '100');
-                    e.dataTransfer.setData('height', li.dataset.height || '50');
-                    e.dataTransfer.setData('input-type', li.dataset.inputType || '');
-                    e.dataTransfer.setData('placeholder', li.dataset.placeholder || '');
-                    e.dataTransfer.setData('name', li.dataset.name || '');
-                });
-                li.addEventListener('click', () => {
-                    addElementToWorkspace(item, { offsetX: 100, offsetY: 100 });
-                    closeDropdown();
-                });
-                ul.appendChild(li);
-            });
-            dropdown.appendChild(ul);
-            document.getElementById('top-menu').appendChild(dropdown);
-            const rect = button.getBoundingClientRect();
-            dropdown.style.left = `${rect.left - document.getElementById('top-menu').getBoundingClientRect().left}px`;
-            dropdown.style.display = 'block';
-            activeDropdown = dropdown;
-        }
-
-        function closeDropdown() {
-            if (activeDropdown) {
-                activeDropdown.remove();
-                activeDropdown = null;
-            }
-        }
-
-        // Textarea controls
-        function pasteCode(type) {
-            navigator.clipboard.readText().then(text => {
-                document.getElementById(type).value = text;
-                if (mode === 'view' || mode === 'edit') applyCode();
-            });
-        }
-
-        function clearCode(type) {
-            document.getElementById(type).value = '';
-            if (mode === 'view' || mode === 'edit') applyCode();
-        }
-
-        function copyCode(type) {
-            const textarea = document.getElementById(type);
-            textarea.select();
-            navigator.clipboard.writeText(textarea.value);
-            alert(`${type.toUpperCase()} copied to clipboard!`);
-        }
-
-        // Attach event listeners to elements
-        function attachEventListeners(el) {
-            if (el.tagName === 'FORM') {
-                el.addEventListener('submit', (ev) => {
-                    ev.preventDefault();
-                    console.log('Form submitted:', new FormData(el));
-                    alert('Form submitted! Check console for data.');
-                });
-            }
-            if (el.tagName === 'BUTTON' || el.className.includes('button')) {
-                el.addEventListener('click', () => {
-                    if (mode === 'view' && el.dataset.pageLink) {
-                        switchPage(el.dataset.pageLink);
-                        setMode('view');
-                    } else if (mode === 'view') {
-                        console.log('Button clicked!');
-                        alert('Button clicked!');
-                    }
-                });
-            }
-            if (el.querySelectorAll('a').length > 0 || el.tagName === 'A') {
-                if (el.tagName === 'A') {
-                    el.addEventListener('click', (ev) => {
-                        if (mode === 'view') {
-                            ev.preventDefault();
-                            if (el.dataset.pageLink) {
-                                switchPage(el.dataset.pageLink);
-                                setMode('view');
-                            } else {
-                                console.log('Link clicked:', el.href);
-                                alert(`Link clicked: ${el.href}`);
-                            }
-                        }
-                    });
-                } else {
-                    el.querySelectorAll('a').forEach(a => {
-                        a.addEventListener('click', (ev) => {
-                            if (mode === 'view') {
-                                ev.preventDefault();
-                                if (a.dataset.pageLink) {
-                                    switchPage(a.dataset.pageLink);
-                                    setMode('view');
-                                } else {
-                                    console.log('Link clicked:', a.href);
-                                    alert(`Link clicked: ${a.href}`);
-                                }
-                            }
-                        });
-                    });
-                }
-            }
-        }
-
-        // Add element to workspace
-        function addElementToWorkspace(item, position) {
-            const elem = document.createElement(item.type);
-            elem.className = item.class;
-            elem.style.position = 'absolute';
-            elem.style.left = `${position.offsetX - (parseInt(item.width) / 2)}px`;
-            elem.style.top = `${position.offsetY - (parseInt(item.height) / 2)}px`;
-            elem.style.width = `${item.width}px`;
-            elem.style.height = `${item.height}px`;
-
-            if (item.content) elem.innerHTML = item.content;
-            if (item['input-type']) elem.type = item['input-type'];
-            if (item.placeholder) elem.placeholder = item.placeholder;
-            if (item.nameAttr) elem.name = item.nameAttr;
-            if (item.class.includes('font')) {
-                if (item.class.includes('roboto')) elem.style.fontFamily = 'Roboto';
-                if (item.class.includes('open-sans')) elem.style.fontFamily = 'Open Sans';
-                if (item.class.includes('montserrat')) elem.style.fontFamily = 'Montserrat';
-                if (item.class.includes('lato')) elem.style.fontFamily = 'Lato';
-                if (item.class.includes('poppins')) elem.style.fontFamily = 'Poppins';
-                if (item.class.includes('nunito')) elem.style.fontFamily = 'Nunito';
-            }
-            if (item.class.includes('circle') || item.class.includes('oval')) {
-                elem.style.borderRadius = '50%';
-            }
-            if (item.class.includes('rectangle') || item.class.includes('square') || item.class.includes('container') || item.class.includes('card') || item.class.includes('rounded-rectangle')) {
-                elem.style.backgroundColor = '#444';
-                elem.style.border = '1px solid #666';
-                if (item.class.includes('rounded-rectangle')) elem.style.borderRadius = '10px';
-            }
-            if (item.class.includes('triangle')) {
-                elem.style.width = '0';
-                elem.style.height = '0';
-                elem.style.borderLeft = '50px solid transparent';
-                elem.style.borderRight = '50px solid transparent';
-                elem.style.borderBottom = '100px solid #28a745';
-                elem.style.backgroundColor = 'transparent';
-                elem.style.resize = 'none';
-            }
-            if (item.class.includes('icon') || item.class.includes('social-icon') || item.class.includes('material-icons')) {
-                elem.style.display = 'inline-block';
-                if (item.content && item.class.includes('material-icons')) {
-                    elem.textContent = item.content;
-                }
-            }
-            if (item.type === 'button') {
-                elem.textContent = item.content || 'Button';
-            }
-            if (item.type === 'video' || item.type === 'audio') {
-                elem.controls = true;
-                elem.src = '';
-            }
-            if (item.type === 'img' || item.type === 'iframe' || item.type === 'picture') {
-                elem.src = '';
-            }
-            if (item.class.includes('modal')) {
-                elem.style.zIndex = '1000';
-            }
-            attachEventListeners(elem);
-            pageContainer.appendChild(elem);
-            resizeObserver.observe(elem);
-            savePageState(currentPage);
-            updateCode();
-        }
-
-        // Drag from dropdown to page
-        pageContainer.addEventListener('dragover', (e) => {
-            if (mode === 'edit') e.preventDefault();
-        });
-        pageContainer.addEventListener('drop', (e) => {
-            if (mode !== 'edit') return;
-            e.preventDefault();
-            const type = e.dataTransfer.getData('type');
-            const className = e.dataTransfer.getData('class');
-            const content = e.dataTransfer.getData('content');
-            const width = e.dataTransfer.getData('width');
-            const height = e.dataTransfer.getData('height');
-            const inputType = e.dataTransfer.getData('input-type');
-            const placeholder = e.dataTransfer.getData('placeholder');
-            const name = e.dataTransfer.getData('name');
-
-            const rect = pageContainer.getBoundingClientRect();
-            addElementToWorkspace({
-                type,
-                class: className,
-                content,
-                width,
-                height,
-                'input-type': inputType,
-                placeholder,
-                nameAttr: name
-            }, { offsetX: e.clientX - rect.left, offsetY: e.clientY - rect.top });
-            closeDropdown();
-        });
-
-        // Dragging elements within page
-        pageContainer.addEventListener('mousedown', (e) => {
-            if (mode !== 'edit') return;
-            if (e.target !== pageContainer && e.target.parentElement === pageContainer) {
-                dragging = e.target;
-                const rect = pageContainer.getBoundingClientRect();
-                offsetX = e.clientX - rect.left - parseFloat(dragging.style.left || 0);
-                offsetY = e.clientY - rect.top - parseFloat(dragging.style.top || 0);
-            }
-        });
-
-        document.addEventListener('mousemove', (e) => {
-            if (mode !== 'edit' || !dragging) return;
-            const rect = pageContainer.getBoundingClientRect();
-            dragging.style.left = `${e.clientX - rect.left - offsetX}px`;
-            dragging.style.top = `${e.clientY - rect.top - offsetY}px`;
-        });
-
-        document.addEventListener('mouseup', () => {
-            if (dragging) {
-                savePageState(currentPage);
-                updateCode();
-                dragging = null;
-            }
-        });
-
-        // Selection for properties
-        pageContainer.addEventListener('click', (e) => {
-            if (mode !== 'edit') return;
-            if (selected) {
-                selected.style.border = '';
-                selected.classList.remove('selected');
-            }
-            if (e.target === pageContainer) {
-                selected = null;
-                propContent.innerHTML = '';
-                deleteBtn.style.display = 'none';
-            } else if (e.target.parentElement === pageContainer) {
-                selected = e.target;
-                selected.style.border = '1px dashed white';
-                selected.classList.add('selected');
-                showProperties();
-                deleteBtn.style.display = 'block';
-            }
-            e.stopPropagation();
-        });
-
-        // Delete button
-        deleteBtn.addEventListener('click', () => {
-            if (mode !== 'edit' || !selected) return;
-            resizeObserver.unobserve(selected);
-            selected.remove();
-            selected = null;
-            propContent.innerHTML = '';
-            deleteBtn.style.display = 'none';
-            savePageState(currentPage);
-            updateCode();
-        });
-
-        // Keyboard delete
-        document.addEventListener('keydown', (e) => {
-            if (mode !== 'edit' || e.key !== 'Delete' || !selected) return;
-            resizeObserver.unobserve(selected);
-            selected.remove();
-            selected = null;
-            propContent.innerHTML = '';
-            deleteBtn.style.display = 'none';
-            savePageState(currentPage);
-            updateCode();
-        });
-
-        function showProperties() {
-            if (!selected) return;
-            const compStyle = getComputedStyle(selected);
-            const width = parseInt(selected.style.width) || parseInt(compStyle.width);
-            const height = parseInt(selected.style.height) || parseInt(compStyle.height);
-            const left = parseInt(selected.style.left) || 0;
-            const top = parseInt(selected.style.top) || 0;
-            const bgColor = rgbToHex(compStyle.backgroundColor);
-            const textColor = rgbToHex(compStyle.color);
-            const fontSize = parseInt(compStyle.fontSize) || 16;
-            const fontFamily = compStyle.fontFamily || 'Roboto';
-            const borderRadius = compStyle.borderRadius || '0px';
-            const borderWidth = compStyle.borderWidth || '0px';
-            const borderColor = rgbToHex(compStyle.borderColor);
-            const borderStyle = compStyle.borderStyle || 'none';
-            const contentEditable = selected.tagName === 'P' || selected.tagName === 'SPAN' || selected.tagName === 'BUTTON' || selected.className.includes('paragraph');
-            const isMedia = selected.tagName === 'IMG' || selected.tagName === 'VIDEO' || selected.tagName === 'AUDIO' || selected.tagName === 'IFRAME' || selected.tagName === 'PICTURE';
-            const isLink = selected.tagName === 'A' || selected.tagName === 'BUTTON' || selected.className.includes('button');
-            const isInput = selected.tagName === 'INPUT' || selected.tagName === 'TEXTAREA';
-            const isNav = selected.className.includes('navigation');
-            const isModal = selected.className.includes('modal');
-
-            let content = `
-                <label>Left: <input type="number" id="prop-left" value="${left}"></label>
-                <label>Top: <input type="number" id="prop-top" value="${top}"></label>
-                <label>Width: <input type="number" id="prop-width" value="${width}"></label>
-                <label>Height: <input type="number" id="prop-height" value="${height}"></label>
-                <label>Background Color: <input type="color" id="prop-bgcolor" value="${bgColor}"></label>
-                <label>Text Color: <input type="color" id="prop-color" value="${textColor}"></label>
-                <label>Font Size: <input type="number" id="prop-fontsize" value="${fontSize}"></label>
-                <label>Font Family: <select id="prop-fontfamily">
-                    <option value="Roboto" ${fontFamily.includes('Roboto') ? 'selected' : ''}>Roboto</option>
-                    <option value="Open Sans" ${fontFamily.includes('Open Sans') ? 'selected' : ''}>Open Sans</option>
-                    <option value="Montserrat" ${fontFamily.includes('Montserrat') ? 'selected' : ''}>Montserrat</option>
-                    <option value="Lato" ${fontFamily.includes('Lato') ? 'selected' : ''}>Lato</option>
-                    <option value="Poppins" ${fontFamily.includes('Poppins') ? 'selected' : ''}>Poppins</option>
-                    <option value="Nunito" ${fontFamily.includes('Nunito') ? 'selected' : ''}>Nunito</option>
-                </select></label>
-                <label>Border Radius: <input type="text" id="prop-borderradius" value="${borderRadius}"></label>
-                <label>Border Width: <input type="text" id="prop-borderwidth" value="${borderWidth}"></label>
-                <label>Border Color: <input type="color" id="prop-bordercolor" value="${borderColor}"></label>
-                <label>Border Style: <select id="prop-borderstyle">
-                    <option value="none" ${borderStyle === 'none' ? 'selected' : ''}>None</option>
-                    <option value="solid" ${borderStyle === 'solid' ? 'selected' : ''}>Solid</option>
-                    <option value="dashed" ${borderStyle === 'dashed' ? 'selected' : ''}>Dashed</option>
-                    <option value="dotted" ${borderStyle === 'dotted' ? 'selected' : ''}>Dotted</option>
-                </select></label>
-            `;
-
-            if (contentEditable) {
-                content += `<label>Text: <input type="text" id="prop-text" value="${selected.textContent.trim()}"></label>`;
-            }
-            if (isMedia) {
-                content += `<label>Source URL: <input type="text" id="prop-src" value="${selected.src || ''}"></label>`;
-            }
-            if (isLink) {
-                content += `<label>External Link URL: <input type="text" id="prop-href" value="${selected.href || ''}"></label>`;
-                content += `<label>Link to Page: <select id="prop-page-link"><option value="">None</option>`;
-                Object.keys(pages).forEach(pageId => {
-                    content += `<option value="${pageId}" ${selected.dataset.pageLink === pageId ? 'selected' : ''}>${pages[pageId].name}</option>`;
-                });
-                content += `</select></label>`;
-            }
-            if (isInput) {
-                content += `<label>Placeholder: <input type="text" id="prop-placeholder" value="${selected.placeholder || ''}"></label>`;
-            }
-            if (isNav) {
-                const items = Array.from(selected.querySelectorAll('li')).map(li => li.innerHTML).join('\n');
-                content += `<label>Nav Items: <textarea id="prop-navitems">${items}</textarea></label>`;
-            }
-            if (isModal) {
-                content += `<label>Z-Index: <input type="number" id="prop-zindex" value="${selected.style.zIndex || 1000}"></label>`;
-            }
-
-            propContent.innerHTML = content;
-
-            document.getElementById('prop-left').addEventListener('input', (e) => {
-                selected.style.left = e.target.value + 'px';
-                savePageState(currentPage);
-                updateCode();
-            });
-            document.getElementById('prop-top').addEventListener('input', (e) => {
-                selected.style.top = e.target.value + 'px';
-                savePageState(currentPage);
-                updateCode();
-            });
-            document.getElementById('prop-width').addEventListener('input', (e) => {
-                selected.style.width = e.target.value + 'px';
-                savePageState(currentPage);
-                updateCode();
-            });
-            document.getElementById('prop-height').addEventListener('input', (e) => {
-                selected.style.height = e.target.value + 'px';
-                savePageState(currentPage);
-                updateCode();
-            });
-            document.getElementById('prop-bgcolor').addEventListener('input', (e) => {
-                selected.style.backgroundColor = e.target.value;
-                savePageState(currentPage);
-                updateCode();
-            });
-            document.getElementById('prop-color').addEventListener('input', (e) => {
-                selected.style.color = e.target.value;
-                savePageState(currentPage);
-                updateCode();
-            });
-            document.getElementById('prop-fontsize').addEventListener('input', (e) => {
-                selected.style.fontSize = e.target.value + 'px';
-                savePageState(currentPage);
-                updateCode();
-            });
-            document.getElementById('prop-fontfamily').addEventListener('change', (e) => {
-                selected.style.fontFamily = e.target.value;
-                savePageState(currentPage);
-                updateCode();
-            });
-            document.getElementById('prop-borderradius').addEventListener('input', (e) => {
-                selected.style.borderRadius = e.target.value;
-                savePageState(currentPage);
-                updateCode();
-            });
-            document.getElementById('prop-borderwidth').addEventListener('input', (e) => {
-                selected.style.borderWidth = e.target.value;
-                savePageState(currentPage);
-                updateCode();
-            });
-            document.getElementById('prop-bordercolor').addEventListener('input', (e) => {
-                selected.style.borderColor = e.target.value;
-                savePageState(currentPage);
-                updateCode();
-            });
-            document.getElementById('prop-borderstyle').addEventListener('change', (e) => {
-                selected.style.borderStyle = e.target.value;
-                savePageState(currentPage);
-                updateCode();
-            });
-            if (contentEditable) {
-                document.getElementById('prop-text').addEventListener('input', (e) => {
-                    selected.textContent = e.target.value;
-                    savePageState(currentPage);
-                    updateCode();
-                });
-            }
-            if (isMedia) {
-                document.getElementById('prop-src').addEventListener('input', (e) => {
-                    selected.src = e.target.value;
-                    savePageState(currentPage);
-                    updateCode();
-                });
-            }
-            if (isLink) {
-                document.getElementById('prop-href').addEventListener('input', (e) => {
-                    selected.href = e.target.value;
-                    savePageState(currentPage);
-                    updateCode();
-                });
-                document.getElementById('prop-page-link').addEventListener('change', (e) => {
-                    if (e.target.value) {
-                        selected.dataset.pageLink = e.target.value;
-                        selected.href = '#';
-                    } else {
-                        delete selected.dataset.pageLink;
-                        selected.href = document.getElementById('prop-href').value || '';
-                    }
-                    savePageState(currentPage);
-                    updateCode();
-                });
-            }
-            if (isInput) {
-                document.getElementById('prop-placeholder').addEventListener('input', (e) => {
-                    selected.placeholder = e.target.value;
-                    savePageState(currentPage);
-                    updateCode();
-                });
-            }
-            if (isNav) {
-                document.getElementById('prop-navitems').addEventListener('input', (e) => {
-                    selected.innerHTML = e.target.value;
-                    selected.querySelectorAll('a').forEach(a => {
-                        a.addEventListener('click', (ev) => {
-                            if (mode === 'view') {
-                                ev.preventDefault();
-                                if (a.dataset.pageLink) {
-                                    switchPage(a.dataset.pageLink);
-                                    setMode('view');
-                                } else {
-                                    console.log('Link clicked:', a.href);
-                                    alert(`Link clicked: ${a.href}`);
-                                }
-                            }
-                        });
-                    });
-                    savePageState(currentPage);
-                    updateCode();
-                });
-            }
-            if (isModal) {
-                document.getElementById('prop-zindex').addEventListener('input', (e) => {
-                    selected.style.zIndex = e.target.value;
-                    savePageState(currentPage);
-                    updateCode();
-                });
-            }
-        }
-
-        function rgbToHex(rgb) {
-            if (!rgb || rgb === 'rgba(0, 0, 0, 0)') return '#000000';
-            const [r, g, b] = rgb.match(/\d+/g).map(Number);
-            return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
-        }
-
-        // Apply external code
         function applyCode() {
-            pageContainer.innerHTML = '';
-            const html = htmlArea.value;
-            const css = cssArea.value;
-            const js = jsArea.value;
+            alert('Code applied');
+        }
 
-            // Remove existing dynamic styles and scripts
-            document.querySelectorAll('style[data-dynamic]').forEach(style => style.remove());
-            document.querySelectorAll('script[data-dynamic]').forEach(script => script.remove());
+        function allowDrop(event) {
+            event.preventDefault();
+        }
 
-            if (mode === 'view') {
-                // View mode: Render raw HTML/CSS/JS, scope CSS to #page
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(html, 'text/html');
-                const page = doc.querySelector('div#page') || doc.body;
-                if (page) {
-                    Array.from(page.children).forEach(child => {
-                        pageContainer.appendChild(child);
-                        attachEventListeners(child);
-                    });
-                }
-                const style = document.createElement('style');
-                style.setAttribute('data-dynamic', 'true');
-                style.textContent = `#page { position: relative; background-color: #fff; } #page ${css}`;
-                document.head.appendChild(style);
-                try {
-                    const script = document.createElement('script');
-                    script.setAttribute('data-dynamic', 'true');
-                    script.textContent = js;
-                    document.body.appendChild(script);
-                } catch (e) {
-                    console.error('Error executing JS:', e);
-                }
-                savePageState(currentPage);
-            } else {
-                // Edit mode: Parse and make elements editable
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(html, 'text/html');
-                const page = doc.querySelector('div#page') || doc.body;
-                if (page) {
-                    Array.from(page.children).forEach((child, i) => {
-                        const compStyle = getComputedStyle(child);
-                        child.style.position = 'absolute';
-                        child.style.left = compStyle.left !== 'auto' ? compStyle.left : `${i * 20}px`;
-                        child.style.top = compStyle.top !== 'auto' ? compStyle.top : `${i * 20}px`;
-                        child.style.width = compStyle.width !== 'auto' ? compStyle.width : '100px';
-                        child.style.height = compStyle.height !== 'auto' ? compStyle.height : '50px';
-                        if (child.tagName === 'IMG' || child.tagName === 'VIDEO' || child.tagName === 'AUDIO' || child.tagName === 'IFRAME' || child.tagName === 'PICTURE') {
-                            child.src = child.src || '';
-                        }
-                        if (child.tagName === 'INPUT' || child.tagName === 'TEXTAREA') {
-                            child.placeholder = child.placeholder || '';
-                        }
-                        if (child.tagName === 'A' || child.tagName === 'BUTTON') {
-                            child.href = child.href || '';
-                        }
-                        pageContainer.appendChild(child);
-                        attachEventListeners(child);
-                        resizeObserver.observe(child);
-                    });
-                }
-                const style = document.createElement('style');
-                style.setAttribute('data-dynamic', 'true');
-                style.textContent = `#page { position: relative; background-color: #fff; width: 1024px; min-height: 768px; margin: 20px; } #page ${css}`;
-                document.head.appendChild(style);
-                try {
-                    const script = document.createElement('script');
-                    script.setAttribute('data-dynamic', 'true');
-                    script.textContent = js;
-                    document.body.appendChild(script);
-                } catch (e) {
-                    console.error('Error executing JS:', e);
-                }
-                updateCode();
+        function drop(event) {
+            event.preventDefault();
+            if (currentMode === 'edit') {
+                const elementType = event.dataTransfer.getData('text');
+                addElement(elementType);
             }
         }
 
-        // Update code function
-        function updateCode() {
-            if (mode === 'view') return;
-            let html = '<div id="page">\n';
-            let css = '#page {\n  position: relative;\n  background-color: #fff;\n  width: 1024px;\n  min-height: 768px;\n}\n';
-            let js = '// Dynamic JS for interactions\n';
-            const children = Array.from(pageContainer.children);
-            let hasForm = false;
-            let hasButton = false;
-            let hasLink = false;
-
-            children.forEach((el, i) => {
-                const uniqueClass = `elem${i + 1}`;
-                el.dataset.uniqueClass = uniqueClass;
-                if (!el.classList.contains(uniqueClass)) {
-                    el.classList.add(uniqueClass);
-                }
-
-                const clone = el.cloneNode(true);
-                if (mode === 'edit') {
-                    clone.style.position = '';
-                    clone.style.left = '';
-                    clone.style.top = '';
-                }
-                clone.classList.remove('selected');
-                if (clone.tagName === 'BUTTON') {
-                    clone.textContent = el.textContent;
-                }
-                if (clone.tagName === 'IMG' || clone.tagName === 'VIDEO' || clone.tagName === 'AUDIO' || clone.tagName === 'IFRAME' || clone.tagName === 'PICTURE') {
-                    clone.src = el.src || '';
-                }
-                if (clone.tagName === 'INPUT' || clone.tagName === 'TEXTAREA') {
-                    clone.placeholder = el.placeholder || '';
-                }
-                if (clone.tagName === 'A' || clone.tagName === 'BUTTON') {
-                    clone.href = el.href || '';
-                    if (el.dataset.pageLink) {
-                        clone.dataset.pageLink = el.dataset.pageLink;
-                    }
-                }
-                html += `  ${clone.outerHTML}\n`;
-
-                const compStyle = getComputedStyle(el);
-                css += `.${uniqueClass} {\n`;
-                const props = ['position', 'left', 'top', 'width', 'height', 'background-color', 'border', 'border-radius', 'border-width', 'border-color', 'border-style', 'color', 'font-size', 'font-family', 'display', 'padding', 'margin', 'z-index'];
-                props.forEach(prop => {
-                    const value = compStyle.getPropertyValue(prop);
-                    if (value && value !== 'auto' && value !== '0px' && value !== 'rgba(0, 0, 0, 0)') {
-                        css += `  ${prop}: ${value};\n`;
-                    }
-                });
-                if (el.className.includes('triangle')) {
-                    css += `  border-left: ${compStyle.borderLeft};\n`;
-                    css += `  border-right: ${compStyle.borderRight};\n`;
-                    css += `  border-bottom: ${compStyle.borderBottom};\n`;
-                }
-                css += '}\n';
-
-                if (el.tagName === 'FORM') hasForm = true;
-                if (el.tagName === 'BUTTON' || el.className.includes('button')) hasButton = true;
-                if (el.querySelectorAll('a').length > 0 || el.tagName === 'A') hasLink = true;
-            });
-            html += '</div>';
-
-            if (hasForm) {
-                js += `document.querySelector('form').addEventListener('submit', (e) => {\n  e.preventDefault();\n  console.log('Form submitted');\n});\n`;
-            }
-            if (hasButton) {
-                js += `document.querySelectorAll('button').forEach(btn => {\n  btn.addEventListener('click', () => {\n    if (btn.dataset.pageLink) {\n      // Page navigation handled by designer\n    } else {\n      console.log('Button clicked');\n    }\n  });\n});\n`;
-            }
-            if (hasLink) {
-                js += `document.querySelectorAll('a').forEach(a => {\n  a.addEventListener('click', (e) => {\n    e.preventDefault();\n    if (a.dataset.pageLink) {\n      // Page navigation handled by designer\n    } else {\n      console.log('Link clicked: ' + a.href);\n    }\n  });\n});\n`;
-            }
-
-            htmlArea.value = html;
-            cssArea.value = css;
-            jsArea.value = js || '// No JS generated yet';
-
-            pages[currentPage].html = html;
-            pages[currentPage].css = css;
-            pages[currentPage].js = js;
+        function addElement(type) {
+            const canvas = document.getElementById('canvas');
+            const element = document.createElement('div');
+            element.className = 'absolute bg-gray-200 p-2 border';
+            element.style.left = '50px';
+            element.style.top = '50px';
+            element.draggable = true;
+            element.ondragstart = (e) => e.dataTransfer.setData('text', type);
+            element.onclick = () => selectElement(element, type);
+            element.innerHTML = type;
+            canvas.appendChild(element);
+            elements.push({ type, element });
+            history.push({ action: 'add', element, type });
+            redoStack = [];
+            updateLayerPanel();
         }
 
-        // Initialize page and edit mode
-        switchPage('page1');
-        setMode('edit');
+        function addFont(font) {
+            document.body.style.fontFamily = font;
+            history.push({ action: 'font', font });
+            redoStack = [];
+        }
+
+        function applyDesignSystem(system) {
+            alert(`Applied ${system} design system`);
+            history.push({ action: 'design-system', system });
+            redoStack = [];
+        }
+
+        function applyTrend(trend) {
+            alert(`Applied ${trend} trend`);
+            history.push({ action: 'trend', trend });
+            redoStack = [];
+        }
+
+        function selectElement(element, type) {
+            selectedElement = element;
+            const propertiesPanel = document.getElementById('properties-panel');
+            propertiesPanel.innerHTML = `<p>Properties for ${type}</p>
+                <input type="text" placeholder="Width" oninput="updateProperty('width', this.value)">
+                <input type="text" placeholder="Height" oninput="updateProperty('height', this.value)">
+                <input type="text" placeholder="Color" oninput="updateProperty('backgroundColor', this.value)">`;
+        }
+
+        function updateProperty(property, value) {
+            if (selectedElement) {
+                selectedElement.style[property] = value;
+                history.push({ action: 'update', element: selectedElement, property, value });
+                redoStack = [];
+            }
+        }
+
+        function deleteSelected() {
+            if (selectedElement) {
+                selectedElement.remove();
+                elements = elements.filter(e => e.element !== selectedElement);
+                history.push({ action: 'delete', element: selectedElement });
+                redoStack = [];
+                selectedElement = null;
+                updateLayerPanel();
+            }
+        }
+
+        function paste() {
+            alert('Pasted element');
+        }
+
+        function clear() {
+            document.getElementById('canvas').innerHTML = '';
+            elements = [];
+            history.push({ action: 'clear' });
+            redoStack = [];
+            updateLayerPanel();
+        }
+
+        function copy() {
+            if (selectedElement) {
+                alert('Copied element');
+            }
+        }
+
+        function toggleZoomControls() {
+            const zoomControls = document.getElementById('zoom-controls');
+            zoomControls.classList.toggle('hidden');
+            history.push({ action: 'toggle-zoom' });
+            redoStack = [];
+        }
+
+        function zoomIn() {
+            zoomLevel += 0.1;
+            document.getElementById('canvas').style.transform = `scale(${zoomLevel})`;
+            document.getElementById('zoom-level').innerText = `${Math.round(zoomLevel * 100)}%`;
+            history.push({ action: 'zoom', level: zoomLevel });
+            redoStack = [];
+        }
+
+        function zoomOut() {
+            zoomLevel = Math.max(0.1, zoomLevel - 0.1);
+            document.getElementById('canvas').style.transform = `scale(${zoomLevel})`;
+            document.getElementById('zoom-level').innerText = `${Math.round(zoomLevel * 100)}%`;
+            history.push({ action: 'zoom', level: zoomLevel });
+            redoStack = [];
+        }
+
+        function toggleRulers() {
+            const rulerX = document.getElementById('ruler-x');
+            const rulerY = document.getElementById('ruler-y');
+            rulerX.classList.toggle('hidden');
+            rulerY.classList.toggle('hidden');
+            history.push({ action: 'toggle-rulers' });
+            redoStack = [];
+        }
+
+        function toggleLayerManagement() {
+            const layerPanel = document.getElementById('layer-panel');
+            layerPanel.classList.toggle('hidden');
+            updateLayerPanel();
+            history.push({ action: 'toggle-layers' });
+            redoStack = [];
+        }
+
+        function updateLayerPanel() {
+            const layerPanel = document.getElementById('layer-panel');
+            layerPanel.innerHTML = elements.map((e, i) => `<div class="p-2 border-b">${e.type} <button onclick="selectElementFromLayer(${i})">Select</button></div>`).join('');
+        }
+
+        function selectElementFromLayer(index) {
+            const { element, type } = elements[index];
+            selectElement(element, type);
+        }
+
+        function undo() {
+            if (history.length === 0) return;
+            const action = history.pop();
+            redoStack.push(action);
+            if (action.action === 'add') {
+                action.element.remove();
+                elements = elements.filter(e => e.element !== action.element);
+            } else if (action.action === 'delete') {
+                document.getElementById('canvas').appendChild(action.element);
+                elements.push({ element: action.element, type: action.element.innerHTML });
+            } else if (action.action === 'clear') {
+                elements.forEach(e => document.getElementById('canvas').appendChild(e.element));
+            } else if (action.action === 'update') {
+                action.element.style[action.property] = '';
+            } else if (action.action === 'font') {
+                document.body.style.fontFamily = '';
+            } else if (action.action === 'toggle-zoom') {
+                document.getElementById('zoom-controls').classList.toggle('hidden');
+            } else if (action.action === 'toggle-rulers') {
+                document.getElementById('ruler-x').classList.toggle('hidden');
+                document.getElementById('ruler-y').classList.toggle('hidden');
+            } else if (action.action === 'toggle-layers') {
+                document.getElementById('layer-panel').classList.toggle('hidden');
+            } else if (action.action === 'zoom') {
+                zoomLevel = action.level - 0.1;
+                document.getElementById('canvas').style.transform = `scale(${zoomLevel})`;
+                document.getElementById('zoom-level').innerText = `${Math.round(zoomLevel * 100)}%`;
+            }
+            updateLayerPanel();
+        }
+
+        function redo() {
+            if (redoStack.length === 0) return;
+            const action = redoStack.pop();
+            history.push(action);
+            if (action.action === 'add') {
+                document.getElementById('canvas').appendChild(action.element);
+                elements.push({ element: action.element, type: action.type });
+            } else if (action.action === 'delete') {
+                action.element.remove();
+                elements = elements.filter(e => e.element !== action.element);
+            } else if (action.action === 'clear') {
+                document.getElementById('canvas').innerHTML = '';
+                elements = [];
+            } else if (action.action === 'update') {
+                action.element.style[action.property] = action.value;
+            } else if (action.action === 'font') {
+                document.body.style.fontFamily = action.font;
+            } else if (action.action === 'toggle-zoom') {
+                document.getElementById('zoom-controls').classList.toggle('hidden');
+            } else if (action.action === 'toggle-rulers') {
+                document.getElementById('ruler-x').classList.toggle('hidden');
+                document.getElementById('ruler-y').classList.toggle('hidden');
+            } else if (action.action === 'toggle-layers') {
+                document.getElementById('layer-panel').classList.toggle('hidden');
+            } else if (action.action === 'zoom') {
+                zoomLevel = action.level;
+                document.getElementById('canvas').style.transform = `scale(${zoomLevel})`;
+                document.getElementById('zoom-level').innerText = `${Math.round(zoomLevel * 100)}%`;
+            }
+            updateLayerPanel();
+        }
     </script>
 </body>
 </html>
