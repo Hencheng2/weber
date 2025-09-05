@@ -27,6 +27,7 @@
             display: flex;
             gap: 10px;
             flex-wrap: wrap;
+            position: relative;
         }
         #top-menu button {
             background-color: #3c3c3c;
@@ -42,42 +43,23 @@
         #top-menu button.active {
             background-color: #007bff;
         }
-        #main-content {
-            display: flex;
-            flex-direction: row;
-            gap: 20px;
-        }
-        #menu {
-            width: 300px;
+        .dropdown {
+            position: absolute;
+            top: 100%;
             background-color: #2d2d2d;
-            padding: 20px;
-            border-right: 1px solid #444;
-            max-height: 600px;
-            overflow-y: auto;
-        }
-        #properties {
-            width: 300px;
-            background-color: #2d2d2d;
-            padding: 20px;
-            border-left: 1px solid #444;
-            max-height: 600px;
-            overflow-y: auto;
-        }
-        details {
-            margin-bottom: 10px;
-        }
-        summary {
-            cursor: pointer;
-            background-color: #3c3c3c;
-            padding: 10px;
+            border: 1px solid #444;
             border-radius: 4px;
+            z-index: 1000;
+            max-height: 300px;
+            overflow-y: auto;
+            display: none;
         }
-        #menu ul {
+        .dropdown ul {
             list-style: none;
-            padding: 0;
-            margin: 10px 0 0 0;
+            padding: 10px;
+            margin: 0;
         }
-        #menu li {
+        .dropdown li {
             padding: 10px;
             background-color: #3c3c3c;
             margin-bottom: 5px;
@@ -85,8 +67,13 @@
             border-radius: 4px;
             user-select: none;
         }
-        #menu li:hover {
+        .dropdown li:hover {
             background-color: #4a4a4a;
+        }
+        #main-content {
+            display: flex;
+            flex-direction: row;
+            gap: 20px;
         }
         #workspace {
             flex: 1;
@@ -96,6 +83,25 @@
             position: relative;
             overflow: auto;
             transition: width 0.3s;
+        }
+        #properties {
+            width: 300px;
+            background-color: #2d2d2d;
+            padding: 20px;
+            border-left: 1px solid #444;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        #properties label {
+            display: block;
+            margin-bottom: 10px;
+        }
+        #properties input, #properties select, #properties textarea {
+            background-color: #2d2d2d;
+            color: #fff;
+            border: 1px solid #444;
+            width: 100%;
+            padding: 5px;
         }
         #code {
             margin-top: 20px;
@@ -129,17 +135,6 @@
         }
         #code button:hover {
             background-color: #4a4a4a;
-        }
-        #properties label {
-            display: block;
-            margin-bottom: 10px;
-        }
-        #properties input, #properties select, #properties textarea {
-            background-color: #2d2d2d;
-            color: #fff;
-            border: 1px solid #444;
-            width: 100%;
-            padding: 5px;
         }
         .shape.rectangle, .shape.square, .shape.rounded-rectangle {
             background-color: #007bff;
@@ -193,15 +188,15 @@
             border: none;
         }
         #workspace.phone {
-            width: 375px;
+            width: 375px !important;
             margin: 0 auto;
         }
         #workspace.tablet {
-            width: 768px;
+            width: 768px !important;
             margin: 0 auto;
         }
         #workspace.laptop {
-            width: 1024px;
+            width: 1024px !important;
             margin: 0 auto;
         }
         #page-nav {
@@ -240,20 +235,21 @@
             <button id="phone-btn" onclick="setPreview('phone')" style="display: none;">Phone</button>
             <button id="tablet-btn" onclick="setPreview('tablet')" style="display: none;">Tablet</button>
             <button id="laptop-btn" onclick="setPreview('laptop')" style="display: none;">Laptop</button>
-            <button id="add-shape-btn" onclick="openCategory('shapes')">Add Shape</button>
-            <button id="add-icon-btn" onclick="openCategory('icons')">Add Icon</button>
-            <button id="add-social-icon-btn" onclick="openCategory('social-icons')">Add Social Icon</button>
-            <button id="add-navigation-btn" onclick="openCategory('navigations')">Add Navigation</button>
-            <button id="add-menu-btn" onclick="openCategory('menus')">Add Menu</button>
-            <button id="add-media-btn" onclick="openCategory('media')">Add Media</button>
-            <button id="add-form-btn" onclick="openCategory('forms')">Add Form</button>
-            <button id="add-utility-btn" onclick="openCategory('utilities')">Add Utility</button>
-            <button id="add-creative-btn" onclick="openCategory('creatives')">Add Creative</button>
-            <button id="add-modal-btn" onclick="openCategory('modals')">Add Modal</button>
-            <button id="add-button-btn" onclick="openCategory('buttons')">Add Button</button>
-            <button id="add-card-btn" onclick="openCategory('cards')">Add Card</button>
-            <button id="add-slider-btn" onclick="openCategory('sliders')">Add Slider</button>
-            <button id="add-font-btn" onclick="openCategory('fonts')">Add Font</button>
+            <button id="add-shape-btn" onclick="openCategory('shapes', this)">Add Shape</button>
+            <button id="add-icon-btn" onclick="openCategory('icons', this)">Add Icon</button>
+            <button id="add-social-icon-btn" onclick="openCategory('social-icons', this)">Add Social Icon</button>
+            <button id="add-material-icon-btn" onclick="openCategory('material-icons', this)">Add Material Icon</button>
+            <button id="add-navigation-btn" onclick="openCategory('navigations', this)">Add Navigation</button>
+            <button id="add-menu-btn" onclick="openCategory('menus', this)">Add Menu</button>
+            <button id="add-media-btn" onclick="openCategory('media', this)">Add Media</button>
+            <button id="add-form-btn" onclick="openCategory('forms', this)">Add Form</button>
+            <button id="add-utility-btn" onclick="openCategory('utilities', this)">Add Utility</button>
+            <button id="add-creative-btn" onclick="openCategory('creatives', this)">Add Creative</button>
+            <button id="add-modal-btn" onclick="openCategory('modals', this)">Add Modal</button>
+            <button id="add-button-btn" onclick="openCategory('buttons', this)">Add Button</button>
+            <button id="add-card-btn" onclick="openCategory('cards', this)">Add Card</button>
+            <button id="add-slider-btn" onclick="openCategory('sliders', this)">Add Slider</button>
+            <button id="add-font-btn" onclick="openCategory('fonts', this)">Add Font</button>
         </div>
         <div id="page-nav">
             <button onclick="newPage()">New Page</button>
@@ -264,186 +260,6 @@
             <button id="apply-code-btn" onclick="applyCode()">Apply Code</button>
         </div>
         <div id="main-content">
-            <div id="menu">
-                <details id="shapes">
-                    <summary>Shapes</summary>
-                    <ul>
-                        <li draggable="true" data-type="div" data-class="shape rectangle" data-width="100" data-height="50">Rectangle</li>
-                        <li draggable="true" data-type="div" data-class="shape square" data-width="100" data-height="100">Square</li>
-                        <li draggable="true" data-type="div" data-class="shape rounded-rectangle" data-width="100" data-height="50">Rounded Rectangle</li>
-                        <li draggable="true" data-type="div" data-class="shape circle" data-width="50" data-height="50">Circle</li>
-                        <li draggable="true" data-type="div" data-class="shape oval" data-width="100" data-height="50">Oval</li>
-                        <li draggable="true" data-type="div" data-class="shape triangle" data-width="100" data-height="100">Triangle</li>
-                        <li draggable="true" data-type="div" data-class="shape pentagon" data-width="100" data-height="100">Pentagon</li>
-                        <li draggable="true" data-type="div" data-class="shape hexagon" data-width="100" data-height="100">Hexagon</li>
-                        <li draggable="true" data-type="div" data-class="shape octagon" data-width="100" data-height="100">Octagon</li>
-                        <li draggable="true" data-type="div" data-class="shape trapezoid" data-width="100" data-height="50">Trapezoid</li>
-                        <li draggable="true" data-type="div" data-class="shape diamond" data-width="100" data-height="100">Diamond</li>
-                        <li draggable="true" data-type="div" data-class="shape star" data-width="100" data-height="100">Star</li>
-                    </ul>
-                </details>
-                <details id="icons">
-                    <summary>Icons (Font Awesome)</summary>
-                    <ul>
-                        <li draggable="true" data-type="i" data-class="fas fa-home icon" data-width="30" data-height="30">Home Icon</li>
-                        <li draggable="true" data-type="i" data-class="fas fa-user icon" data-width="30" data-height="30">User Icon</li>
-                        <li draggable="true" data-type="i" data-class="fas fa-cog icon" data-width="30" data-height="30">Settings Icon</li>
-                        <li draggable="true" data-type="i" data-class="fas fa-search icon" data-width="30" data-height="30">Search Icon</li>
-                        <li draggable="true" data-type="i" data-class="fas fa-heart icon" data-width="30" data-height="30">Heart Icon</li>
-                        <li draggable="true" data-type="i" data-class="fas fa-star icon" data-width="30" data-height="30">Star Icon</li>
-                        <li draggable="true" data-type="i" data-class="fas fa-bell icon" data-width="30" data-height="30">Bell Icon</li>
-                        <li draggable="true" data-type="i" data-class="fas fa-camera icon" data-width="30" data-height="30">Camera Icon</li>
-                        <li draggable="true" data-type="i" data-class="fas fa-envelope icon" data-width="30" data-height="30">Email Icon</li>
-                        <li draggable="true" data-type="i" data-class="fas fa-shopping-cart icon" data-width="30" data-height="30">Cart Icon</li>
-                        <li draggable="true" data-type="i" data-class="fas fa-cloud icon" data-width="30" data-height="30">Cloud Icon</li>
-                        <li draggable="true" data-type="i" data-class="fas fa-lock icon" data-width="30" data-height="30">Lock Icon</li>
-                    </ul>
-                </details>
-                <details id="social-icons">
-                    <summary>Social Icons</summary>
-                    <ul>
-                        <li draggable="true" data-type="a" data-class="fab fa-facebook-f social-icon" data-width="30" data-height="30">Facebook</li>
-                        <li draggable="true" data-type="a" data-class="fab fa-twitter social-icon" data-width="30" data-height="30">Twitter</li>
-                        <li draggable="true" data-type="a" data-class="fab fa-instagram social-icon" data-width="30" data-height="30">Instagram</li>
-                        <li draggable="true" data-type="a" data-class="fab fa-linkedin-in social-icon" data-width="30" data-height="30">LinkedIn</li>
-                        <li draggable="true" data-type="a" data-class="fab fa-github social-icon" data-width="30" data-height="30">GitHub</li>
-                        <li draggable="true" data-type="a" data-class="fab fa-youtube social-icon" data-width="30" data-height="30">YouTube</li>
-                        <li draggable="true" data-type="a" data-class="fab fa-tiktok social-icon" data-width="30" data-height="30">TikTok</li>
-                        <li draggable="true" data-type="a" data-class="fab fa-discord social-icon" data-width="30" data-height="30">Discord</li>
-                        <li draggable="true" data-type="a" data-class="fab fa-pinterest social-icon" data-width="30" data-height="30">Pinterest</li>
-                        <li draggable="true" data-type="a" data-class="fab fa-whatsapp social-icon" data-width="30" data-height="30">WhatsApp</li>
-                    </ul>
-                </details>
-                <details id="material-icons">
-                    <summary>Material Icons</summary>
-                    <ul>
-                        <li draggable="true" data-type="i" data-class="material-icons icon" data-content="home" data-width="30" data-height="30">Home</li>
-                        <li draggable="true" data-type="i" data-class="material-icons icon" data-content="person" data-width="30" data-height="30">Person</li>
-                        <li draggable="true" data-type="i" data-class="material-icons icon" data-content="settings" data-width="30" data-height="30">Settings</li>
-                        <li draggable="true" data-type="i" data-class="material-icons icon" data-content="search" data-width="30" data-height="30">Search</li>
-                        <li draggable="true" data-type="i" data-class="material-icons icon" data-content="favorite" data-width="30" data-height="30">Favorite</li>
-                        <li draggable="true" data-type="i" data-class="material-icons icon" data-content="star" data-width="30" data-height="30">Star</li>
-                        <li draggable="true" data-type="i" data-class="material-icons icon" data-content="notifications" data-width="30" data-height="30">Notifications</li>
-                        <li draggable="true" data-type="i" data-class="material-icons icon" data-content="camera_alt" data-width="30" data-height="30">Camera</li>
-                    </ul>
-                </details>
-                <details id="navigations">
-                    <summary>Navigations</summary>
-                    <ul>
-                        <li draggable="true" data-type="nav" data-class="navigation bar" data-content='<ul><li><a href="#">Home</a></li><li><a href="#">About</a></li><li><a href="#">Contact</a></li></ul>' data-width="400" data-height="40">Horizontal Nav Bar</li>
-                        <li draggable="true" data-type="nav" data-class="navigation sidebar" data-content='<ul><li><a href="#">Home</a></li><li><a href="#">About</a></li><li><a href="#">Contact</a></li></ul>' data-width="150" data-height="200">Vertical Sidebar</li>
-                        <li draggable="true" data-type="footer" data-class="navigation footer" data-content='<p>Footer Content</p>' data-width="400" data-height="50">Footer Nav</li>
-                        <li draggable="true" data-type="header" data-class="navigation header" data-content='<h1>Header</h1>' data-width="400" data-height="50">Header Nav</li>
-                        <li draggable="true" data-type="nav" data-class="navigation breadcrumb" data-content='<ul><li><a href="#">Home</a></li><li><a href="#">Category</a></li><li><a href="#">Page</a></li></ul>' data-width="400" data-height="30">Breadcrumb</li>
-                        <li draggable="true" data-type="nav" data-class="navigation sticky-nav" data-content='<ul><li><a href="#">Home</a></li><li><a href="#">Services</a></li><li><a href="#">Contact</a></li></ul>' data-width="400" data-height="40">Sticky Nav</li>
-                    </ul>
-                </details>
-                <details id="menus">
-                    <summary>Menus</summary>
-                    <ul>
-                        <li draggable="true" data-type="select" data-class="menu dropdown" data-content='<option>Option 1</option><option>Option 2</option><option>Option 3</option>' data-width="150" data-height="30">Dropdown Menu</li>
-                        <li draggable="true" data-type="ul" data-class="menu list" data-content='<li>Item 1</li><li>Item 2</li><li>Item 3</li>' data-width="150" data-height="100">List Menu</li>
-                        <li draggable="true" data-type="input" data-class="menu radio" data-input-type="radio" data-name="group1" data-width="30" data-height="30">Radio Button</li>
-                        <li draggable="true" data-type="input" data-class="menu checkbox" data-input-type="checkbox" data-width="30" data-height="30">Checkbox</li>
-                        <li draggable="true" data-type="select" data-class="menu multiselect" data-content='<option>Option 1</option><option>Option 2</option><option>Option 3</option>' data-width="150" data-height="100">Multi-Select</li>
-                        <li draggable="true" data-type="div" data-class="menu context-menu" data-content='<ul><li>Option 1</li><li>Option 2</li><li>Option 3</li></ul>' data-width="150" data-height="100">Context Menu</li>
-                    </ul>
-                </details>
-                <details id="media">
-                    <summary>Media</summary>
-                    <ul>
-                        <li draggable="true" data-type="img" data-class="media image" data-width="150" data-height="150">Image</li>
-                        <li draggable="true" data-type="video" data-class="media video" data-width="320" data-height="240">Video</li>
-                        <li draggable="true" data-type="audio" data-class="media audio" data-width="200" data-height="30">Audio</li>
-                        <li draggable="true" data-type="iframe" data-class="media iframe" data-width="300" data-height="200">Iframe</li>
-                        <li draggable="true" data-type="picture" data-class="media picture" data-width="150" data-height="150">Picture</li>
-                        <li draggable="true" data-type="video" data-class="media video-loop" data-width="320" data-height="240">Looping Video</li>
-                    </ul>
-                </details>
-                <details id="forms">
-                    <summary>Forms</summary>
-                    <ul>
-                        <li draggable="true" data-type="form" data-class="form container" data-content='<input type="text" placeholder="Name"><input type="email" placeholder="Email"><button>Submit</button>' data-width="300" data-height="150">Basic Form</li>
-                        <li draggable="true" data-type="input" data-class="form text" data-input-type="text" data-placeholder="Enter text" data-width="200" data-height="30">Text Input</li>
-                        <li draggable="true" data-type="input" data-class="form email" data-input-type="email" data-placeholder="Enter email" data-width="200" data-height="30">Email Input</li>
-                        <li draggable="true" data-type="input" data-class="form password" data-input-type="password" data-placeholder="Enter password" data-width="200" data-height="30">Password Input</li>
-                        <li draggable="true" data-type="textarea" data-class="form textarea" data-placeholder="Enter message" data-width="200" data-height="100">Textarea</li>
-                        <li draggable="true" data-type="button" data-class="form button" data-content="Submit" data-width="100" data-height="30">Button</li>
-                        <li draggable="true" data-type="input" data-class="form file" data-input-type="file" data-width="200" data-height="30">File Upload</li>
-                        <li draggable="true" data-type="input" data-class="form number" data-input-type="number" data-placeholder="Enter number" data-width="200" data-height="30">Number Input</li>
-                        <li draggable="true" data-type="input" data-class="form date" data-input-type="date" data-width="200" data-height="30">Date Input</li>
-                        <li draggable="true" data-type="input" data-class="form range" data-input-type="range" data-width="200" data-height="30">Range Slider</li>
-                        <li draggable="true" data-type="input" data-class="form color" data-input-type="color" data-width="100" data-height="30">Color Picker</li>
-                    </ul>
-                </details>
-                <details id="utilities">
-                    <summary>Utilities</summary>
-                    <ul>
-                        <li draggable="true" data-type="div" data-class="utility container" data-width="200" data-height="100">Container Div</li>
-                        <li draggable="true" data-type="section" data-class="utility section" data-width="300" data-height="150">Section</li>
-                        <li draggable="true" data-type="article" data-class="utility article" data-width="300" data-height="150">Article</li>
-                        <li draggable="true" data-type="aside" data-class="utility aside" data-width="150" data-height="200">Aside</li>
-                        <li draggable="true" data-type="p" data-class="utility paragraph" data-content="Paragraph text" data-width="200" data-height="50">Paragraph</li>
-                        <li draggable="true" data-type="div" data-class="utility card" data-width="200" data-height="150">Card</li>
-                        <li draggable="true" data-type="hr" data-class="utility divider" data-width="200" data-height="2">Divider</li>
-                        <li draggable="true" data-type="div" data-class="utility grid" data-content='<div>Grid Item 1</div><div>Grid Item 2</div><div>Grid Item 3</div>' data-width="300" data-height="150">Grid Container</li>
-                        <li draggable="true" data-type="div" data-class="utility flexbox" data-content='<div>Flex Item 1</div><div>Flex Item 2</div><div>Flex Item 3</div>' data-width="300" data-height="150">Flexbox Container</li>
-                    </ul>
-                </details>
-                <details id="creatives">
-                    <summary>Creatives</summary>
-                    <ul>
-                        <li draggable="true" data-type="canvas" data-class="creative canvas" data-width="200" data-height="200">Canvas</li>
-                        <li draggable="true" data-type="svg" data-class="creative svg" data-content='<rect width="100" height="50" fill="blue"/>' data-width="200" data-height="200">SVG</li>
-                        <li draggable="true" data-type="div" data-class="creative animation" data-width="100" data-height="100">Animation Box</li>
-                        <li draggable="true" data-type="div" data-class="creative carousel" data-content='<div>Slide 1</div><div>Slide 2</div><div>Slide 3</div>' data-width="300" data-height="200">Carousel</li>
-                        <li draggable="true" data-type="div" data-class="creative parallax" data-width="300" data-height="200">Parallax Section</li>
-                    </ul>
-                </details>
-                <details id="modals">
-                    <summary>Modals</summary>
-                    <ul>
-                        <li draggable="true" data-type="div" data-class="modal basic" data-content='<h2>Modal Title</h2><p>Modal content goes here.</p><button>Close</button>' data-width="300" data-height="200">Basic Modal</li>
-                        <li draggable="true" data-type="div" data-class="modal centered" data-content='<h2>Centered Modal</h2><p>Centered modal content.</p><button>Close</button>' data-width="300" data-height="200">Centered Modal</li>
-                        <li draggable="true" data-type="div" data-class="modal fullscreen" data-content='<h2>Fullscreen Modal</h2><p>Fullscreen content.</p><button>Close</button>' data-width="400" data-height="300">Fullscreen Modal</li>
-                    </ul>
-                </details>
-                <details id="buttons">
-                    <summary>Buttons</summary>
-                    <ul>
-                        <li draggable="true" data-type="button" data-class="button primary" data-content="Primary Button" data-width="100" data-height="40">Primary Button</li>
-                        <li draggable="true" data-type="button" data-class="button secondary" data-content="Secondary Button" data-width="100" data-height="40">Secondary Button</li>
-                        <li draggable="true" data-type="button" data-class="button outline" data-content="Outline Button" data-width="100" data-height="40">Outline Button</li>
-                        <li draggable="true" data-type="button" data-class="button icon-button" data-content='<i class="fas fa-play"></i>' data-width="40" data-height="40">Icon Button</li>
-                    </ul>
-                </details>
-                <details id="cards">
-                    <summary>Cards</summary>
-                    <ul>
-                        <li draggable="true" data-type="div" data-class="card basic" data-content='<h3>Card Title</h3><p>Card content goes here.</p>' data-width="200" data-height="150">Basic Card</li>
-                        <li draggable="true" data-type="div" data-class="card image-card" data-content='<img src="" alt="Card Image"><h3>Card Title</h3><p>Card content.</p>' data-width="200" data-height="200">Image Card</li>
-                        <li draggable="true" data-type="div" data-class="card hover-card" data-content='<h3>Hover Card</h3><p>Hover to see effect.</p>' data-width="200" data-height="150">Hover Card</li>
-                    </ul>
-                </details>
-                <details id="sliders">
-                    <summary>Sliders</summary>
-                    <ul>
-                        <li draggable="true" data-type="div" data-class="slider basic" data-content='<div>Slide 1</div><div>Slide 2</div><div>Slide 3</div>' data-width="300" data-height="200">Basic Slider</li>
-                        <li draggable="true" data-type="div" data-class="slider image-slider" data-content='<img src="" alt="Slide 1"><img src="" alt="Slide 2"><img src="" alt="Slide 3">' data-width="300" data-height="200">Image Slider</li>
-                    </ul>
-                </details>
-                <details id="fonts">
-                    <summary>Fonts</summary>
-                    <ul>
-                        <li draggable="true" data-type="p" data-class="font roboto" data-content="Roboto Text" data-width="200" data-height="50">Roboto</li>
-                        <li draggable="true" data-type="p" data-class="font open-sans" data-content="Open Sans Text" data-width="200" data-height="50">Open Sans</li>
-                        <li draggable="true" data-type="p" data-class="font montserrat" data-content="Montserrat Text" data-width="200" data-height="50">Montserrat</li>
-                        <li draggable="true" data-type="p" data-class="font lato" data-content="Lato Text" data-width="200" data-height="50">Lato</li>
-                        <li draggable="true" data-type="p" data-class="font poppins" data-content="Poppins Text" data-width="200" data-height="50">Poppins</li>
-                        <li draggable="true" data-type="p" data-class="font nunito" data-content="Nunito Text" data-width="200" data-height="50">Nunito</li>
-                    </ul>
-                </details>
-            </div>
             <div id="workspace" class="edit-mode"></div>
             <div id="properties">
                 <h3>Properties</h3>
@@ -491,20 +307,6 @@
         const phoneBtn = document.getElementById('phone-btn');
         const tabletBtn = document.getElementById('tablet-btn');
         const laptopBtn = document.getElementById('laptop-btn');
-        const addShapeBtn = document.getElementById('add-shape-btn');
-        const addIconBtn = document.getElementById('add-icon-btn');
-        const addSocialIconBtn = document.getElementById('add-social-icon-btn');
-        const addNavigationBtn = document.getElementById('add-navigation-btn');
-        const addMenuBtn = document.getElementById('add-menu-btn');
-        const addMediaBtn = document.getElementById('add-media-btn');
-        const addFormBtn = document.getElementById('add-form-btn');
-        const addUtilityBtn = document.getElementById('add-utility-btn');
-        const addCreativeBtn = document.getElementById('add-creative-btn');
-        const addModalBtn = document.getElementById('add-modal-btn');
-        const addButtonBtn = document.getElementById('add-button-btn');
-        const addCardBtn = document.getElementById('add-card-btn');
-        const addSliderBtn = document.getElementById('add-slider-btn');
-        const addFontBtn = document.getElementById('add-font-btn');
         const pageSelector = document.getElementById('page-selector');
         const pageNameInput = document.getElementById('page-name');
         const applyCodeBtn = document.getElementById('apply-code-btn');
@@ -517,7 +319,144 @@
         let currentPage = 'page1';
         let pages = { 'page1': { name: 'index.html', html: '', css: '', js: '', elements: [] } };
         let pageCount = 1;
+        let activeDropdown = null;
         const resizeObserver = new ResizeObserver(() => updateCode());
+
+        const elementCategories = {
+            'shapes': [
+                { type: 'div', class: 'shape rectangle', width: '100', height: '50', name: 'Rectangle' },
+                { type: 'div', class: 'shape square', width: '100', height: '100', name: 'Square' },
+                { type: 'div', class: 'shape rounded-rectangle', width: '100', height: '50', name: 'Rounded Rectangle' },
+                { type: 'div', class: 'shape circle', width: '50', height: '50', name: 'Circle' },
+                { type: 'div', class: 'shape oval', width: '100', height: '50', name: 'Oval' },
+                { type: 'div', class: 'shape triangle', width: '100', height: '100', name: 'Triangle' },
+                { type: 'div', class: 'shape pentagon', width: '100', height: '100', name: 'Pentagon' },
+                { type: 'div', class: 'shape hexagon', width: '100', height: '100', name: 'Hexagon' },
+                { type: 'div', class: 'shape octagon', width: '100', height: '100', name: 'Octagon' },
+                { type: 'div', class: 'shape trapezoid', width: '100', height: '50', name: 'Trapezoid' },
+                { type: 'div', class: 'shape diamond', width: '100', height: '100', name: 'Diamond' },
+                { type: 'div', class: 'shape star', width: '100', height: '100', name: 'Star' }
+            ],
+            'icons': [
+                { type: 'i', class: 'fas fa-home icon', width: '30', height: '30', name: 'Home Icon' },
+                { type: 'i', class: 'fas fa-user icon', width: '30', height: '30', name: 'User Icon' },
+                { type: 'i', class: 'fas fa-cog icon', width: '30', height: '30', name: 'Settings Icon' },
+                { type: 'i', class: 'fas fa-search icon', width: '30', height: '30', name: 'Search Icon' },
+                { type: 'i', class: 'fas fa-heart icon', width: '30', height: '30', name: 'Heart Icon' },
+                { type: 'i', class: 'fas fa-star icon', width: '30', height: '30', name: 'Star Icon' },
+                { type: 'i', class: 'fas fa-bell icon', width: '30', height: '30', name: 'Bell Icon' },
+                { type: 'i', class: 'fas fa-camera icon', width: '30', height: '30', name: 'Camera Icon' },
+                { type: 'i', class: 'fas fa-envelope icon', width: '30', height: '30', name: 'Email Icon' },
+                { type: 'i', class: 'fas fa-shopping-cart icon', width: '30', height: '30', name: 'Cart Icon' },
+                { type: 'i', class: 'fas fa-cloud icon', width: '30', height: '30', name: 'Cloud Icon' },
+                { type: 'i', class: 'fas fa-lock icon', width: '30', height: '30', name: 'Lock Icon' }
+            ],
+            'social-icons': [
+                { type: 'a', class: 'fab fa-facebook-f social-icon', width: '30', height: '30', name: 'Facebook' },
+                { type: 'a', class: 'fab fa-twitter social-icon', width: '30', height: '30', name: 'Twitter' },
+                { type: 'a', class: 'fab fa-instagram social-icon', width: '30', height: '30', name: 'Instagram' },
+                { type: 'a', class: 'fab fa-linkedin-in social-icon', width: '30', height: '30', name: 'LinkedIn' },
+                { type: 'a', class: 'fab fa-github social-icon', width: '30', height: '30', name: 'GitHub' },
+                { type: 'a', class: 'fab fa-youtube social-icon', width: '30', height: '30', name: 'YouTube' },
+                { type: 'a', class: 'fab fa-tiktok social-icon', width: '30', height: '30', name: 'TikTok' },
+                { type: 'a', class: 'fab fa-discord social-icon', width: '30', height: '30', name: 'Discord' },
+                { type: 'a', class: 'fab fa-pinterest social-icon', width: '30', height: '30', name: 'Pinterest' },
+                { type: 'a', class: 'fab fa-whatsapp social-icon', width: '30', height: '30', name: 'WhatsApp' }
+            ],
+            'material-icons': [
+                { type: 'i', class: 'material-icons icon', content: 'home', width: '30', height: '30', name: 'Home' },
+                { type: 'i', class: 'material-icons icon', content: 'person', width: '30', height: '30', name: 'Person' },
+                { type: 'i', class: 'material-icons icon', content: 'settings', width: '30', height: '30', name: 'Settings' },
+                { type: 'i', class: 'material-icons icon', content: 'search', width: '30', height: '30', name: 'Search' },
+                { type: 'i', class: 'material-icons icon', content: 'favorite', width: '30', height: '30', name: 'Favorite' },
+                { type: 'i', class: 'material-icons icon', content: 'star', width: '30', height: '30', name: 'Star' },
+                { type: 'i', class: 'material-icons icon', content: 'notifications', width: '30', height: '30', name: 'Notifications' },
+                { type: 'i', class: 'material-icons icon', content: 'camera_alt', width: '30', height: '30', name: 'Camera' }
+            ],
+            'navigations': [
+                { type: 'nav', class: 'navigation bar', content: '<ul><li><a href="#">Home</a></li><li><a href="#">About</a></li><li><a href="#">Contact</a></li></ul>', width: '400', height: '40', name: 'Horizontal Nav Bar' },
+                { type: 'nav', class: 'navigation sidebar', content: '<ul><li><a href="#">Home</a></li><li><a href="#">About</a></li><li><a href="#">Contact</a></li></ul>', width: '150', height: '200', name: 'Vertical Sidebar' },
+                { type: 'footer', class: 'navigation footer', content: '<p>Footer Content</p>', width: '400', height: '50', name: 'Footer Nav' },
+                { type: 'header', class: 'navigation header', content: '<h1>Header</h1>', width: '400', height: '50', name: 'Header Nav' },
+                { type: 'nav', class: 'navigation breadcrumb', content: '<ul><li><a href="#">Home</a></li><li><a href="#">Category</a></li><li><a href="#">Page</a></li></ul>', width: '400', height: '30', name: 'Breadcrumb' },
+                { type: 'nav', class: 'navigation sticky-nav', content: '<ul><li><a href="#">Home</a></li><li><a href="#">Services</a></li><li><a href="#">Contact</a></li></ul>', width: '400', height: '40', name: 'Sticky Nav' }
+            ],
+            'menus': [
+                { type: 'select', class: 'menu dropdown', content: '<option>Option 1</option><option>Option 2</option><option>Option 3</option>', width: '150', height: '30', name: 'Dropdown Menu' },
+                { type: 'ul', class: 'menu list', content: '<li>Item 1</li><li>Item 2</li><li>Item 3</li>', width: '150', height: '100', name: 'List Menu' },
+                { type: 'input', class: 'menu radio', 'input-type': 'radio', name: 'group1', width: '30', height: '30', name: 'Radio Button' },
+                { type: 'input', class: 'menu checkbox', 'input-type': 'checkbox', width: '30', height: '30', name: 'Checkbox' },
+                { type: 'select', class: 'menu multiselect', content: '<option>Option 1</option><option>Option 2</option><option>Option 3</option>', width: '150', height: '100', name: 'Multi-Select' },
+                { type: 'div', class: 'menu context-menu', content: '<ul><li>Option 1</li><li>Option 2</li><li>Option 3</li></ul>', width: '150', height: '100', name: 'Context Menu' }
+            ],
+            'media': [
+                { type: 'img', class: 'media image', width: '150', height: '150', name: 'Image' },
+                { type: 'video', class: 'media video', width: '320', height: '240', name: 'Video' },
+                { type: 'audio', class: 'media audio', width: '200', height: '30', name: 'Audio' },
+                { type: 'iframe', class: 'media iframe', width: '300', height: '200', name: 'Iframe' },
+                { type: 'picture', class: 'media picture', width: '150', height: '150', name: 'Picture' },
+                { type: 'video', class: 'media video-loop', width: '320', height: '240', name: 'Looping Video' }
+            ],
+            'forms': [
+                { type: 'form', class: 'form container', content: '<input type="text" placeholder="Name"><input type="email" placeholder="Email"><button>Submit</button>', width: '300', height: '150', name: 'Basic Form' },
+                { type: 'input', class: 'form text', 'input-type': 'text', placeholder: 'Enter text', width: '200', height: '30', name: 'Text Input' },
+                { type: 'input', class: 'form email', 'input-type': 'email', placeholder: 'Enter email', width: '200', height: '30', name: 'Email Input' },
+                { type: 'input', class: 'form password', 'input-type': 'password', placeholder: 'Enter password', width: '200', height: '30', name: 'Password Input' },
+                { type: 'textarea', class: 'form textarea', placeholder: 'Enter message', width: '200', height: '100', name: 'Textarea' },
+                { type: 'button', class: 'form button', content: 'Submit', width: '100', height: '30', name: 'Button' },
+                { type: 'input', class: 'form file', 'input-type': 'file', width: '200', height: '30', name: 'File Upload' },
+                { type: 'input', class: 'form number', 'input-type': 'number', placeholder: 'Enter number', width: '200', height: '30', name: 'Number Input' },
+                { type: 'input', class: 'form date', 'input-type': 'date', width: '200', height: '30', name: 'Date Input' },
+                { type: 'input', class: 'form range', 'input-type': 'range', width: '200', height: '30', name: 'Range Slider' },
+                { type: 'input', class: 'form color', 'input-type': 'color', width: '100', height: '30', name: 'Color Picker' }
+            ],
+            'utilities': [
+                { type: 'div', class: 'utility container', width: '200', height: '100', name: 'Container Div' },
+                { type: 'section', class: 'utility section', width: '300', height: '150', name: 'Section' },
+                { type: 'article', class: 'utility article', width: '300', height: '150', name: 'Article' },
+                { type: 'aside', class: 'utility aside', width: '150', height: '200', name: 'Aside' },
+                { type: 'p', class: 'utility paragraph', content: 'Paragraph text', width: '200', height: '50', name: 'Paragraph' },
+                { type: 'div', class: 'utility card', width: '200', height: '150', name: 'Card' },
+                { type: 'hr', class: 'utility divider', width: '200', height: '2', name: 'Divider' },
+                { type: 'div', class: 'utility grid', content: '<div>Grid Item 1</div><div>Grid Item 2</div><div>Grid Item 3</div>', width: '300', height: '150', name: 'Grid Container' },
+                { type: 'div', class: 'utility flexbox', content: '<div>Flex Item 1</div><div>Flex Item 2</div><div>Flex Item 3</div>', width: '300', height: '150', name: 'Flexbox Container' }
+            ],
+            'creatives': [
+                { type: 'canvas', class: 'creative canvas', width: '200', height: '200', name: 'Canvas' },
+                { type: 'svg', class: 'creative svg', content: '<rect width="100" height="50" fill="blue"/>', width: '200', height: '200', name: 'SVG' },
+                { type: 'div', class: 'creative animation', width: '100', height: '100', name: 'Animation Box' },
+                { type: 'div', class: 'creative carousel', content: '<div>Slide 1</div><div>Slide 2</div><div>Slide 3</div>', width: '300', height: '200', name: 'Carousel' },
+                { type: 'div', class: 'creative parallax', width: '300', height: '200', name: 'Parallax Section' }
+            ],
+            'modals': [
+                { type: 'div', class: 'modal basic', content: '<h2>Modal Title</h2><p>Modal content goes here.</p><button>Close</button>', width: '300', height: '200', name: 'Basic Modal' },
+                { type: 'div', class: 'modal centered', content: '<h2>Centered Modal</h2><p>Centered modal content.</p><button>Close</button>', width: '300', height: '200', name: 'Centered Modal' },
+                { type: 'div', class: 'modal fullscreen', content: '<h2>Fullscreen Modal</h2><p>Fullscreen content.</p><button>Close</button>', width: '400', height: '300', name: 'Fullscreen Modal' }
+            ],
+            'buttons': [
+                { type: 'button', class: 'button primary', content: 'Primary Button', width: '100', height: '40', name: 'Primary Button' },
+                { type: 'button', class: 'button secondary', content: 'Secondary Button', width: '100', height: '40', name: 'Secondary Button' },
+                { type: 'button', class: 'button outline', content: 'Outline Button', width: '100', height: '40', name: 'Outline Button' },
+                { type: 'button', class: 'button icon-button', content: '<i class="fas fa-play"></i>', width: '40', height: '40', name: 'Icon Button' }
+            ],
+            'cards': [
+                { type: 'div', class: 'card basic', content: '<h3>Card Title</h3><p>Card content goes here.</p>', width: '200', height: '150', name: 'Basic Card' },
+                { type: 'div', class: 'card image-card', content: '<img src="" alt="Card Image"><h3>Card Title</h3><p>Card content.</p>', width: '200', height: '200', name: 'Image Card' },
+                { type: 'div', class: 'card hover-card', content: '<h3>Hover Card</h3><p>Hover to see effect.</p>', width: '200', height: '150', name: 'Hover Card' }
+            ],
+            'sliders': [
+                { type: 'div', class: 'slider basic', content: '<div>Slide 1</div><div>Slide 2</div><div>Slide 3</div>', width: '300', height: '200', name: 'Basic Slider' },
+                { type: 'div', class: 'slider image-slider', content: '<img src="" alt="Slide 1"><img src="" alt="Slide 2"><img src="" alt="Slide 3">', width: '300', height: '200', name: 'Image Slider' }
+            ],
+            'fonts': [
+                { type: 'p', class: 'font roboto', content: 'Roboto Text', width: '200', height: '50', name: 'Roboto' },
+                { type: 'p', class: 'font open-sans', content: 'Open Sans Text', width: '200', height: '50', name: 'Open Sans' },
+                { type: 'p', class: 'font montserrat', content: 'Montserrat Text', width: '200', height: '50', name: 'Montserrat' },
+                { type: 'p', class: 'font lato', content: 'Lato Text', width: '200', height: '50', name: 'Lato' },
+                { type: 'p', class: 'font poppins', content: 'Poppins Text', width: '200', height: '50', name: 'Poppins' },
+                { type: 'p', class: 'font nunito', content: 'Nunito Text', width: '200', height: '50', name: 'Nunito' }
+            ]
+        };
 
         // Mode switching
         function setMode(newMode) {
@@ -529,21 +468,11 @@
             phoneBtn.style.display = mode === 'view' ? 'inline-block' : 'none';
             tabletBtn.style.display = mode === 'view' ? 'inline-block' : 'none';
             laptopBtn.style.display = mode === 'view' ? 'inline-block' : 'none';
-            addShapeBtn.style.display = mode === 'edit' ? 'inline-block' : 'none';
-            addIconBtn.style.display = mode === 'edit' ? 'inline-block' : 'none';
-            addSocialIconBtn.style.display = mode === 'edit' ? 'inline-block' : 'none';
-            addNavigationBtn.style.display = mode === 'edit' ? 'inline-block' : 'none';
-            addMenuBtn.style.display = mode === 'edit' ? 'inline-block' : 'none';
-            addMediaBtn.style.display = mode === 'edit' ? 'inline-block' : 'none';
-            addFormBtn.style.display = mode === 'edit' ? 'inline-block' : 'none';
-            addUtilityBtn.style.display = mode === 'edit' ? 'inline-block' : 'none';
-            addCreativeBtn.style.display = mode === 'edit' ? 'inline-block' : 'none';
-            addModalBtn.style.display = mode === 'edit' ? 'inline-block' : 'none';
-            addButtonBtn.style.display = mode === 'edit' ? 'inline-block' : 'none';
-            addCardBtn.style.display = mode === 'edit' ? 'inline-block' : 'none';
-            addSliderBtn.style.display = mode === 'edit' ? 'inline-block' : 'none';
-            addFontBtn.style.display = mode === 'edit' ? 'inline-block' : 'none';
-            document.getElementById('menu').style.display = mode === 'edit' ? 'block' : 'none';
+            document.querySelectorAll('#top-menu button[id$="-btn"]').forEach(btn => {
+                if (!['edit-mode-btn', 'view-mode-btn', 'phone-btn', 'tablet-btn', 'laptop-btn'].includes(btn.id)) {
+                    btn.style.display = mode === 'edit' ? 'inline-block' : 'none';
+                }
+            });
             document.getElementById('properties').style.display = mode === 'edit' ? 'block' : 'none';
             applyCodeBtn.style.display = mode === 'view' ? 'inline-block' : 'none';
             if (mode === 'view') {
@@ -554,15 +483,13 @@
                 selected = null;
                 propContent.innerHTML = '';
                 deleteBtn.style.display = 'none';
-                document.querySelectorAll('#menu li').forEach(item => item.setAttribute('draggable', 'false'));
-                document.getElementById('menu').style.pointerEvents = 'none';
+                closeDropdown();
                 setPreview('laptop');
             } else {
-                document.querySelectorAll('#menu li').forEach(item => item.setAttribute('draggable', 'true'));
-                document.getElementById('menu').style.pointerEvents = 'auto';
                 workspace.classList.remove('phone', 'tablet', 'laptop');
                 workspace.style.width = '';
                 workspace.style.margin = '';
+                applyCode(); // Ensure elements are editable when switching to edit mode
             }
             updateCode();
         }
@@ -575,6 +502,8 @@
             phoneBtn.classList.toggle('active', device === 'phone');
             tabletBtn.classList.toggle('active', device === 'tablet');
             laptopBtn.classList.toggle('active', device === 'laptop');
+            workspace.style.width = device === 'phone' ? '375px' : device === 'tablet' ? '768px' : '1024px';
+            workspace.style.margin = '0 auto';
         }
 
         // Save page state
@@ -635,7 +564,9 @@
                 });
                 workspace.appendChild(newEl);
                 attachEventListeners(newEl);
-                resizeObserver.observe(newEl);
+                if (mode === 'edit') {
+                    resizeObserver.observe(newEl);
+                }
             });
             htmlArea.value = pages[pageId].html || '';
             cssArea.value = pages[pageId].css || '';
@@ -649,6 +580,7 @@
                 propContent.innerHTML = '';
                 deleteBtn.style.display = 'none';
             }
+            closeDropdown();
             updateCode();
         }
 
@@ -660,25 +592,67 @@
             savePageState(currentPage);
         });
 
-        // Open specific category
-        function openCategory(categoryId) {
-            document.querySelectorAll('#menu details').forEach(detail => {
-                detail.removeAttribute('open');
+        // Dropdown management
+        function openCategory(categoryId, button) {
+            if (mode !== 'edit') return;
+            closeDropdown();
+            const dropdown = document.createElement('div');
+            dropdown.className = 'dropdown';
+            const ul = document.createElement('ul');
+            elementCategories[categoryId].forEach(item => {
+                const li = document.createElement('li');
+                li.textContent = item.name;
+                li.setAttribute('draggable', 'true');
+                li.dataset.type = item.type;
+                li.dataset.class = item.class;
+                if (item.content) li.dataset.content = item.content;
+                if (item.width) li.dataset.width = item.width;
+                if (item.height) li.dataset.height = item.height;
+                if (item['input-type']) li.dataset.inputType = item['input-type'];
+                if (item.placeholder) li.dataset.placeholder = item.placeholder;
+                if (item.nameAttr) li.dataset.name = item.nameAttr;
+                li.addEventListener('dragstart', (e) => {
+                    e.dataTransfer.setData('type', li.dataset.type);
+                    e.dataTransfer.setData('class', li.dataset.class);
+                    e.dataTransfer.setData('content', li.dataset.content || '');
+                    e.dataTransfer.setData('width', li.dataset.width || '100');
+                    e.dataTransfer.setData('height', li.dataset.height || '50');
+                    e.dataTransfer.setData('input-type', li.dataset.inputType || '');
+                    e.dataTransfer.setData('placeholder', li.dataset.placeholder || '');
+                    e.dataTransfer.setData('name', li.dataset.name || '');
+                });
+                li.addEventListener('click', () => {
+                    addElementToWorkspace(item, { offsetX: 100, offsetY: 100 });
+                    closeDropdown();
+                });
+                ul.appendChild(li);
             });
-            document.getElementById(categoryId).setAttribute('open', '');
+            dropdown.appendChild(ul);
+            document.getElementById('top-menu').appendChild(dropdown);
+            const rect = button.getBoundingClientRect();
+            dropdown.style.left = `${rect.left - document.getElementById('top-menu').getBoundingClientRect().left}px`;
+            dropdown.style.display = 'block';
+            activeDropdown = dropdown;
+        }
+
+        function closeDropdown() {
+            if (activeDropdown) {
+                activeDropdown.remove();
+                activeDropdown = null;
+            }
         }
 
         // Textarea controls
         function pasteCode(type) {
             navigator.clipboard.readText().then(text => {
                 document.getElementById(type).value = text;
-                if (mode === 'view') applyCode();
+                if (mode === 'view' || mode === 'edit') applyCode();
             });
         }
 
         function clearCode(type) {
             document.getElementById(type).value = '';
-            if (mode === 'view') applyCode();
+            if (mode === 'view' || mode === 'edit') applyCode();
         }
 
         function copyCode(type) {
@@ -741,7 +715,72 @@
             }
         }
 
-        // Drag from menu to workspace
+        // Add element to workspace
+        function addElementToWorkspace(item, position) {
+            const elem = document.createElement(item.type);
+            elem.className = item.class;
+            elem.style.position = 'absolute';
+            elem.style.left = `${position.offsetX - (parseInt(item.width) / 2)}px`;
+            elem.style.top = `${position.offsetY - (parseInt(item.height) / 2)}px`;
+            elem.style.width = `${item.width}px`;
+            elem.style.height = `${item.height}px`;
+
+            if (item.content) elem.innerHTML = item.content;
+            if (item['input-type']) elem.type = item['input-type'];
+            if (item.placeholder) elem.placeholder = item.placeholder;
+            if (item.nameAttr) elem.name = item.nameAttr;
+            if (item.class.includes('font')) {
+                if (item.class.includes('roboto')) elem.style.fontFamily = 'Roboto';
+                if (item.class.includes('open-sans')) elem.style.fontFamily = 'Open Sans';
+                if (item.class.includes('montserrat')) elem.style.fontFamily = 'Montserrat';
+                if (item.class.includes('lato')) elem.style.fontFamily = 'Lato';
+                if (item.class.includes('poppins')) elem.style.fontFamily = 'Poppins';
+                if (item.class.includes('nunito')) elem.style.fontFamily = 'Nunito';
+            }
+            if (item.class.includes('circle') || item.class.includes('oval')) {
+                elem.style.borderRadius = '50%';
+            }
+            if (item.class.includes('rectangle') || item.class.includes('square') || item.class.includes('container') || item.class.includes('card') || item.class.includes('rounded-rectangle')) {
+                elem.style.backgroundColor = '#444';
+                elem.style.border = '1px solid #666';
+                if (item.class.includes('rounded-rectangle')) elem.style.borderRadius = '10px';
+            }
+            if (item.class.includes('triangle')) {
+                elem.style.width = '0';
+                elem.style.height = '0';
+                elem.style.borderLeft = '50px solid transparent';
+                elem.style.borderRight = '50px solid transparent';
+                elem.style.borderBottom = '100px solid #28a745';
+                elem.style.backgroundColor = 'transparent';
+                elem.style.resize = 'none';
+            }
+            if (item.class.includes('icon') || item.class.includes('social-icon') || item.class.includes('material-icons')) {
+                elem.style.display = 'inline-block';
+                if (item.content && item.class.includes('material-icons')) {
+                    elem.textContent = item.content;
+                }
+            }
+            if (item.type === 'button') {
+                elem.textContent = item.content || 'Button';
+            }
+            if (item.type === 'video' || item.type === 'audio') {
+                elem.controls = true;
+                elem.src = '';
+            }
+            if (item.type === 'img' || item.type === 'iframe' || item.type === 'picture') {
+                elem.src = '';
+            }
+            if (item.class.includes('modal')) {
+                elem.style.zIndex = '1000';
+            }
+            attachEventListeners(elem);
+            workspace.appendChild(elem);
+            resizeObserver.observe(elem);
+            savePageState(currentPage);
+            updateCode();
+        }
+
+        // Drag from dropdown to workspace
         workspace.addEventListener('dragover', (e) => {
             if (mode === 'edit') e.preventDefault();
         });
@@ -757,83 +796,17 @@
             const placeholder = e.dataTransfer.getData('placeholder');
             const name = e.dataTransfer.getData('name');
 
-            const elem = document.createElement(type);
-            elem.className = className;
-            elem.style.position = 'absolute';
-            elem.style.left = `${e.offsetX - (width / 2)}px`;
-            elem.style.top = `${e.offsetY - (height / 2)}px`;
-            elem.style.width = `${width}px`;
-            elem.style.height = `${height}px`;
-
-            if (content) elem.innerHTML = content;
-            if (inputType) elem.type = inputType;
-            if (placeholder) elem.placeholder = placeholder;
-            if (name) elem.name = name;
-            if (className.includes('font')) {
-                if (className.includes('roboto')) elem.style.fontFamily = 'Roboto';
-                if (className.includes('open-sans')) elem.style.fontFamily = 'Open Sans';
-                if (className.includes('montserrat')) elem.style.fontFamily = 'Montserrat';
-                if (className.includes('lato')) elem.style.fontFamily = 'Lato';
-                if (className.includes('poppins')) elem.style.fontFamily = 'Poppins';
-                if (className.includes('nunito')) elem.style.fontFamily = 'Nunito';
-            }
-            if (className.includes('circle') || className.includes('oval')) {
-                elem.style.borderRadius = '50%';
-            }
-            if (className.includes('rectangle') || className.includes('square') || className.includes('container') || className.includes('card') || className.includes('rounded-rectangle')) {
-                elem.style.backgroundColor = '#444';
-                elem.style.border = '1px solid #666';
-                if (className.includes('rounded-rectangle')) elem.style.borderRadius = '10px';
-            }
-            if (className.includes('triangle')) {
-                elem.style.width = '0';
-                elem.style.height = '0';
-                elem.style.borderLeft = '50px solid transparent';
-                elem.style.borderRight = '50px solid transparent';
-                elem.style.borderBottom = '100px solid #28a745';
-                elem.style.backgroundColor = 'transparent';
-                elem.style.resize = 'none';
-            }
-            if (className.includes('icon') || className.includes('social-icon') || className.includes('material-icons')) {
-                elem.style.display = 'inline-block';
-                if (content && className.includes('material-icons')) {
-                    elem.textContent = content;
-                }
-            }
-            if (type === 'button') {
-                elem.textContent = content || 'Button';
-            }
-            if (type === 'video' || type === 'audio') {
-                elem.controls = true;
-                elem.src = '';
-            }
-            if (type === 'img' || type === 'iframe' || type === 'picture') {
-                elem.src = '';
-            }
-            if (className.includes('modal')) {
-                elem.style.zIndex = '1000';
-            }
-            attachEventListeners(elem);
-            workspace.appendChild(elem);
-            resizeObserver.observe(elem);
-            savePageState(currentPage);
-            updateCode();
-        });
-
-        // Menu item drag start
-        const menuItems = document.querySelectorAll('#menu li');
-        menuItems.forEach(item => {
-            item.addEventListener('dragstart', (e) => {
-                if (mode !== 'edit') return;
-                e.dataTransfer.setData('type', item.dataset.type);
-                e.dataTransfer.setData('class', item.dataset.class);
-                e.dataTransfer.setData('content', item.dataset.content || '');
-                e.dataTransfer.setData('width', item.dataset.width || '100');
-                e.dataTransfer.setData('height', item.dataset.height || '50');
-                e.dataTransfer.setData('input-type', item.dataset.inputType || '');
-                e.dataTransfer.setData('placeholder', item.dataset.placeholder || '');
-                e.dataTransfer.setData('name', item.dataset.name || '');
-            });
+            addElementToWorkspace({
+                type,
+                class: className,
+                content,
+                width,
+                height,
+                'input-type': inputType,
+                placeholder,
+                nameAttr: name
+            }, { offsetX: e.offsetX, offsetY: e.offsetY });
+            closeDropdown();
         });
 
         // Dragging elements within workspace
@@ -1118,44 +1091,80 @@
             return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
         }
 
-        // Apply external code in view mode
+        // Apply external code
         function applyCode() {
-            if (mode !== 'view') return;
             workspace.innerHTML = '';
             const html = htmlArea.value;
             const css = cssArea.value;
             const js = jsArea.value;
 
-            // Apply HTML
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(html, 'text/html');
-            const page = doc.querySelector('div#page') || doc.body;
-            if (page) {
-                Array.from(page.children).forEach(child => {
-                    child.style.position = 'absolute';
-                    child.style.left = child.style.left || '0px';
-                    child.style.top = child.style.top || '0px';
-                    workspace.appendChild(child);
-                    attachEventListeners(child);
-                    resizeObserver.observe(child);
-                });
+            // Remove existing styles
+            document.querySelectorAll('style[data-dynamic]').forEach(style => style.remove());
+            document.querySelectorAll('script[data-dynamic]').forEach(script => script.remove());
+
+            if (mode === 'view') {
+                // View mode: Render raw HTML/CSS/JS
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const page = doc.querySelector('div#page') || doc.body;
+                if (page) {
+                    Array.from(page.children).forEach(child => {
+                        workspace.appendChild(child);
+                        attachEventListeners(child);
+                    });
+                }
+                const style = document.createElement('style');
+                style.setAttribute('data-dynamic', 'true');
+                style.textContent = css;
+                document.head.appendChild(style);
+                try {
+                    const script = document.createElement('script');
+                    script.setAttribute('data-dynamic', 'true');
+                    script.textContent = js;
+                    document.body.appendChild(script);
+                } catch (e) {
+                    console.error('Error executing JS:', e);
+                }
+            } else {
+                // Edit mode: Parse and make elements editable
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const page = doc.querySelector('div#page') || doc.body;
+                if (page) {
+                    Array.from(page.children).forEach((child, i) => {
+                        const compStyle = getComputedStyle(child);
+                        child.style.position = 'absolute';
+                        child.style.left = compStyle.left !== 'auto' ? compStyle.left : `${i * 20}px`;
+                        child.style.top = compStyle.top !== 'auto' ? compStyle.top : `${i * 20}px`;
+                        child.style.width = compStyle.width !== 'auto' ? compStyle.width : '100px';
+                        child.style.height = compStyle.height !== 'auto' ? compStyle.height : '50px';
+                        if (child.tagName === 'IMG' || child.tagName === 'VIDEO' || child.tagName === 'AUDIO' || child.tagName === 'IFRAME' || child.tagName === 'PICTURE') {
+                            child.src = child.src || '';
+                        }
+                        if (child.tagName === 'INPUT' || child.tagName === 'TEXTAREA') {
+                            child.placeholder = child.placeholder || '';
+                        }
+                        if (child.tagName === 'A' || child.tagName === 'BUTTON') {
+                            child.href = child.href || '';
+                        }
+                        workspace.appendChild(child);
+                        attachEventListeners(child);
+                        resizeObserver.observe(child);
+                    });
+                }
+                const style = document.createElement('style');
+                style.setAttribute('data-dynamic', 'true');
+                style.textContent = css;
+                document.head.appendChild(style);
+                try {
+                    const script = document.createElement('script');
+                    script.setAttribute('data-dynamic', 'true');
+                    script.textContent = js;
+                    document.body.appendChild(script);
+                } catch (e) {
+                    console.error('Error executing JS:', e);
+                }
             }
-
-            // Apply CSS
-            const style = document.createElement('style');
-            style.textContent = css;
-            document.head.appendChild(style);
-
-            // Apply JS
-            try {
-                const script = document.createElement('script');
-                script.textContent = js;
-                document.body.appendChild(script);
-            } catch (e) {
-                console.error('Error executing JS:', e);
-            }
-
-            // Save to current page
             savePageState(currentPage);
             updateCode();
         }
@@ -1178,7 +1187,11 @@
                 }
 
                 const clone = el.cloneNode(true);
-                clone.removeAttribute('style');
+                if (mode === 'edit') {
+                    clone.style.position = '';
+                    clone.style.left = '';
+                    clone.style.top = '';
+                }
                 clone.classList.remove('selected');
                 if (clone.tagName === 'BUTTON') {
                     clone.textContent = el.textContent;
