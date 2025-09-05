@@ -109,7 +109,6 @@
             resize: both;
             overflow: auto;
         }
-        /* Add more base styles as needed */
     </style>
 </head>
 <body>
@@ -123,9 +122,9 @@
                     <li draggable="true" data-type="div" data-class="shape circle" data-width="50" data-height="50">Circle</li>
                     <li draggable="true" data-type="div" data-class="shape oval" data-width="100" data-height="50">Oval</li>
                     <li draggable="true" data-type="div" data-class="shape triangle" data-width="100" data-height="100">Triangle</li>
-                    <li draggable="true" data-type="div" data-class="shape pentagon" data-width="100" data-height="100">Pentagon (Placeholder)</li>
-                    <li draggable="true" data-type="div" data-class="shape hexagon" data-width="100" data-height="100">Hexagon (Placeholder)</li>
-                    <li draggable="true" data-type="div" data-class="shape star" data-width="100" data-height="100">Star (Placeholder)</li>
+                    <li draggable="true" data-type="div" data-class="shape pentagon" data-width="100" data-height="100">Pentagon</li>
+                    <li draggable="true" data-type="div" data-class="shape hexagon" data-width="100" data-height="100">Hexagon</li>
+                    <li draggable="true" data-type="div" data-class="shape star" data-width="100" data-height="100">Star</li>
                 </ul>
             </details>
             <details>
@@ -164,10 +163,10 @@
             <details>
                 <summary>Media</summary>
                 <ul>
-                    <li draggable="true" data-type="img" data-class="media image" data-src="https://via.placeholder.com/150" data-width="150" data-height="150">Image</li>
-                    <li draggable="true" data-type="video" data-class="media video" data-src="https://www.w3schools.com/html/mov_bbb.mp4" data-width="320" data-height="240">Video</li>
-                    <li draggable="true" data-type="audio" data-class="media audio" data-src="https://www.w3schools.com/html/horse.mp3" data-width="200" data-height="30">Audio</li>
-                    <li draggable="true" data-type="iframe" data-class="media iframe" data-src="https://www.example.com" data-width="300" data-height="200">Iframe</li>
+                    <li draggable="true" data-type="img" data-class="media image" data-width="150" data-height="150">Image</li>
+                    <li draggable="true" data-type="video" data-class="media video" data-width="320" data-height="240">Video</li>
+                    <li draggable="true" data-type="audio" data-class="media audio" data-width="200" data-height="30">Audio</li>
+                    <li draggable="true" data-type="iframe" data-class="media iframe" data-width="300" data-height="200">Iframe</li>
                 </ul>
             </details>
             <details>
@@ -197,7 +196,7 @@
                 <ul>
                     <li draggable="true" data-type="canvas" data-class="creative canvas" data-width="200" data-height="200">Canvas</li>
                     <li draggable="true" data-type="svg" data-class="creative svg" data-content='<rect width="100" height="50" fill="blue"/>' data-width="200" data-height="200">SVG</li>
-                    <li draggable="true" data-type="div" data-class="creative animation" data-width="100" data-height="100">Animation Box (Placeholder)</li>
+                    <li draggable="true" data-type="div" data-class="creative animation" data-width="100" data-height="100">Animation Box</li>
                 </ul>
             </details>
             <div id="properties">
@@ -237,7 +236,6 @@
             const content = e.dataTransfer.getData('content');
             const width = e.dataTransfer.getData('width');
             const height = e.dataTransfer.getData('height');
-            const src = e.dataTransfer.getData('src');
             const inputType = e.dataTransfer.getData('input-type');
             const placeholder = e.dataTransfer.getData('placeholder');
             const name = e.dataTransfer.getData('name');
@@ -251,7 +249,6 @@
             elem.style.height = `${height}px`;
 
             if (content) elem.innerHTML = content;
-            if (src) elem.src = src;
             if (inputType) elem.type = inputType;
             if (placeholder) elem.placeholder = placeholder;
             if (name) elem.name = name;
@@ -271,7 +268,7 @@
                 elem.style.borderRight = '50px solid transparent';
                 elem.style.borderBottom = '100px solid #28a745';
                 elem.style.backgroundColor = 'transparent';
-                elem.style.resize = 'none'; // Disable resize for triangle
+                elem.style.resize = 'none';
             }
             if (className.includes('icon')) {
                 elem.style.display = 'inline-block';
@@ -281,9 +278,10 @@
             }
             if (type === 'video' || type === 'audio') {
                 elem.controls = true;
+                elem.src = ''; // Placeholder for user input
             }
-            if (type === 'iframe') {
-                elem.src = src;
+            if (type === 'img' || type === 'iframe') {
+                elem.src = ''; // Placeholder for user input
             }
             if (type === 'form') {
                 elem.addEventListener('submit', (ev) => {
@@ -326,7 +324,6 @@
                 e.dataTransfer.setData('content', item.dataset.content || '');
                 e.dataTransfer.setData('width', item.dataset.width || '100');
                 e.dataTransfer.setData('height', item.dataset.height || '50');
-                e.dataTransfer.setData('src', item.dataset.src || '');
                 e.dataTransfer.setData('input-type', item.dataset.inputType || '');
                 e.dataTransfer.setData('placeholder', item.dataset.placeholder || '');
                 e.dataTransfer.setData('name', item.dataset.name || '');
@@ -415,6 +412,10 @@
             const borderColor = rgbToHex(compStyle.borderColor);
             const borderStyle = compStyle.borderStyle || 'none';
             const contentEditable = selected.tagName === 'P' || selected.tagName === 'SPAN' || selected.tagName === 'BUTTON' || selected.className.includes('paragraph');
+            const isMedia = selected.tagName === 'IMG' || selected.tagName === 'VIDEO' || selected.tagName === 'AUDIO' || selected.tagName === 'IFRAME';
+            const isLink = selected.tagName === 'A';
+            const isInput = selected.tagName === 'INPUT' || selected.tagName === 'TEXTAREA';
+            const isNav = selected.className.includes('navigation');
 
             let content = `
                 <label>Left: <input type="number" id="prop-left" value="${left}"></label>
@@ -437,6 +438,19 @@
 
             if (contentEditable) {
                 content += `<label>Text: <input type="text" id="prop-text" value="${selected.textContent.trim()}"></label>`;
+            }
+            if (isMedia) {
+                content += `<label>Source URL: <input type="text" id="prop-src" value="${selected.src || ''}"></label>`;
+            }
+            if (isLink) {
+                content += `<label>Link URL: <input type="text" id="prop-href" value="${selected.href || ''}"></label>`;
+            }
+            if (isInput) {
+                content += `<label>Placeholder: <input type="text" id="prop-placeholder" value="${selected.placeholder || ''}"></label>`;
+            }
+            if (isNav) {
+                const items = selected28Array.from(selected.querySelectorAll('li')).map(li => li.innerHTML).join('\n');
+                content += `<label>Nav Items: <textarea id="prop-navitems">${items}</textarea></label>`;
             }
 
             propContent.innerHTML = content;
@@ -492,6 +506,37 @@
                     updateCode();
                 });
             }
+            if (isMedia) {
+                document.getElementById('prop-src').addEventListener('input', (e) => {
+                    selected.src = e.target.value;
+                    updateCode();
+                });
+            }
+            if (isLink) {
+                document.getElementById('prop-href').addEventListener('input', (e) => {
+                    selected.href = e.target.value;
+                    updateCode();
+                });
+            }
+            if (isInput) {
+                document.getElementById('prop-placeholder').addEventListener('input', (e) => {
+                    selected.placeholder = e.target.value;
+                    updateCode();
+                });
+            }
+            if (isNav) {
+                document.getElementById('prop-navitems').addEventListener('input', (e) => {
+                    selected.innerHTML = e.target.value;
+                    selected.querySelectorAll('a').forEach(a => {
+                        a.addEventListener('click', (ev) => {
+                            ev.preventDefault();
+                            console.log('Link clicked:', a.href);
+                            alert(`Link clicked: ${a.href}`);
+                        });
+                    });
+                    updateCode();
+                });
+            }
         }
 
         function rgbToHex(rgb) {
@@ -521,6 +566,12 @@
                 clone.removeAttribute('style');
                 if (clone.tagName === 'BUTTON') {
                     clone.textContent = el.textContent;
+                }
+                if (clone.tagName === 'IMG' || clone.tagName === 'VIDEO' || clone.tagName === 'AUDIO' || clone.tagName === 'IFRAME') {
+                    clone.src = el.src || '';
+                }
+                if (clone.tagName === 'INPUT' || clone.tagName === 'TEXTAREA') {
+                    clone.placeholder = el.placeholder || '';
                 }
                 html += `  ${clone.outerHTML}\n`;
 
