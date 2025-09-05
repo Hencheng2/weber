@@ -81,7 +81,7 @@
             display: block;
             margin-bottom: 10px;
         }
-        #properties input {
+        #properties input, #properties select {
             background-color: #2d2d2d;
             color: #fff;
             border: 1px solid #444;
@@ -173,6 +173,7 @@
             <details>
                 <summary>Forms</summary>
                 <ul>
+                    <li draggable="true" data-type="form" data-class="form container" data-content='<input type="text" placeholder="Name"><input type="email" placeholder="Email"><button>Submit</button>' data-width="300" data-height="150">Basic Form</li>
                     <li draggable="true" data-type="input" data-class="form text" data-input-type="text" data-placeholder="Enter text" data-width="200" data-height="30">Text Input</li>
                     <li draggable="true" data-type="input" data-class="form email" data-input-type="email" data-placeholder="Enter email" data-width="200" data-height="30">Email Input</li>
                     <li draggable="true" data-type="input" data-class="form password" data-input-type="password" data-placeholder="Enter password" data-width="200" data-height="30">Password Input</li>
@@ -202,6 +203,7 @@
             <div id="properties">
                 <h3>Properties</h3>
                 <div id="prop-content"></div>
+                <button id="delete-btn" style="display: none; background-color: #dc3545; border: none; color: white; padding: 10px; cursor: pointer;">Delete Selected</button>
             </div>
         </div>
         <div id="workspace"></div>
@@ -218,6 +220,7 @@
         const cssArea = document.getElementById('css');
         const jsArea = document.getElementById('js');
         const propContent = document.getElementById('prop-content');
+        const deleteBtn = document.getElementById('delete-btn');
 
         let dragging = null;
         let offsetX = 0;
@@ -282,6 +285,32 @@
             if (type === 'iframe') {
                 elem.src = src;
             }
+            if (type === 'form') {
+                elem.addEventListener('submit', (ev) => {
+                    ev.preventDefault();
+                    console.log('Form submitted:', new FormData(elem));
+                    alert('Form submitted! Check console for data.');
+                });
+            }
+
+            // Make buttons clickable
+            if (type === 'button' || className.includes('button')) {
+                elem.addEventListener('click', () => {
+                    console.log('Button clicked!');
+                    alert('Button clicked!');
+                });
+            }
+
+            // Make links clickable (for nav)
+            if (elem.querySelectorAll('a').length > 0) {
+                elem.querySelectorAll('a').forEach(a => {
+                    a.addEventListener('click', (ev) => {
+                        ev.preventDefault();
+                        console.log('Link clicked:', a.href);
+                        alert(`Link clicked: ${a.href}`);
+                    });
+                });
+            }
 
             workspace.appendChild(elem);
             resizeObserver.observe(elem);
@@ -323,8 +352,10 @@
         });
 
         document.addEventListener('mouseup', () => {
-            updateCode();
-            dragging = null;
+            if (dragging) {
+                updateCode();
+                dragging = null;
+            }
         });
 
         // Selection for properties
@@ -335,32 +366,82 @@
             if (e.target === workspace) {
                 selected = null;
                 propContent.innerHTML = '';
+                deleteBtn.style.display = 'none';
             } else {
                 selected = e.target;
                 selected.style.border = '1px dashed white';
                 showProperties();
+                deleteBtn.style.display = 'block';
+            }
+            e.stopPropagation();
+        });
+
+        // Delete button
+        deleteBtn.addEventListener('click', () => {
+            if (selected) {
+                resizeObserver.unobserve(selected);
+                selected.remove();
+                selected = null;
+                propContent.innerHTML = '';
+                deleteBtn.style.display = 'none';
+                updateCode();
+            }
+        });
+
+        // Keyboard delete
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Delete' && selected) {
+                resizeObserver.unobserve(selected);
+                selected.remove();
+                selected = null;
+                propContent.innerHTML = '';
+                deleteBtn.style.display = 'none';
+                updateCode();
             }
         });
 
         function showProperties() {
             if (!selected) return;
-            const width = parseInt(selected.style.width) || parseInt(getComputedStyle(selected).width);
-            const height = parseInt(selected.style.height) || parseInt(getComputedStyle(selected).height);
+            const compStyle = getComputedStyle(selected);
+            const width = parseInt(selected.style.width) || parseInt(compStyle.width);
+            const height = parseInt(selected.style.height) || parseInt(compStyle.height);
             const left = parseInt(selected.style.left) || 0;
             const top = parseInt(selected.style.top) || 0;
-            const bgColor = rgbToHex(getComputedStyle(selected).backgroundColor);
-            const textColor = rgbToHex(getComputedStyle(selected).color);
+            const bgColor = rgbToHex(compStyle.backgroundColor);
+            const textColor = rgbToHex(compStyle.color);
+            const fontSize = parseInt(compStyle.fontSize) || 16;
+            const borderRadius = compStyle.borderRadius || '0px';
+            const borderWidth = compStyle.borderWidth || '0px';
+            const borderColor = rgbToHex(compStyle.borderColor);
+            const borderStyle = compStyle.borderStyle || 'none';
+            const contentEditable = selected.tagName === 'P' || selected.tagName === 'SPAN' || selected.tagName === 'BUTTON' || selected.className.includes('paragraph');
 
-            const content = `
+            let content = `
                 <label>Left: <input type="number" id="prop-left" value="${left}"></label>
                 <label>Top: <input type="number" id="prop-top" value="${top}"></label>
                 <label>Width: <input type="number" id="prop-width" value="${width}"></label>
                 <label>Height: <input type="number" id="prop-height" value="${height}"></label>
                 <label>Background Color: <input type="color" id="prop-bgcolor" value="${bgColor}"></label>
                 <label>Text Color: <input type="color" id="prop-color" value="${textColor}"></label>
+                <label>Font Size: <input type="number" id="prop-fontsize" value="${fontSize}"></label>
+                <label>Border Radius: <input type="text" id="prop-borderradius" value="${borderRadius}"></label>
+                <label>Border Width: <input type="text" id="prop-borderwidth" value="${borderWidth}"></label>
+                <label>Border Color: <input type="color" id="prop-bordercolor" value="${borderColor}"></label>
+                <label>Border Style: <select id="prop-borderstyle">
+                    <option value="none" ${borderStyle === 'none' ? 'selected' : ''}>None</option>
+                    <option value="solid" ${borderStyle === 'solid' ? 'selected' : ''}>Solid</option>
+                    <option value="dashed" ${borderStyle === 'dashed' ? 'selected' : ''}>Dashed</option>
+                    <option value="dotted" ${borderStyle === 'dotted' ? 'selected' : ''}>Dotted</option>
+                </select></label>
             `;
+
+            if (contentEditable) {
+                content += `<label>Text: <input type="text" id="prop-text" value="${selected.textContent.trim()}"></label>`;
+            }
+
             propContent.innerHTML = content;
 
+            // Event listeners for properties
             document.getElementById('prop-left').addEventListener('input', (e) => {
                 selected.style.left = e.target.value + 'px';
                 updateCode();
@@ -385,6 +466,32 @@
                 selected.style.color = e.target.value;
                 updateCode();
             });
+            document.getElementById('prop-fontsize').addEventListener('input', (e) => {
+                selected.style.fontSize = e.target.value + 'px';
+                updateCode();
+            });
+            document.getElementById('prop-borderradius').addEventListener('input', (e) => {
+                selected.style.borderRadius = e.target.value;
+                updateCode();
+            });
+            document.getElementById('prop-borderwidth').addEventListener('input', (e) => {
+                selected.style.borderWidth = e.target.value;
+                updateCode();
+            });
+            document.getElementById('prop-bordercolor').addEventListener('input', (e) => {
+                selected.style.borderColor = e.target.value;
+                updateCode();
+            });
+            document.getElementById('prop-borderstyle').addEventListener('change', (e) => {
+                selected.style.borderStyle = e.target.value;
+                updateCode();
+            });
+            if (contentEditable) {
+                document.getElementById('prop-text').addEventListener('input', (e) => {
+                    selected.textContent = e.target.value;
+                    updateCode();
+                });
+            }
         }
 
         function rgbToHex(rgb) {
@@ -397,7 +504,12 @@
         function updateCode() {
             let html = '<div id="page">\n';
             let css = '#page {\n  position: relative;\n}\n';
+            let js = '// Dynamic JS for interactions\n';
             const children = Array.from(workspace.children);
+            let hasForm = false;
+            let hasButton = false;
+            let hasLink = false;
+
             children.forEach((el, i) => {
                 const uniqueClass = `elem${i + 1}`;
                 el.dataset.uniqueClass = uniqueClass;
@@ -407,11 +519,14 @@
 
                 const clone = el.cloneNode(true);
                 clone.removeAttribute('style');
+                if (clone.tagName === 'BUTTON') {
+                    clone.textContent = el.textContent;
+                }
                 html += `  ${clone.outerHTML}\n`;
 
                 const compStyle = getComputedStyle(el);
                 css += `.${uniqueClass} {\n`;
-                const props = ['position', 'left', 'top', 'width', 'height', 'background-color', 'border', 'border-radius', 'color', 'font-size', 'display', 'padding', 'margin'];
+                const props = ['position', 'left', 'top', 'width', 'height', 'background-color', 'border', 'border-radius', 'border-width', 'border-color', 'border-style', 'color', 'font-size', 'display', 'padding', 'margin'];
                 props.forEach(prop => {
                     const value = compStyle.getPropertyValue(prop);
                     if (value && value !== 'auto' && value !== '0px' && value !== 'rgba(0, 0, 0, 0)') {
@@ -424,12 +539,28 @@
                     css += `  border-bottom: ${compStyle.borderBottom};\n`;
                 }
                 css += '}\n';
+
+                // Check for interactions
+                if (el.tagName === 'FORM') hasForm = true;
+                if (el.tagName === 'BUTTON' || el.className.includes('button')) hasButton = true;
+                if (el.querySelectorAll('a').length > 0) hasLink = true;
             });
             html += '</div>';
 
+            // Generate JS for interactions
+            if (hasForm) {
+                js += `document.querySelector('form').addEventListener('submit', (e) => {\n  e.preventDefault();\n  console.log('Form submitted');\n});\n`;
+            }
+            if (hasButton) {
+                js += `document.querySelectorAll('button').forEach(btn => {\n  btn.addEventListener('click', () => console.log('Button clicked'));\n});\n`;
+            }
+            if (hasLink) {
+                js += `document.querySelectorAll('a').forEach(a => {\n  a.addEventListener('click', (e) => { e.preventDefault(); console.log('Link clicked: ' + a.href); });\n});\n`;
+            }
+
             htmlArea.value = html;
             cssArea.value = css;
-            jsArea.value = '// Add custom JS here if needed\n// Currently no dynamic JS generated';
+            jsArea.value = js || '// No JS generated yet';
         }
     </script>
 </body>
