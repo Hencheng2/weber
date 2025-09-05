@@ -82,7 +82,41 @@
             border: 1px solid #444;
             position: relative;
             overflow: auto;
-            transition: width 0.3s;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            transition: all 0.3s;
+        }
+        #page {
+            background-color: #fff;
+            color: #000;
+            position: relative;
+            min-height: 100px;
+            transition: all 0.3s;
+            box-sizing: border-box;
+        }
+        #page.edit-mode {
+            border: 2px solid #007bff;
+            width: 1024px;
+            min-height: 768px;
+        }
+        #page.view-mode.phone {
+            width: 375px;
+            height: 667px;
+            border: 2px solid #555;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        }
+        #page.view-mode.tablet {
+            width: 768px;
+            height: 1024px;
+            border: 2px solid #555;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        }
+        #page.view-mode.laptop {
+            width: 1024px;
+            height: 768px;
+            border: 2px solid #555;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
         }
         #properties {
             width: 300px;
@@ -176,28 +210,16 @@
             padding: 10px;
             border-radius: 4px;
         }
-        #workspace > * {
+        #page > * {
             resize: both;
             overflow: auto;
         }
-        #workspace.view-mode > * {
+        #page.view-mode > * {
             resize: none;
             cursor: default;
         }
-        #workspace.view-mode > *.selected {
+        #page.view-mode > *.selected {
             border: none;
-        }
-        #workspace.phone {
-            width: 375px !important;
-            margin: 0 auto;
-        }
-        #workspace.tablet {
-            width: 768px !important;
-            margin: 0 auto;
-        }
-        #workspace.laptop {
-            width: 1024px !important;
-            margin: 0 auto;
         }
         #page-nav {
             margin-top: 10px;
@@ -225,10 +247,14 @@
         #apply-code-btn:hover {
             background-color: #218838;
         }
-        #page {
-            position: relative;
-            width: 100%;
-            height: 100%;
+        #create-page-btn {
+            background-color: #17a2b8;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        #create-page-btn:hover {
+            background-color: #138496;
         }
     </style>
 </head>
@@ -257,6 +283,7 @@
             <button id="add-font-btn" onclick="openCategory('fonts', this)">Add Font</button>
         </div>
         <div id="page-nav">
+            <button id="create-page-btn" onclick="createPage()">Create Page</button>
             <button onclick="newPage()">New Page</button>
             <input id="page-name" type="text" placeholder="Enter page name" value="index.html">
             <select id="page-selector" onchange="switchPage(this.value)">
@@ -265,8 +292,8 @@
             <button id="apply-code-btn" onclick="applyCode()">Apply Code</button>
         </div>
         <div id="main-content">
-            <div id="workspace" class="edit-mode">
-                <div id="page"></div>
+            <div id="workspace">
+                <div id="page" class="edit-mode"></div>
             </div>
             <div id="properties">
                 <h3>Properties</h3>
@@ -325,7 +352,7 @@
         let selected = null;
         let mode = 'edit';
         let currentPage = 'page1';
-        let pages = { 'page1': { name: 'index.html', html: '', css: '', js: '', elements: [] } };
+        let pages = { 'page1': { name: 'index.html', html: '<div id="page"></div>', css: '#page {\n  position: relative;\n  background-color: #fff;\n  width: 1024px;\n  min-height: 768px;\n}\n', js: '// No JS generated yet', elements: [] } };
         let pageCount = 1;
         let activeDropdown = null;
         const resizeObserver = new ResizeObserver(() => updateCode());
@@ -469,8 +496,8 @@
         // Mode switching
         function setMode(newMode) {
             mode = newMode;
-            workspace.classList.remove('edit-mode', 'view-mode');
-            workspace.classList.add(`${mode}-mode`);
+            pageContainer.classList.remove('edit-mode', 'view-mode', 'phone', 'tablet', 'laptop');
+            pageContainer.classList.add(`${mode}-mode`);
             editModeBtn.classList.toggle('active', mode === 'edit');
             viewModeBtn.classList.toggle('active', mode === 'view');
             phoneBtn.style.display = mode === 'view' ? 'inline-block' : 'none';
@@ -494,23 +521,25 @@
                 closeDropdown();
                 setPreview('laptop');
             } else {
-                workspace.classList.remove('phone', 'tablet', 'laptop');
-                workspace.style.width = '';
-                workspace.style.margin = '';
-                applyCode(); // Ensure elements are editable when switching to edit mode
+                pageContainer.classList.remove('phone', 'tablet', 'laptop');
+                pageContainer.style.width = '1024px';
+                pageContainer.style.height = '768px';
+                pageContainer.style.margin = '';
+                applyCode();
             }
         }
 
         // Preview mode
         function setPreview(device) {
             if (mode !== 'view') return;
-            workspace.classList.remove('phone', 'tablet', 'laptop');
-            workspace.classList.add(device);
+            pageContainer.classList.remove('phone', 'tablet', 'laptop');
+            pageContainer.classList.add(device);
             phoneBtn.classList.toggle('active', device === 'phone');
             tabletBtn.classList.toggle('active', device === 'tablet');
             laptopBtn.classList.toggle('active', device === 'laptop');
-            workspace.style.width = device === 'phone' ? '375px' : device === 'tablet' ? '768px' : '1024px';
-            workspace.style.margin = '0 auto';
+            pageContainer.style.width = device === 'phone' ? '375px' : device === 'tablet' ? '768px' : '1024px';
+            pageContainer.style.height = device === 'phone' ? '667px' : device === 'tablet' ? '1024px' : '768px';
+            pageContainer.style.margin = '10px auto';
         }
 
         // Save page state
@@ -538,12 +567,39 @@
         }
 
         // Page management
+        function createPage() {
+            savePageState(currentPage);
+            pageCount++;
+            const newPageId = `page${pageCount}`;
+            const pageName = `page${pageCount}.html`;
+            pages[newPageId] = {
+                name: pageName,
+                html: '<div id="page"></div>',
+                css: '#page {\n  position: relative;\n  background-color: #fff;\n  width: 1024px;\n  min-height: 768px;\n}\n',
+                js: '// No JS generated yet',
+                elements: []
+            };
+            const option = document.createElement('option');
+            option.value = newPageId;
+            option.textContent = pageName;
+            option.dataset.name = pageName;
+            pageSelector.appendChild(option);
+            switchPage(newPageId);
+            pageNameInput.value = pageName;
+        }
+
         function newPage() {
             savePageState(currentPage);
             pageCount++;
             const newPageId = `page${pageCount}`;
             const pageName = `page${pageCount}.html`;
-            pages[newPageId] = { name: pageName, html: '', css: '', js: '', elements: [] };
+            pages[newPageId] = {
+                name: pageName,
+                html: '<div id="page"></div>',
+                css: '#page {\n  position: relative;\n  background-color: #fff;\n  width: 1024px;\n  min-height: 768px;\n}\n',
+                js: '// No JS generated yet',
+                elements: []
+            };
             const option = document.createElement('option');
             option.value = newPageId;
             option.textContent = pageName;
@@ -575,8 +631,8 @@
                     resizeObserver.observe(newEl);
                 }
             });
-            htmlArea.value = pages[pageId].html || '';
-            cssArea.value = pages[pageId].css || '';
+            htmlArea.value = pages[pageId].html || '<div id="page"></div>';
+            cssArea.value = pages[pageId].css || '#page {\n  position: relative;\n  background-color: #fff;\n  width: 1024px;\n  min-height: 768px;\n}\n';
             jsArea.value = pages[pageId].js || '// No JS generated yet';
             pageSelector.value = pageId;
             pageNameInput.value = pages[pageId].name;
@@ -588,7 +644,7 @@
                 deleteBtn.style.display = 'none';
             }
             closeDropdown();
-            setMode(mode); // Reapply mode to ensure correct rendering
+            setMode(mode);
         }
 
         // Update page name
@@ -787,11 +843,11 @@
             updateCode();
         }
 
-        // Drag from dropdown to workspace
-        workspace.addEventListener('dragover', (e) => {
+        // Drag from dropdown to page
+        pageContainer.addEventListener('dragover', (e) => {
             if (mode === 'edit') e.preventDefault();
         });
-        workspace.addEventListener('drop', (e) => {
+        pageContainer.addEventListener('drop', (e) => {
             if (mode !== 'edit') return;
             e.preventDefault();
             const type = e.dataTransfer.getData('type');
@@ -803,6 +859,7 @@
             const placeholder = e.dataTransfer.getData('placeholder');
             const name = e.dataTransfer.getData('name');
 
+            const rect = pageContainer.getBoundingClientRect();
             addElementToWorkspace({
                 type,
                 class: className,
@@ -812,16 +869,16 @@
                 'input-type': inputType,
                 placeholder,
                 nameAttr: name
-            }, { offsetX: e.offsetX, offsetY: e.offsetY });
+            }, { offsetX: e.clientX - rect.left, offsetY: e.clientY - rect.top });
             closeDropdown();
         });
 
-        // Dragging elements within workspace
-        workspace.addEventListener('mousedown', (e) => {
+        // Dragging elements within page
+        pageContainer.addEventListener('mousedown', (e) => {
             if (mode !== 'edit') return;
             if (e.target !== pageContainer && e.target.parentElement === pageContainer) {
                 dragging = e.target;
-                const rect = workspace.getBoundingClientRect();
+                const rect = pageContainer.getBoundingClientRect();
                 offsetX = e.clientX - rect.left - parseFloat(dragging.style.left || 0);
                 offsetY = e.clientY - rect.top - parseFloat(dragging.style.top || 0);
             }
@@ -829,7 +886,7 @@
 
         document.addEventListener('mousemove', (e) => {
             if (mode !== 'edit' || !dragging) return;
-            const rect = workspace.getBoundingClientRect();
+            const rect = pageContainer.getBoundingClientRect();
             dragging.style.left = `${e.clientX - rect.left - offsetX}px`;
             dragging.style.top = `${e.clientY - rect.top - offsetY}px`;
         });
@@ -843,13 +900,13 @@
         });
 
         // Selection for properties
-        workspace.addEventListener('click', (e) => {
+        pageContainer.addEventListener('click', (e) => {
             if (mode !== 'edit') return;
             if (selected) {
                 selected.style.border = '';
                 selected.classList.remove('selected');
             }
-            if (e.target === workspace || e.target === pageContainer) {
+            if (e.target === pageContainer) {
                 selected = null;
                 propContent.innerHTML = '';
                 deleteBtn.style.display = 'none';
@@ -1122,8 +1179,7 @@
                 }
                 const style = document.createElement('style');
                 style.setAttribute('data-dynamic', 'true');
-                // Scope CSS to #page to prevent affecting tool UI
-                style.textContent = `#page { position: relative; } #page ${css}`;
+                style.textContent = `#page { position: relative; background-color: #fff; } #page ${css}`;
                 document.head.appendChild(style);
                 try {
                     const script = document.createElement('script');
@@ -1133,7 +1189,6 @@
                 } catch (e) {
                     console.error('Error executing JS:', e);
                 }
-                // Do not update code in view mode to prevent random CSS
                 savePageState(currentPage);
             } else {
                 // Edit mode: Parse and make elements editable
@@ -1164,7 +1219,7 @@
                 }
                 const style = document.createElement('style');
                 style.setAttribute('data-dynamic', 'true');
-                style.textContent = `#page { position: relative; } #page ${css}`;
+                style.textContent = `#page { position: relative; background-color: #fff; width: 1024px; min-height: 768px; } #page ${css}`;
                 document.head.appendChild(style);
                 try {
                     const script = document.createElement('script');
@@ -1174,15 +1229,15 @@
                 } catch (e) {
                     console.error('Error executing JS:', e);
                 }
-                updateCode(); // Update code in edit mode to reflect changes
+                updateCode();
             }
         }
 
         // Update code function
         function updateCode() {
-            if (mode === 'view') return; // Skip in view mode to prevent random CSS
+            if (mode === 'view') return;
             let html = '<div id="page">\n';
-            let css = '#page {\n  position: relative;\n}\n';
+            let css = '#page {\n  position: relative;\n  background-color: #fff;\n  width: 1024px;\n  min-height: 768px;\n}\n';
             let js = '// Dynamic JS for interactions\n';
             const children = Array.from(pageContainer.children);
             let hasForm = false;
@@ -1261,7 +1316,8 @@
             pages[currentPage].js = js;
         }
 
-        // Initialize edit mode
+        // Initialize page and edit mode
+        switchPage('page1');
         setMode('edit');
     </script>
 </body>
