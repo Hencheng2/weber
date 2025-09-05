@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visual Web Designer Tool</title>
+    <style>
+        body {
+            background-color: #1e1e1e;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        #container {
+            display: flex;
+            flex-direction: row;
+        }
+        #menu {
+            width: 250px;
+            background-color: #2d2d2d;
+            padding: 20px;
+            border-right: 1px solid #444;
+        }
+        #menu h3 {
+            margin-top: 0;
+            color: #ccc;
+        }
+        #menu ul {
+            list-style: none;
+            padding: 0;
+        }
+        #menu li {
+            padding: 10px;
+            background-color: #3c3c3c;
+            margin-bottom: 10px;
+            cursor: grab;
+            border-radius: 4px;
+            user-select: none;
+        }
+        #menu li:hover {
+            background-color: #4a4a4a;
+        }
+        #workspace {
+            flex: 1;
+            height: 600px;
+            background-color: #333;
+            border: 1px solid #444;
+            position: relative;
+            overflow: auto;
+            margin-left: 20px;
+        }
+        #code {
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+        }
+        #code textarea {
+            width: 32%;
+            height: 300px;
+            background-color: #2d2d2d;
+            color: #ffffff;
+            border: 1px solid #444;
+            padding: 10px;
+            font-family: monospace;
+            resize: vertical;
+        }
+        .shape.rectangle {
+            background-color: #007bff;
+        }
+        .shape.circle {
+            background-color: #dc3545;
+            border-radius: 50%;
+        }
+        .icon {
+            font-size: 24px;
+        }
+        /* Add more base styles as needed */
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div id="menu">
+            <h3>Shapes</h3>
+            <ul>
+                <li draggable="true" data-type="div" data-class="shape rectangle" data-width="100" data-height="50">Rectangle</li>
+                <li draggable="true" data-type="div" data-class="shape circle" data-width="50" data-height="50">Circle</li>
+            </ul>
+            <h3>Icons</h3>
+            <ul>
+                <li draggable="true" data-type="span" data-class="icon smiley" data-content="😊" data-width="30" data-height="30">Smiley Icon</li>
+                <li draggable="true" data-type="span" data-class="icon heart" data-content="❤️" data-width="30" data-height="30">Heart Icon</li>
+            </ul>
+            <h3>Navigations</h3>
+            <ul>
+                <li draggable="true" data-type="nav" data-class="navigation bar" data-content='<ul><li><a href="#">Home</a></li><li><a href="#">About</a></li></ul>' data-width="300" data-height="40">Nav Bar</li>
+            </ul>
+            <h3>Menus</h3>
+            <ul>
+                <li draggable="true" data-type="select" data-class="menu dropdown" data-content='<option>Option 1</option><option>Option 2</option>' data-width="150" data-height="30">Dropdown Menu</li>
+            </ul>
+            <h3>Media</h3>
+            <ul>
+                <li draggable="true" data-type="img" data-class="media image" data-src="https://via.placeholder.com/150" data-width="150" data-height="150">Image</li>
+                <li draggable="true" data-type="video" data-class="media video" data-src="https://www.w3schools.com/html/mov_bbb.mp4" data-width="320" data-height="240">Video (Placeholder)</li>
+            </ul>
+            <h3>Forms</h3>
+            <ul>
+                <li draggable="true" data-type="input" data-class="form text" data-input-type="text" data-placeholder="Enter text" data-width="200" data-height="30">Text Input</li>
+                <li draggable="true" data-type="button" data-class="form button" data-content="Button" data-width="100" data-height="30">Button</li>
+            </ul>
+            <h3>Utilities</h3>
+            <ul>
+                <li draggable="true" data-type="div" data-class="utility container" data-width="200" data-height="100">Container Div</li>
+            </ul>
+            <h3>Creatives</h3>
+            <ul>
+                <li draggable="true" data-type="canvas" data-class="creative canvas" data-width="200" data-height="200">Canvas</li>
+            </ul>
+        </div>
+        <div id="workspace"></div>
+    </div>
+    <div id="code">
+        <textarea id="html" placeholder="Generated HTML"></textarea>
+        <textarea id="css" placeholder="Generated CSS"></textarea>
+        <textarea id="js" placeholder="Generated JS">// No JS generated yet</textarea>
+    </div>
+
+    <script>
+        const workspace = document.getElementById('workspace');
+        const htmlArea = document.getElementById('html');
+        const cssArea = document.getElementById('css');
+        const jsArea = document.getElementById('js');
+
+        let dragging = null;
+        let offsetX = 0;
+        let offsetY = 0;
+        let elemCounter = 0;
+
+        // Drag from menu to workspace
+        workspace.addEventListener('dragover', (e) => e.preventDefault());
+        workspace.addEventListener('drop', (e) => {
+            e.preventDefault();
+            const type = e.dataTransfer.getData('type');
+            const className = e.dataTransfer.getData('class');
+            const content = e.dataTransfer.getData('content');
+            const width = e.dataTransfer.getData('width');
+            const height = e.dataTransfer.getData('height');
+            const src = e.dataTransfer.getData('src');
+            const inputType = e.dataTransfer.getData('input-type');
+            const placeholder = e.dataTransfer.getData('placeholder');
+
+            const elem = document.createElement(type);
+            elem.className = className;
+            elem.style.position = 'absolute';
+            elem.style.left = `${e.offsetX - (width / 2)}px`;
+            elem.style.top = `${e.offsetY - (height / 2)}px`;
+            elem.style.width = `${width}px`;
+            elem.style.height = `${height}px`;
+
+            if (content) elem.innerHTML = content;
+            if (src) elem.src = src;
+            if (inputType) elem.type = inputType;
+            if (placeholder) elem.placeholder = placeholder;
+
+            // Apply base styles based on class
+            if (className.includes('circle')) {
+                elem.style.borderRadius = '50%';
+            }
+            if (className.includes('rectangle') || className.includes('container')) {
+                elem.style.backgroundColor = '#444';
+                elem.style.border = '1px solid #666';
+            }
+            if (className.includes('icon')) {
+                elem.style.display = 'inline-block';
+            }
+            if (type === 'button') {
+                elem.textContent = content || 'Button';
+            }
+            if (type === 'video') {
+                elem.controls = true;
+            }
+
+            workspace.appendChild(elem);
+            updateCode();
+        });
+
+        // Menu item drag start
+        const menuItems = document.querySelectorAll('#menu li');
+        menuItems.forEach(item => {
+            item.addEventListener('dragstart', (e) => {
+                e.dataTransfer.setData('type', item.dataset.type);
+                e.dataTransfer.setData('class', item.dataset.class);
+                e.dataTransfer.setData('content', item.dataset.content || '');
+                e.dataTransfer.setData('width', item.dataset.width || '100');
+                e.dataTransfer.setData('height', item.dataset.height || '50');
+                e.dataTransfer.setData('src', item.dataset.src || '');
+                e.dataTransfer.setData('input-type', item.dataset.inputType || '');
+                e.dataTransfer.setData('placeholder', item.dataset.placeholder || '');
+            });
+        });
+
+        // Dragging elements within workspace
+        workspace.addEventListener('mousedown', (e) => {
+            if (e.target !== workspace && e.target.parentElement === workspace) {
+                dragging = e.target;
+                const rect = workspace.getBoundingClientRect();
+                offsetX = e.clientX - rect.left - parseFloat(dragging.style.left || 0);
+                offsetY = e.clientY - rect.top - parseFloat(dragging.style.top || 0);
+            }
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (dragging) {
+                const rect = workspace.getBoundingClientRect();
+                dragging.style.left = `${e.clientX - rect.left - offsetX}px`;
+                dragging.style.top = `${e.clientY - rect.top - offsetY}px`;
+            }
+        });
+
+        document.addEventListener('mouseup', () => {
+            if (dragging) {
+                updateCode();
+                dragging = null;
+            }
+        });
+
+        // Update code function
+        function updateCode() {
+            let html = '<div id="page">\n';
+            let css = '#page {\n  position: relative;\n}\n';
+            const children = Array.from(workspace.children);
+            children.forEach((el, i) => {
+                const uniqueClass = `elem${i + 1}`;
+                if (!el.classList.contains(uniqueClass)) {
+                    el.classList.add(uniqueClass);
+                }
+
+                const clone = el.cloneNode(true);
+                clone.removeAttribute('style'); // Remove inline styles for clean HTML
+
+                html += `  ${clone.outerHTML.replace(uniqueClass, `${el.className}`)}\n`; // Keep all classes
+
+                const compStyle = getComputedStyle(el);
+                css += `.${uniqueClass} {\n`;
+                const props = ['position', 'left', 'top', 'width', 'height', 'background', 'background-color', 'border', 'border-radius', 'color', 'font-size', 'display', 'padding', 'margin'];
+                props.forEach(prop => {
+                    const value = compStyle.getPropertyValue(prop);
+                    if (value && value !== 'auto' && value !== '0px') {
+                        css += `  ${prop}: ${value};\n`;
+                    }
+                });
+                css += '}\n';
+            });
+            html += '</div>';
+
+            htmlArea.value = html;
+            cssArea.value = css;
+            jsArea.value = '// Add custom JS here if needed\n// Currently no dynamic JS generated';
+        }
+    </script>
+</body>
+</html>
