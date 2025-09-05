@@ -36,6 +36,9 @@
         #top-menu button:hover {
             background-color: #4a4a4a;
         }
+        #top-menu button.active {
+            background-color: #007bff;
+        }
         #main-content {
             display: flex;
             flex-direction: row;
@@ -135,11 +138,20 @@
             resize: both;
             overflow: auto;
         }
+        #workspace.view-mode > * {
+            resize: none;
+            cursor: default;
+        }
+        #workspace.view-mode > *.selected {
+            border: none;
+        }
     </style>
 </head>
 <body>
     <div id="container">
         <div id="top-menu">
+            <button id="edit-mode-btn" class="active" onclick="setMode('edit')">Edit Mode</button>
+            <button id="view-mode-btn" onclick="setMode('view')">View Mode</button>
             <button onclick="openCategory('shapes')">Add Shape</button>
             <button onclick="openCategory('icons')">Add Icon</button>
             <button onclick="openCategory('social-icons')">Add Social Icon</button>
@@ -268,7 +280,7 @@
                     <button id="delete-btn" style="display: none; background-color: #dc3545; border: none; color: white; padding: 10px; cursor: pointer;">Delete Selected</button>
                 </div>
             </div>
-            <div id="workspace"></div>
+            <div id="workspace" class="edit-mode"></div>
         </div>
     </div>
     <div id="code">
@@ -284,12 +296,39 @@
         const jsArea = document.getElementById('js');
         const propContent = document.getElementById('prop-content');
         const deleteBtn = document.getElementById('delete-btn');
+        const editModeBtn = document.getElementById('edit-mode-btn');
+        const viewModeBtn = document.getElementById('view-mode-btn');
 
         let dragging = null;
         let offsetX = 0;
         let offsetY = 0;
         let selected = null;
+        let mode = 'edit';
         const resizeObserver = new ResizeObserver(() => updateCode());
+
+        // Mode switching
+        function setMode(newMode) {
+            mode = newMode;
+            workspace.classList.remove('edit-mode', 'view-mode');
+            workspace.classList.add(`${mode}-mode`);
+            editModeBtn.classList.toggle('active', mode === 'edit');
+            viewModeBtn.classList.toggle('active', mode === 'view');
+            if (mode === 'view') {
+                if (selected) {
+                    selected.style.border = '';
+                    selected = null;
+                    propContent.innerHTML = '';
+                    deleteBtn.style.display = 'none';
+                }
+                document.querySelectorAll('#menu li').forEach(item => item.setAttribute('draggable', 'false'));
+                document.getElementById('menu').style.pointerEvents = 'none';
+                document.getElementById('properties').style.display = 'none';
+            } else {
+                document.querySelectorAll('#menu li').forEach(item => item.setAttribute('draggable', 'true'));
+                document.getElementById('menu').style.pointerEvents = 'auto';
+                document.getElementById('properties').style.display = 'block';
+            }
+        }
 
         // Open specific category
         function openCategory(categoryId) {
@@ -300,8 +339,11 @@
         }
 
         // Drag from menu to workspace
-        workspace.addEventListener('dragover', (e) => e.preventDefault());
+        workspace.addEventListener('dragover', (e) => {
+            if (mode === 'edit') e.preventDefault();
+        });
         workspace.addEventListener('drop', (e) => {
+            if (mode !== 'edit') return;
             e.preventDefault();
             const type = e.dataTransfer.getData('type');
             const className = e.dataTransfer.getData('class');
@@ -364,25 +406,31 @@
             }
             if (type === 'button' || className.includes('button')) {
                 elem.addEventListener('click', () => {
-                    console.log('Button clicked!');
-                    alert('Button clicked!');
+                    if (mode === 'view') {
+                        console.log('Button clicked!');
+                        alert('Button clicked!');
+                    }
                 });
             }
             if (elem.querySelectorAll('a').length > 0 || type === 'a') {
                 if (type === 'a') {
                     elem.href = '';
                     elem.addEventListener('click', (ev) => {
-                        ev.preventDefault();
-                        console.log('Link clicked:', elem.href);
-                        alert(`Link clicked: ${elem.href}`);
+                        if (mode === 'view') {
+                            ev.preventDefault();
+                            console.log('Link clicked:', elem.href);
+                            alert(`Link clicked: ${elem.href}`);
+                        }
                     });
                 } else {
                     elem.querySelectorAll('a').forEach(a => {
                         a.href = a.href || '';
                         a.addEventListener('click', (ev) => {
-                            ev.preventDefault();
-                            console.log('Link clicked:', a.href);
-                            alert(`Link clicked: ${a.href}`);
+                            if (mode === 'view') {
+                                ev.preventDefault();
+                                console.log('Link clicked:', a.href);
+                                alert(`Link clicked: ${a.href}`);
+                            }
                         });
                     });
                 }
@@ -397,6 +445,7 @@
         const menuItems = document.querySelectorAll('#menu li');
         menuItems.forEach(item => {
             item.addEventListener('dragstart', (e) => {
+                if (mode !== 'edit') return;
                 e.dataTransfer.setData('type', item.dataset.type);
                 e.dataTransfer.setData('class', item.dataset.class);
                 e.dataTransfer.setData('content', item.dataset.content || '');
@@ -410,6 +459,7 @@
 
         // Dragging elements within workspace
         workspace.addEventListener('mousedown', (e) => {
+            if (mode !== 'edit') return;
             if (e.target !== workspace && e.target.parentElement === workspace) {
                 dragging = e.target;
                 const rect = workspace.getBoundingClientRect();
@@ -419,11 +469,10 @@
         });
 
         document.addEventListener('mousemove', (e) => {
-            if (dragging) {
-                const rect = workspace.getBoundingClientRect();
-                dragging.style.left = `${e.clientX - rect.left - offsetX}px`;
-                dragging.style.top = `${e.clientY - rect.top - offsetY}px`;
-            }
+            if (mode !== 'edit' || !dragging) return;
+            const rect = workspace.getBoundingClientRect();
+            dragging.style.left = `${e.clientX - rect.left - offsetX}px`;
+            dragging.style.top = `${e.clientY - rect.top - offsetY}px`;
         });
 
         document.addEventListener('mouseup', () => {
@@ -435,8 +484,10 @@
 
         // Selection for properties
         workspace.addEventListener('click', (e) => {
+            if (mode !== 'edit') return;
             if (selected) {
                 selected.style.border = '';
+                selected.classList.remove('selected');
             }
             if (e.target === workspace) {
                 selected = null;
@@ -445,6 +496,7 @@
             } else {
                 selected = e.target;
                 selected.style.border = '1px dashed white';
+                selected.classList.add('selected');
                 showProperties();
                 deleteBtn.style.display = 'block';
             }
@@ -453,26 +505,24 @@
 
         // Delete button
         deleteBtn.addEventListener('click', () => {
-            if (selected) {
-                resizeObserver.unobserve(selected);
-                selected.remove();
-                selected = null;
-                propContent.innerHTML = '';
-                deleteBtn.style.display = 'none';
-                updateCode();
-            }
+            if (mode !== 'edit' || !selected) return;
+            resizeObserver.unobserve(selected);
+            selected.remove();
+            selected = null;
+            propContent.innerHTML = '';
+            deleteBtn.style.display = 'none';
+            updateCode();
         });
 
         // Keyboard delete
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'Delete' && selected) {
-                resizeObserver.unobserve(selected);
-                selected.remove();
-                selected = null;
-                propContent.innerHTML = '';
-                deleteBtn.style.display = 'none';
-                updateCode();
-            }
+            if (mode !== 'edit' || e.key !== 'Delete' || !selected) return;
+            resizeObserver.unobserve(selected);
+            selected.remove();
+            selected = null;
+            propContent.innerHTML = '';
+            deleteBtn.style.display = 'none';
+            updateCode();
         });
 
         function showProperties() {
@@ -607,9 +657,11 @@
                     selected.innerHTML = e.target.value;
                     selected.querySelectorAll('a').forEach(a => {
                         a.addEventListener('click', (ev) => {
-                            ev.preventDefault();
-                            console.log('Link clicked:', a.href);
-                            alert(`Link clicked: ${a.href}`);
+                            if (mode === 'view') {
+                                ev.preventDefault();
+                                console.log('Link clicked:', a.href);
+                                alert(`Link clicked: ${a.href}`);
+                            }
                         });
                     });
                     updateCode();
@@ -642,6 +694,7 @@
 
                 const clone = el.cloneNode(true);
                 clone.removeAttribute('style');
+                clone.classList.remove('selected');
                 if (clone.tagName === 'BUTTON') {
                     clone.textContent = el.textContent;
                 }
@@ -694,6 +747,9 @@
             cssArea.value = css;
             jsArea.value = js || '// No JS generated yet';
         }
+
+        // Initialize edit mode
+        setMode('edit');
     </script>
 </body>
 </html>
