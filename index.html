@@ -3,718 +3,1427 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Web Editor</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Visual Web Designer Tool</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Open+Sans:wght@400;600&family=Montserrat:wght@400;700&family=Lato:wght@400;700&family=Poppins:wght@400;600&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        .dropdown-content { display: none; position: absolute; background-color: white; box-shadow: 0 8px 16px rgba(0,0,0,0.2); z-index: 1; }
-        .dropdown:hover .dropdown-content { display: block; }
-        .submenu-content { display: none; position: absolute; left: 100%; top: 0; background-color: white; box-shadow: 0 8px 16px rgba(0,0,0,0.2); }
-        .submenu:hover .submenu-content { display: block; }
-        .canvas { border: 1px solid #ccc; position: relative; }
-        .ruler { background: #f0f0f0; position: absolute; }
-        .ruler-x { height: 20px; width: 100%; top: 0; }
-        .ruler-y { width: 20px; height: 100%; left: 0; }
-        .layer-panel { max-height: 300px; overflow-y: auto; }
+        body {
+            background-color: #1e1e1e;
+            color: #ffffff;
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 20px;
+            overflow: hidden;
+        }
+        #container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            height: 100vh;
+        }
+        #top-menu {
+            background-color: #2d2d2d;
+            padding: 10px;
+            border-radius: 4px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            position: relative;
+            z-index: 100;
+        }
+        #top-menu button {
+            background-color: #3c3c3c;
+            border: none;
+            color: #fff;
+            padding: 8px 16px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        #top-menu button:hover {
+            background-color: #4a4a4a;
+        }
+        #top-menu button.active {
+            background-color: #007bff;
+        }
+        .dropdown {
+            position: absolute;
+            top: 100%;
+            background-color: #2d2d2d;
+            border: 1px solid #444;
+            border-radius: 4px;
+            z-index: 1000;
+            max-height: 300px;
+            overflow-y: auto;
+            display: none;
+        }
+        .dropdown ul {
+            list-style: none;
+            padding: 10px;
+            margin: 0;
+        }
+        .dropdown li {
+            padding: 10px;
+            background-color: #3c3c3c;
+            margin-bottom: 5px;
+            cursor: grab;
+            border-radius: 4px;
+            user-select: none;
+        }
+        .dropdown li:hover {
+            background-color: #4a4a4a;
+        }
+        #main-content {
+            display: flex;
+            flex-direction: row;
+            gap: 20px;
+            flex: 1;
+            overflow: hidden;
+        }
+        #workspace-container {
+            flex: 1;
+            position: relative;
+            overflow: auto;
+            background-color: #252526;
+        }
+        #ruler-x, #ruler-y {
+            position: absolute;
+            background-color: #2d2d2d;
+            z-index: 10;
+        }
+        #ruler-x {
+            top: 0;
+            left: 30px;
+            height: 30px;
+            width: calc(100% - 30px);
+            border-bottom: 1px solid #444;
+        }
+        #ruler-y {
+            top: 30px;
+            left: 0;
+            width: 30px;
+            height: calc(100% - 30px);
+            border-right: 1px solid #444;
+        }
+        .ruler-mark {
+            position: absolute;
+            background-color: #666;
+            font-size: 10px;
+            color: #aaa;
+        }
+        .ruler-mark.x {
+            height: 5px;
+            width: 1px;
+            bottom: 0;
+        }
+        .ruler-mark.y {
+            width: 5px;
+            height: 1px;
+            right: 0;
+        }
+        .ruler-label {
+            position: absolute;
+            font-size: 10px;
+            color: #aaa;
+        }
+        #workspace {
+            position: absolute;
+            top: 30px;
+            left: 30px;
+            transform-origin: 0 0;
+            transition: transform 0.3s ease;
+        }
+        #page {
+            background-color: #fff;
+            color: #000;
+            position: relative;
+            min-height: 100px;
+            transition: all 0.3s;
+            box-sizing: border-box;
+        }
+        #page.edit-mode {
+            width: 1024px;
+            min-height: 768px;
+            border: 2px solid #007bff;
+            margin: 20px;
+        }
+        #page.view-mode.phone {
+            width: 375px;
+            height: 667px;
+            border: 2px solid #555;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            margin: 20px auto;
+        }
+        #page.view-mode.tablet {
+            width: 768px;
+            height: 1024px;
+            border: 2px solid #555;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            margin: 20px auto;
+        }
+        #page.view-mode.laptop {
+            width: 1024px;
+            height: 768px;
+            border: 2px solid #555;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            margin: 20px auto;
+        }
+        #properties {
+            width: 300px;
+            background-color: #2d2d2d;
+            padding: 20px;
+            border-left: 1px solid #444;
+            max-height: 100%;
+            overflow-y: auto;
+        }
+        #properties label {
+            display: block;
+            margin-bottom: 10px;
+        }
+        #properties input, #properties select, #properties textarea {
+            background-color: #2d2d2d;
+            color: #fff;
+            border: 1px solid #444;
+            width: 100%;
+            padding: 5px;
+        }
+        #code {
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            height: 300px;
+        }
+        #code div {
+            width: 32%;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        #code textarea {
+            width: 100%;
+            height: 100%;
+            background-color: #2d2d2d;
+            color: #ffffff;
+            border: 1px solid #444;
+            padding: 10px;
+            font-family: monospace;
+            resize: vertical;
+        }
+        #code button {
+            background-color: #3c3c3c;
+            border: none;
+            color: #fff;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        #code button:hover {
+            background-color: #4a4a4a;
+        }
+        .shape.rectangle, .shape.square, .shape.rounded-rectangle {
+            background-color: #007bff;
+        }
+        .shape.circle, .shape.oval {
+            background-color: #dc3545;
+            border-radius: 50%;
+        }
+        .shape.triangle {
+            width: 0;
+            height: 0;
+            border-left: 50px solid transparent;
+            border-right: 50px solid transparent;
+            border-bottom: 100px solid #28a745;
+            background-color: transparent;
+        }
+        .shape.pentagon, .shape.hexagon, .shape.octagon {
+            background-color: #6610f2;
+        }
+        .icon, .social-icon {
+            font-size: 24px;
+            display: inline-block;
+        }
+        .modal {
+            background-color: #fff;
+            color: #000;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        }
+        .card {
+            background-color: #444;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+        .slider {
+            background-color: #555;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        #page > * {
+            resize: both;
+            overflow: auto;
+        }
+        #page.view-mode > * {
+            resize: none;
+            cursor: default;
+        }
+        #page.view-mode > *.selected {
+            border: none;
+        }
+        #page-nav {
+            margin-top: 10px;
+            display: flex;
+            gap: 10px;
+        }
+        #page-nav input, #page-nav select, #page-nav button {
+            background-color: #3c3c3c;
+            border: none;
+            color: #fff;
+            padding: 8px 16px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        #page-nav input:hover, #page-nav select:hover, #page-nav button:hover {
+            background-color: #4a4a4a;
+        }
+        #apply-code-btn {
+            background-color: #28a745;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: none;
+        }
+        #apply-code-btn:hover {
+            background-color: #218838;
+        }
+        #create-page-btn {
+            background-color: #17a2b8;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        #create-page-btn:hover {
+            background-color: #138496;
+        }
+        #zoom-controls {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background-color: #2d2d2d;
+            padding: 10px;
+            border-radius: 4px;
+            display: flex;
+            gap: 10px;
+            z-index: 50;
+        }
+        #zoom-controls button {
+            background-color: #3c3c3c;
+            border: none;
+            color: #fff;
+            width: 40px;
+            height: 40px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        #zoom-controls button:hover {
+            background-color: #4a4a4a;
+        }
+        #zoom-level {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 60px;
+        }
+        #layers-panel {
+            position: absolute;
+            top: 30px;
+            right: 320px;
+            width: 200px;
+            background-color: #2d2d2d;
+            border: 1px solid #444;
+            border-radius: 4px;
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 50;
+            display: none;
+        }
+        #layers-panel h3 {
+            margin: 0;
+            padding: 10px;
+            background-color: #3c3c3c;
+            border-bottom: 1px solid #444;
+        }
+        #layers-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        #layers-list li {
+            padding: 10px;
+            border-bottom: 1px solid #444;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        #layers-list li:hover {
+            background-color: #4a4a4a;
+        }
+        #layers-list li.selected {
+            background-color: #007bff;
+        }
+        #layers-list li .layer-visibility {
+            cursor: pointer;
+        }
+        .guide {
+            position: absolute;
+            background-color: rgba(0, 123, 255, 0.5);
+            z-index: 5;
+        }
+        .guide.horizontal {
+            width: 100%;
+            height: 1px;
+            cursor: ns-resize;
+        }
+        .guide.vertical {
+            width: 1px;
+            height: 100%;
+            cursor: ew-resize;
+        }
+        #history-controls {
+            display: flex;
+            gap: 10px;
+            margin-left: auto;
+        }
     </style>
 </head>
-<body class="bg-gray-100 font-sans">
-    <div class="flex flex-col h-screen">
-        <!-- Top Bar -->
-        <div class="bg-white p-4 shadow flex justify-between items-center">
-            <div class="flex space-x-4">
-                <div class="relative dropdown">
-                    <button class="bg-blue-500 text-white px-4 py-2 rounded">Edit Mode</button>
-                    <div class="dropdown-content">
-                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="setMode('edit')">Edit Mode</a>
-                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="setMode('view')">View Mode</a>
-                    </div>
-                </div>
-                <div class="relative dropdown">
-                    <button class="bg-blue-500 text-white px-4 py-2 rounded">Device Preview</button>
-                    <div class="dropdown-content">
-                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="setDevice('phone')">Phone</a>
-                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="setDevice('tablet')">Tablet</a>
-                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="setDevice('laptop')">Laptop</a>
-                    </div>
-                </div>
-                <div class="relative dropdown">
-                    <button class="bg-blue-500 text-white px-4 py-2 rounded">Library</button>
-                    <div class="dropdown-content">
-                        <!-- Icons -->
-                        <div class="relative submenu">
-                            <a href="#" class="block px-4 py-2 hover:bg-gray-200">Icons</a>
-                            <div class="submenu-content">
-                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('glyph-icon')">Glyph Icons</a>
-                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('material-icon')">Material Icons</a>
-                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('font-icon')">Font-Based Icons</a>
-                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('custom-icon')">Custom Icons</a>
-                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('emoji-icon')">Emoji Icons</a>
-                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('animated-icon')">Animated Icons</a>
-                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('social-icon')">Social Media Icons</a>
-                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('action-icon')">Action Icons</a>
-                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('status-icon')">Status Icons</a>
-                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('navigation-icon')">Navigation Icons</a>
-                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('duotone-icon')">Duotone Icons</a>
-                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('neumorphic-icon')">Neumorphic Icons</a>
-                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('weather-icon')">Weather Icons</a>
-                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('ecommerce-icon')">E-commerce Icons</a>
-                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('accessibility-icon')">Accessibility Icons</a>
-                            </div>
-                        </div>
-                        <!-- Navigation -->
-                        <div class="relative submenu">
-                            <a href="#" class="block px-4 py-2 hover:bg-gray-200">Navigation</a>
-                            <div class="submenu-content">
-                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('top-nav')">Top Navigation Bar</a>
-                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('hamburger-menu')">Hamburger Menu</a>
-                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('sidebar')">Sidebar</a>
-                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('bottom-nav')">Bottom Navigation Bar</a>
-                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('tab-bar')">Tab Bar</a>
-                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('breadcrumbs')">Breadcrumbs</a>
-                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('mega-menu')">Mega Menu</a>
-                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('fab')">Floating Action Button</a>
-                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('sticky-nav')">Sticky Navigation</a>
-                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('gesture-nav')">Gesture-Based Navigation</a>
-                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('voice-nav')">Voice Navigation</a>
-                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('pagination')">Pagination</a>
-                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('dropdown-menu')">Dropdown Menu</a>
-                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('accordion-menu')">Accordion Menu</a>
-                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('step-indicators')">Step Indicators</a>
-                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('back-to-top')">Back-to-Top Button</a>
-                            </div>
-                        </div>
-                        <!-- Fonts -->
-                        <div class="relative submenu">
-                            <a href="#" class="block px-4 py-2 hover:bg-gray-200">Fonts</a>
-                            <div class="submenu-content">
-                                <div class="relative submenu">
-                                    <a href="#" class="block px-4 py-2 hover:bg-gray-200">Sans-Serif Fonts</a>
-                                    <div class="submenu-content">
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addFont('Roboto')">Roboto</a>
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addFont('Open Sans')">Open Sans</a>
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addFont('Inter')">Inter</a>
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addFont('Montserrat')">Montserrat</a>
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addFont('Lato')">Lato</a>
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addFont('Poppins')">Poppins</a>
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addFont('Helvetica')">Helvetica</a>
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addFont('Arial')">Arial</a>
-                                    </div>
-                                </div>
-                                <div class="relative submenu">
-                                    <a href="#" class="block px-4 py-2 hover:bg-gray-200">Serif Fonts</a>
-                                    <div class="submenu-content">
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addFont('Georgia')">Georgia</a>
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addFont('Times New Roman')">Times New Roman</a>
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addFont('Playfair Display')">Playfair Display</a>
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addFont('Merriweather')">Merriweather</a>
-                                    </div>
-                                </div>
-                                <div class="relative submenu">
-                                    <a href="#" class="block px-4 py-2 hover:bg-gray-200">Monospace Fonts</a>
-                                    <div class="submenu-content">
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addFont('Fira Code')">Fira Code</a>
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addFont('JetBrains Mono')">JetBrains Mono</a>
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addFont('Courier New')">Courier New</a>
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addFont('Source Code Pro')">Source Code Pro</a>
-                                    </div>
-                                </div>
-                                <div class="relative submenu">
-                                    <a href="#" class="block px-4 py-2 hover:bg-gray-200">Display Fonts</a>
-                                    <div class="submenu-content">
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addFont('Bebas Neue')">Bebas Neue</a>
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addFont('Raleway')">Raleway</a>
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addFont('Oswald')">Oswald</a>
-                                    </div>
-                                </div>
-                                <div class="relative submenu">
-                                    <a href="#" class="block px-4 py-2 hover:bg-gray-200">Variable Fonts</a>
-                                    <div class="submenu-content">
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addFont('Inter Variable')">Inter Variable</a>
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addFont('Roboto Flex')">Roboto Flex</a>
-                                    </div>
-                                </div>
-                                <div class="relative submenu">
-                                    <a href="#" class="block px-4 py-2 hover:bg-gray-200">System Fonts</a>
-                                    <div class="submenu-content">
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addFont('San Francisco')">San Francisco</a>
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addFont('Segoe UI')">Segoe UI</a>
-                                    </div>
-                                </div>
-                                <div class="relative submenu">
-                                    <a href="#" class="block px-4 py-2 hover:bg-gray-200">Custom Fonts</a>
-                                    <div class="submenu-content">
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addFont('Netflix Sans')">Netflix Sans</a>
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addFont('Airbnb Cereal')">Airbnb Cereal</a>
-                                    </div>
-                                </div>
-                                <div class="relative submenu">
-                                    <a href="#" class="block px-4 py-2 hover:bg-gray-200">Non-Latin Fonts</a>
-                                    <div class="submenu-content">
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addFont('Amiri')">Amiri (Arabic)</a>
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addFont('Noto Serif CJK SC')">Noto Serif CJK SC (Chinese)</a>
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addFont('Noto Serif CJK JP')">Noto Serif CJK JP (Japanese)</a>
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addFont('Noto Serif Devanagari')">Noto Serif Devanagari (Hindi)</a>
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addFont('Noto Serif Bengali')">Noto Serif Bengali (Bengali)</a>
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addFont('Noto')">Noto (Russian)</a>
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addFont('Noto Serif CJK KR')">Noto Serif CJK KR (Korean)</a>
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addFont('DejaVu Sans')">DejaVu Sans (Hebrew, Greek)</a>
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addFont('Noto Serif Thai')">Noto Serif Thai (Thai)</a>
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addFont('Noto Serif Gurmukhi')">Noto Serif Gurmukhi (Punjabi)</a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- UI Elements -->
-                        <div class="relative submenu">
-                            <a href="#" class="block px-4 py-2 hover:bg-gray-200">UI Elements</a>
-                            <div class="submenu-content">
-                                <div class="relative submenu">
-                                    <a href="#" class="block px-4 py-2 hover:bg-gray-200">Buttons</a>
-                                    <div class="submenu-content">
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('primary-button')">Primary Button</a>
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('secondary-button')">Secondary Button</a>
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('icon-button')">Icon Button</a>
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('toggle-button')">Toggle Button</a>
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('ghost-button')">Ghost Button</a>
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('split-button')">Split Button</a>
-                                    </div>
-                                </div>
-                                <div class="relative submenu">
-                                    <a href="#" class="block px-4 py-2 hover:bg-gray-200">Forms</a>
-                                    <div class="submenu-content">
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('text-input')">Text Input</a>
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('textarea')">Textarea</a>
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('dropdown')">Dropdown</a>
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('checkbox')">Checkbox</a>
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('radio')">Radio Button</a>
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('file-upload')">File Upload</a>
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('search-bar')">Search Bar</a>
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('slider')">Slider</a>
-                                    </div>
-                                </div>
-                                <div class="relative submenu">
-                                    <a href="#" class="block px-4 py-2 hover:bg-gray-200">Form Feedback</a>
-                                    <div class="submenu-content">
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('validation-indicator')">Validation Indicator</a>
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('tooltip')">Tooltip</a>
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('placeholder')">Placeholder Text</a>
-                                    </div>
-                                </div>
-                                <div class="relative submenu">
-                                    <a href="#" class="block px-4 py-2 hover:bg-gray-200">Cards</a>
-                                    <div class="submenu-content">
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('content-card')">Content Card</a>
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('profile-card')">Profile Card</a>
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('feature-card')">Feature Card</a>
-                                    </div>
-                                </div>
-                                <div class="relative submenu">
-                                    <a href="#" class="block px-4 py-2 hover:bg-gray-200">Modals</a>
-                                    <div class="submenu-content">
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('alert-modal')">Alert Modal</a>
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('form-modal')">Form Modal</a>
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('full-screen-modal')">Full-Screen Modal</a>
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('toast')">Toast Notification</a>
-                                    </div>
-                                </div>
-                                <div class="relative submenu">
-                                    <a href="#" class="block px-4 py-2 hover:bg-gray-200">Loaders</a>
-                                    <div class="submenu-content">
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('circular-spinner')">Circular Spinner</a>
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('progress-bar')">Progress Bar</a>
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('skeleton-loader')">Skeleton Loader</a>
-                                    </div>
-                                </div>
-                                <div class="relative submenu">
-                                    <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('avatar')">Avatars</a>
-                                    <div class="submenu-content">
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('circular-avatar')">Circular Avatar</a>
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('square-avatar')">Square Avatar</a>
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('initials-avatar')">Initials Avatar</a>
-                                    </div>
-                                </div>
-                                <div class="relative submenu">
-                                    <a href="#" class="block px-4 py-2 hover:bg-gray-200">Badges</a>
-                                    <div class="submenu-content">
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('status-badge')">Status Badge</a>
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('category-tag')">Category Tag</a>
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('notification-badge')">Notification Badge</a>
-                                    </div>
-                                </div>
-                                <div class="relative submenu">
-                                    <a href="#" class="block px-4 py-2 hover:bg-gray-200">Sliders</a>
-                                    <div class="submenu-content">
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('image-carousel')">Image Carousel</a>
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('content-slider')">Content Slider</a>
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('autoplay-slider')">Autoplay Slider</a>
-                                    </div>
-                                </div>
-                                <div class="relative submenu">
-                                    <a href="#" class="block px-4 py-2 hover:bg-gray-200">Progress</a>
-                                    <div class="submenu-content">
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('linear-progress')">Linear Progress Bar</a>
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('circular-progress')">Circular Progress Ring</a>
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('step-indicator')">Step Indicator</a>
-                                    </div>
-                                </div>
-                                <div class="relative submenu">
-                                    <a href="#" class="block px-4 py-2 hover:bg-gray-200">Toggles</a>
-                                    <div class="submenu-content">
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('mode-toggle')">Dark/Light Mode Toggle</a>
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('feature-toggle')">Feature Toggle</a>
-                                    </div>
-                                </div>
-                                <div class="relative submenu">
-                                    <a href="#" class="block px-4 py-2 hover:bg-gray-200">Micro-Interactions</a>
-                                    <div class="submenu-content">
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('hover-animation')">Hover Animation</a>
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('click-animation')">Click Animation</a>
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('scroll-animation')">Scroll Animation</a>
-                                    </div>
-                                </div>
-                                <div class="relative submenu">
-                                    <a href="#" class="block px-4 py-2 hover:bg-gray-200">Tables</a>
-                                    <div class="submenu-content">
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('data-table')">Data Table</a>
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('pricing-table')">Pricing Table</a>
-                                    </div>
-                                </div>
-                                <div class="relative submenu">
-                                    <a href="#" class="block px-4 py-2 hover:bg-gray-200">Alerts</a>
-                                    <div class="submenu-content">
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('success-alert')">Success Alert</a>
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('warning-alert')">Warning Alert</a>
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('error-alert')">Error Alert</a>
-                                    </div>
-                                </div>
-                                <div class="relative submenu">
-                                    <a href="#" class="block px-4 py-2 hover:bg-gray-200">Search Filters</a>
-                                    <div class="submenu-content">
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('filter-chip')">Filter Chip</a>
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('advanced-search')">Advanced Search Toggle</a>
-                                    </div>
-                                </div>
-                                <div class="relative submenu">
-                                    <a href="#" class="block px-4 py-2 hover:bg-gray-200">Footers</a>
-                                    <div class="submenu-content">
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('static-footer')">Static Footer</a>
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('interactive-footer')">Interactive Footer</a>
-                                    </div>
-                                </div>
-                                <div class="relative submenu">
-                                    <a href="#" class="block px-4 py-2 hover:bg-gray-200">Headers</a>
-                                    <div class="submenu-content">
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('hero-header')">Hero Header</a>
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('fixed-header')">Fixed Header</a>
-                                    </div>
-                                </div>
-                                <div class="relative submenu">
-                                    <a href="#" class="block px-4 py-2 hover:bg-gray-200">Dividers</a>
-                                    <div class="submenu-content">
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('horizontal-rule')">Horizontal Rule</a>
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('section-divider')">Section Divider</a>
-                                    </div>
-                                </div>
-                                <div class="relative submenu">
-                                    <a href="#" class="block px-4 py-2 hover:bg-gray-200">Typography</a>
-                                    <div class="submenu-content">
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('heading')">Heading</a>
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('body-text')">Body Text</a>
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('blockquote')">Blockquote</a>
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('caption')">Caption</a>
-                                    </div>
-                                </div>
-                                <div class="relative submenu">
-                                    <a href="#" class="block px-4 py-2 hover:bg-gray-200">Media</a>
-                                    <div class="submenu-content">
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('image-gallery')">Image Gallery</a>
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('video-player')">Video Player</a>
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('audio-player')">Audio Player</a>
-                                    </div>
-                                </div>
-                                <div class="relative submenu">
-                                    <a href="#" class="block px-4 py-2 hover:bg-gray-200">AR Elements</a>
-                                    <div class="submenu-content">
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('3d-preview')">3D Product Preview</a>
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('interactive-icon')">Interactive Icon</a>
-                                    </div>
-                                </div>
-                                <div class="relative submenu">
-                                    <a href="#" class="block px-4 py-2 hover:bg-gray-200">Gamification</a>
-                                    <div class="submenu-content">
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('progress-badge')">Progress Badge</a>
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('leaderboard')">Leaderboard</a>
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('reward-popup')">Reward Popup</a>
-                                    </div>
-                                </div>
-                                <div class="relative submenu">
-                                    <a href="#" class="block px-4 py-2 hover:bg-gray-200">Accessibility</a>
-                                    <div class="submenu-content">
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('skip-to-content')">Skip-to-Content Link</a>
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('aria-landmark')">ARIA Landmark</a>
-                                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('focus-indicator')">Focus Indicator</a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Design Systems -->
-                        <div class="relative submenu">
-                            <a href="#" class="block px-4 py-2 hover:bg-gray-200">Design Systems</a>
-                            <div class="submenu-content">
-                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="applyDesignSystem('material')">Material Design</a>
-                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="applyDesignSystem('human-interface')">Human Interface Guidelines</a>
-                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="applyDesignSystem('fluent')">Fluent Design</a>
-                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="applyDesignSystem('bootstrap')">Bootstrap</a>
-                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="applyDesignSystem('tailwind')">Tailwind CSS</a>
-                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="applyDesignSystem('ant')">Ant Design</a>
-                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="applyDesignSystem('mui')">MUI</a>
-                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="applyDesignSystem('chakra')">Chakra UI</a>
-                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="applyDesignSystem('bulma')">Bulma</a>
-                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="applyDesignSystem('semantic')">Semantic UI</a>
-                            </div>
-                        </div>
-                        <!-- Emerging Trends -->
-                        <div class="relative submenu">
-                            <a href="#" class="block px-4 py-2 hover:bg-gray-200">Emerging Trends</a>
-                            <div class="submenu-content">
-                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="applyTrend('glassmorphism')">Glassmorphism</a>
-                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="applyTrend('neumorphism')">Neumorphism</a>
-                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="applyTrend('3d-elements')">3D Elements</a>
-                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="applyTrend('ai-driven-ui')">AI-Driven UI</a>
-                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="applyTrend('voice-ui')">Voice UI</a>
-                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="applyTrend('minimalist-maximalism')">Minimalist Maximalism</a>
-                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="applyTrend('dynamic-color')">Dynamic Color Schemes</a>
-                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="applyTrend('micro-animation')">Micro-Animation Systems</a>
-                            </div>
-                        </div>
-                        <!-- New Features -->
-                        <div class="relative submenu">
-                            <a href="#" class="block px-4 py-2 hover:bg-gray-200">Tools</a>
-                            <div class="submenu-content">
-                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="toggleZoomControls()">Zoom Controls</a>
-                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="toggleRulers()">Rulers/Guides</a>
-                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="toggleLayerManagement()">Layer Management</a>
-                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="undo()">Undo</a>
-                                <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="redo()">Redo</a>
-                            </div>
-                        </div>
-                        <!-- Existing Elements -->
-                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('shape')">Add Shape</a>
-                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('icon')">Add Icon</a>
-                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('social-icon')">Add Social Icon</a>
-                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('material-icon')">Add Material Icon</a>
-                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('navigation')">Add Navigation</a>
-                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('menu')">Add Menu</a>
-                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('media')">Add Media</a>
-                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('form')">Add Form</a>
-                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('utility')">Add Utility</a>
-                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('creative')">Add Creative</a>
-                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('modal')">Add Modal</a>
-                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('button')">Add Button</a>
-                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('card')">Add Card</a>
-                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addElement('slider')">Add Slider</a>
-                        <a href="#" class="block px-4 py-2 hover:bg-gray-200" onclick="addFont('default')">Add Font</a>
-                    </div>
-                </div>
-            </div>
-            <div>
-                <button class="bg-green-500 text-white px-4 py-2 rounded" onclick="createPage()">Create Page</button>
-                <button class="bg-blue-500 text-white px-4 py-2 rounded" onclick="newPage()">New Page</button>
-                <span class="text-gray-700">index.html</span>
-                <button class="bg-blue-500 text-white px-4 py-2 rounded" onclick="applyCode()">Apply Code</button>
+<body>
+    <div id="container">
+        <div id="top-menu">
+            <button id="edit-mode-btn" class="active" onclick="setMode('edit')">Edit Mode</button>
+            <button id="view-mode-btn" onclick="setMode('view')">View Mode</button>
+            <button id="phone-btn" onclick="setPreview('phone')" style="display: none;">Phone</button>
+            <button id="tablet-btn" onclick="setPreview('tablet')" style="display: none;">Tablet</button>
+            <button id="laptop-btn" onclick="setPreview('laptop')" style="display: none;">Laptop</button>
+            <button id="add-shape-btn" onclick="openCategory('shapes', this)">Add Shape</button>
+            <button id="add-icon-btn" onclick="openCategory('icons', this)">Add Icon</button>
+            <button id="add-social-icon-btn" onclick="openCategory('social-icons', this)">Add Social Icon</button>
+            <button id="add-material-icon-btn" onclick="openCategory('material-icons', this)">Add Material Icon</button>
+            <button id="add-navigation-btn" onclick="openCategory('navigations', this)">Add Navigation</button>
+            <button id="add-menu-btn" onclick="openCategory('menus', this)">Add Menu</button>
+            <button id="add-media-btn" onclick="openCategory('media', this)">Add Media</button>
+            <button id="add-form-btn" onclick="openCategory('forms', this)">Add Form</button>
+            <button id="add-utility-btn" onclick="openCategory('utilities', this)">Add Utility</button>
+            <button id="add-creative-btn" onclick="openCategory('creatives', this)">Add Creative</button>
+            <button id="add-modal-btn" onclick="openCategory('modals', this)">Add Modal</button>
+            <button id="add-button-btn" onclick="openCategory('buttons', this)">Add Button</button>
+            <button id="add-card-btn" onclick="openCategory('cards', this)">Add Card</button>
+            <button id="add-slider-btn" onclick="openCategory('sliders', this)">Add Slider</button>
+            <button id="add-font-btn" onclick="openCategory('fonts', this)">Add Font</button>
+            <button id="add-gamification-btn" onclick="openCategory('gamification', this)">Add Gamification</button>
+            <button id="add-ar-btn" onclick="openCategory('ar', this)">Add AR</button>
+            <button id="add-3d-btn" onclick="openCategory('3d', this)">Add 3D</button>
+            <button id="add-voice-btn" onclick="openCategory('voice', this)">Add Voice</button>
+            <button id="add-ai-btn" onclick="openCategory('ai', this)">Add AI</button>
+            <button id="toggle-rulers-btn" onclick="toggleRulers()">Toggle Rulers</button>
+            <button id="toggle-guides-btn" onclick="toggleGuides()">Toggle Guides</button>
+            <button id="toggle-layers-btn" onclick="toggleLayers()">Toggle Layers</button>
+            <div id="history-controls">
+                <button id="undo-btn" onclick="undo()" title="Undo">↩</button>
+                <button id="redo-btn" onclick="redo()" title="Redo">↪</button>
             </div>
         </div>
-
-        <!-- Main Content -->
-        <div class="flex flex-1 overflow-hidden">
-            <!-- Left Sidebar -->
-            <div class="w-1/4 bg-white p-4 shadow">
-                <h2 class="text-lg font-bold mb-4">Properties</h2>
-                <div id="properties-panel">
-                    <p>Properties for selected element</p>
+        <div id="page-nav">
+            <button id="create-page-btn" onclick="createPage()">Create Page</button>
+            <button onclick="newPage()">New Page</button>
+            <input id="page-name" type="text" placeholder="Enter page name" value="index.html">
+            <select id="page-selector" onchange="switchPage(this.value)">
+                <option value="page1" data-name="index.html">index.html</option>
+            </select>
+            <button id="apply-code-btn" onclick="applyCode()">Apply Code</button>
+        </div>
+        <div id="main-content">
+            <div id="workspace-container">
+                <div id="ruler-x"></div>
+                <div id="ruler-y"></div>
+                <div id="workspace">
+                    <div id="page" class="edit-mode"></div>
                 </div>
-                <button class="bg-red-500 text-white px-4 py-2 rounded mt-4" onclick="deleteSelected()">Delete Selected</button>
-            </div>
-
-            <!-- Canvas -->
-            <div class="flex-1 p-4 relative">
-                <div id="zoom-controls" class="absolute top-4 right-4 hidden">
-                    <button class="bg-gray-200 px-2 py-1" onclick="zoomIn()">+</button>
-                    <button class="bg-gray-200 px-2 py-1" onclick="zoomOut()">-</button>
-                    <span id="zoom-level">100%</span>
+                <div id="zoom-controls">
+                    <button id="zoom-out" onclick="zoomOut()">-</button>
+                    <div id="zoom-level">100%</div>
+                    <button id="zoom-in" onclick="zoomIn()">+</button>
+                    <button id="reset-zoom" onclick="resetZoom()">⟳</button>
                 </div>
-                <div id="ruler-x" class="ruler ruler-x hidden"></div>
-                <div id="ruler-y" class="ruler ruler-y hidden"></div>
-                <div id="canvas" class="canvas bg-white w-full h-full" ondrop="drop(event)" ondragover="allowDrop(event)">
-                    <!-- Canvas content -->
-                </div>
-            </div>
-
-            <!-- Right Sidebar -->
-            <div class="w-1/4 bg-white p-4 shadow">
-                <h2 class="text-lg font-bold mb-4">Layers</h2>
-                <div id="layer-panel" class="layer-panel hidden">
-                    <!-- Layer management content -->
-                </div>
-                <div class="mt-4">
-                    <button class="bg-gray-500 text-white px-4 py-2 rounded" onclick="paste()">Paste</button>
-                    <button class="bg-gray-500 text-white px-4 py-2 rounded" onclick="clear()">Clear</button>
-                    <button class="bg-gray-500 text-white px-4 py-2 rounded" onclick="copy()">Copy</button>
+                <div id="layers-panel">
+                    <h3>Layers</h3>
+                    <ul id="layers-list"></ul>
                 </div>
             </div>
+            <div id="properties">
+                <h3>Properties</h3>
+                <div id="prop-content"></div>
+                <button id="delete-btn" style="display: none; background-color: #dc3545; border: none; color: white; padding: 10px; cursor: pointer;">Delete Selected</button>
+            </div>
+        </div>
+    </div>
+    <div id="code">
+        <div>
+            <div>
+                <button onclick="pasteCode('html')">Paste</button>
+                <button onclick="clearCode('html')">Clear</button>
+                <button onclick="copyCode('html')">Copy</button>
+            </div>
+            <textarea id="html" placeholder="Generated HTML"></textarea>
+        </div>
+        <div>
+            <div>
+                <button onclick="pasteCode('css')">Paste</button>
+                <button onclick="clearCode('css')">Clear</button>
+                <button onclick="copyCode('css')">Copy</button>
+            </div>
+            <textarea id="css" placeholder="Generated CSS"></textarea>
+        </div>
+        <div>
+            <div>
+                <button onclick="pasteCode('js')">Paste</button>
+                <button onclick="clearCode('js')">Clear</button>
+                <button onclick="copyCode('js')">Copy</button>
+            </div>
+            <textarea id="js" placeholder="Generated JS">// No JS generated yet</textarea>
         </div>
     </div>
 
     <script>
-        let currentMode = 'edit';
-        let currentDevice = 'laptop';
-        let zoomLevel = 1;
-        let elements = [];
-        let history = [];
-        let redoStack = [];
-        let selectedElement = null;
+        const workspaceContainer = document.getElementById('workspace-container');
+        const workspace = document.getElementById('workspace');
+        const pageContainer = document.getElementById('page');
+        const htmlArea = document.getElementById('html');
+        const cssArea = document.getElementById('css');
+        const jsArea = document.getElementById('js');
+        const propContent = document.getElementById('prop-content');
+        const deleteBtn = document.getElementById('delete-btn');
+        const editModeBtn = document.getElementById('edit-mode-btn');
+        const viewModeBtn = document.getElementById('view-mode-btn');
+        const phoneBtn = document.getElementById('phone-btn');
+        const tabletBtn = document.getElementById('tablet-btn');
+        const laptopBtn = document.getElementById('laptop-btn');
+        const pageSelector = document.getElementById('page-selector');
+        const pageNameInput = document.getElementById('page-name');
+        const applyCodeBtn = document.getElementById('apply-code-btn');
+        const zoomLevel = document.getElementById('zoom-level');
+        const layersPanel = document.getElementById('layers-panel');
+        const layersList = document.getElementById('layers-list');
+        const rulerX = document.getElementById('ruler-x');
+        const rulerY = document.getElementById('ruler-y');
 
-        function setMode(mode) {
-            currentMode = mode;
-            alert(`Switched to ${mode} mode`);
+        let dragging = null;
+        let offsetX = 0;
+        let offsetY = 0;
+        let selected = null;
+        let mode = 'edit';
+        let currentPage = 'page1';
+        let pages = { 'page1': { name: 'index.html', html: '<div id="page"></div>', css: '#page {\n  position: relative;\n  background-color: #fff;\n  width: 1024px;\n  min-height: 768px;\n}\n', js: '// No JS generated yet', elements: [] } };
+        let pageCount = 1;
+        let activeDropdown = null;
+        let zoom = 1;
+        let showRulers = true;
+        let showGuides = true;
+        let showLayers = false;
+        let guides = [];
+        const resizeObserver = new ResizeObserver(() => updateCode());
+        const history = [];
+        let historyIndex = -1;
+
+        // New element categories
+        const elementCategories = {
+            'shapes': [
+                { type: 'div', class: 'shape rectangle', width: '100', height: '50', name: 'Rectangle' },
+                { type: 'div', class: 'shape square', width: '100', height: '100', name: 'Square' },
+                { type: 'div', class: 'shape rounded-rectangle', width: '100', height: '50', name: 'Rounded Rectangle' },
+                { type: 'div', class: 'shape circle', width: '50', height: '50', name: 'Circle' },
+                { type: 'div', class: 'shape oval', width: '100', height: '50', name: 'Oval' },
+                { type: 'div', class: 'shape triangle', width: '100', height: '100', name: 'Triangle' },
+                { type: 'div', class: 'shape pentagon', width: '100', height: '100', name: 'Pentagon' },
+                { type: 'div', class: 'shape hexagon', width: '100', height: '100', name: 'Hexagon' },
+                { type: 'div', class: 'shape octagon', width: '100', height: '100', name: 'Octagon' },
+                { type: 'div', class: 'shape trapezoid', width: '100', height: '50', name: 'Trapezoid' },
+                { type: 'div', class: 'shape diamond', width: '100', height: '100', name: 'Diamond' },
+                { type: 'div', class: 'shape star', width: '100', height: '100', name: 'Star' },
+                { type: 'div', class: 'shape parallelogram', width: '100', height: '50', name: 'Parallelogram' },
+                { type: 'div', class: 'shape heart', width: '100', height: '90', name: 'Heart' },
+                { type: 'div', class: 'shape infinity', width: '100', height: '40', name: 'Infinity' }
+            ],
+            'icons': [
+                { type: 'i', class: 'fas fa-home icon', width: '30', height: '30', name: 'Home Icon' },
+                { type: 'i', class: 'fas fa-user icon', width: '30', height: '30', name: 'User Icon' },
+                { type: 'i', class: 'fas fa-cog icon', width: '30', height: '30', name: 'Settings Icon' },
+                { type: 'i', class: 'fas fa-search icon', width: '30', height: '30', name: 'Search Icon' },
+                { type: 'i', class: 'fas fa-heart icon', width: '30', height: '30', name: 'Heart Icon' },
+                { type: 'i', class: 'fas fa-star icon', width: '30', height: '30', name: 'Star Icon' },
+                { type: 'i', class: 'fas fa-bell icon', width: '30', height: '30', name: 'Bell Icon' },
+                { type: 'i', class: 'fas fa-camera icon', width: '30', height: '30', name: 'Camera Icon' },
+                { type: 'i', class: 'fas fa-envelope icon', width: '30', height: '30', name: 'Email Icon' },
+                { type: 'i', class: 'fas fa-shopping-cart icon', width: '30', height: '30', name: 'Cart Icon' },
+                { type: 'i', class: 'fas fa-cloud icon', width: '30', height: '30', name: 'Cloud Icon' },
+                { type: 'i', class: 'fas fa-lock icon', width: '30', height: '30', name: 'Lock Icon' },
+                { type: 'i', class: 'fas fa-play icon', width: '30', height: '30', name: 'Play Icon' },
+                { type: 'i', class: 'fas fa-pause icon', width: '30', height: '30', name: 'Pause Icon' },
+                { type: 'i', class: 'fas fa-trash icon', width: '30', height: '30', name: 'Trash Icon' },
+                { type: 'i', class: 'fas fa-download icon', width: '30', height: '30', name: 'Download Icon' },
+                { type: 'i', class: 'fas fa-upload icon', width: '30', height: '30', name: 'Upload Icon' },
+                { type: 'i', class: 'fas fa-print icon', width: '30', height: '30', name: 'Print Icon' },
+                { type: 'i', class: 'fas fa-share icon', width: '30', height: '30', name: 'Share Icon' },
+                { type: 'i', class: 'fas fa-bookmark icon', width: '30', height: '30', name: 'Bookmark Icon' },
+                { type: 'i', class: 'fas fa-filter icon', width: '30', height: '30', name: 'Filter Icon' },
+                { type: 'i', class: 'fas fa-sort icon', width: '30', height: '30', name: 'Sort Icon' },
+                { type: 'i', class: 'fas fa-refresh icon', width: '30', height: '30', name: 'Refresh Icon' },
+                { type: 'i', class: 'fas fa-plus icon', width: '30', height: '30', name: 'Plus Icon' },
+                { type: 'i', class: 'fas fa-minus icon', width: '30', height: '30', name: 'Minus Icon' },
+                { type: 'i', class: 'fas fa-times icon', width: '30', height: '30', name: 'Close Icon' },
+                { type: 'i', class: 'fas fa-check icon', width: '30', height: '30', name: 'Check Icon' },
+                { type: 'i', class: 'fas fa-exclamation icon', width: '30', height: '30', name: 'Exclamation Icon' },
+                { type: 'i', class: 'fas fa-question icon', width: '30', height: '30', name: 'Question Icon' },
+                { type: 'i', class: 'fas fa-info icon', width: '30', height: '30', name: 'Info Icon' },
+                { type: 'i', class: 'fas fa-arrow-left icon', width: '30', height: '30', name: 'Arrow Left Icon' },
+                { type: 'i', class: 'fas fa-arrow-right icon', width: '30', height: '30', name: 'Arrow Right Icon' },
+                { type: 'i', class: 'fas fa-arrow-up icon', width: '30', height: '30', name: 'Arrow Up Icon' },
+                { type: 'i', class: 'fas fa-arrow-down icon', width: '30', height: '30', name: 'Arrow Down Icon' },
+                { type: 'i', class: 'fas fa-chevron-left icon', width: '30', height: '30', name: 'Chevron Left Icon' },
+                { type: 'i', class: 'fas fa-chevron-right icon', width: '30', height: '30', name: 'Chevron Right Icon' },
+                { type: 'i', class: 'fas fa-chevron-up icon', width: '30', height: '30', name: 'Chevron Up Icon' },
+                { type: 'i', class: 'fas fa-chevron-down icon', width: '30', height: '30', name: 'Chevron Down Icon' },
+                { type: 'i', class: 'fas fa-angle-left icon', width: '30', height: '30', name: 'Angle Left Icon' },
+                { type: 'i', class: 'fas fa-angle-right icon', width: '30', height: '30', name: 'Angle Right Icon' },
+                { type: 'i', class: 'fas fa-angle-up icon', width: '30', height: '30', name: 'Angle Up Icon' },
+                { type: 'i', class: 'fas fa-angle-down icon', width: '30', height: '30', name: 'Angle Down Icon' },
+                { type: 'i', class: 'fas fa-bars icon', width: '30', height: '30', name: 'Menu Icon' },
+                { type: 'i', class: 'fas fa-ellipsis-h icon', width: '30', height: '30', name: 'Ellipsis Icon' },
+                { type: 'i', class: 'fas fa-circle icon', width: '30', height: '30', name: 'Circle Icon' },
+                { type: 'i', class: 'fas fa-square icon', width: '30', height: '30', name: 'Square Icon' }
+            ],
+            'social-icons': [
+                { type: 'a', class: 'fab fa-facebook-f social-icon', width: '30', height: '30', name: 'Facebook' },
+                { type: 'a', class: 'fab fa-twitter social-icon', width: '30', height: '30', name: 'Twitter' },
+                { type: 'a', class: 'fab fa-instagram social-icon', width: '30', height: '30', name: 'Instagram' },
+                { type: 'a', class: 'fab fa-linkedin-in social-icon', width: '30', height: '30', name: 'LinkedIn' },
+                { type: 'a', class: 'fab fa-github social-icon', width: '30', height: '30', name: 'GitHub' },
+                { type: 'a', class: 'fab fa-youtube social-icon', width: '30', height: '30', name: 'YouTube' },
+                { type: 'a', class: 'fab fa-tiktok social-icon', width: '30', height: '30', name: 'TikTok' },
+                { type: 'a', class: 'fab fa-discord social-icon', width: '30', height: '30', name: 'Discord' },
+                { type: 'a', class: 'fab fa-pinterest social-icon', width: '30', height: '30', name: 'Pinterest' },
+                { type: 'a', class: 'fab fa-whatsapp social-icon', width: '30', height: '30', name: 'WhatsApp' },
+                { type: 'a', class: 'fab fa-reddit social-icon', width: '30', height: '30', name: 'Reddit' },
+                { type: 'a', class: 'fab fa-snapchat social-icon', width: '30', height: '30', name: 'Snapchat' },
+                { type: 'a', class: 'fab fa-telegram social-icon', width: '30', height: '30', name: 'Telegram' },
+                { type: 'a', class: 'fab fa-twitch social-icon', width: '30', height: '30', name: 'Twitch' },
+                { type: 'a', class: 'fab fa-vimeo social-icon', width: '30', height: '30', name: 'Vimeo' },
+                { type: 'a', class: 'fab fa-behance social-icon', width: '30', height: '30', name: 'Behance' },
+                { type: 'a', class: 'fab fa-dribbble social-icon', width: '30', height: '30', name: 'Dribbble' },
+                { type: 'a', class: 'fab fa-medium social-icon', width: '30', height: '30', name: 'Medium' },
+                { type: 'a', class: 'fab fa-slack social-icon', width: '30', height: '30', name: 'Slack' },
+                { type: 'a', class: 'fab fa-skype social-icon', width: '30', height: '30', name: 'Skype' }
+            ],
+            'material-icons': [
+                { type: 'i', class: 'material-icons icon', content: 'home', width: '30', height: '30', name: 'Home' },
+                { type: 'i', class: 'material-icons icon', content: 'person', width: '30', height: '30', name: 'Person' },
+                { type: 'i', class: 'material-icons icon', content: 'settings', width: '30', height: '30', name: 'Settings' },
+                { type: 'i', class: 'material-icons icon', content: 'search', width: '30', height: '30', name: 'Search' },
+                { type: 'i', class: 'material-icons icon', content: 'favorite', width: '30', height: '30', name: 'Favorite' },
+                { type: 'i', class: 'material-icons icon', content: 'star', width: '30', height: '30', name: 'Star' },
+                { type: 'i', class: 'material-icons icon', content: 'notifications', width: '30', height: '30', name: 'Notifications' },
+                { type: 'i', class: 'material-icons icon', content: 'camera_alt', width: '30', height: '30', name: 'Camera' },
+                { type: 'i', class: 'material-icons icon', content: 'shopping_cart', width: '30', height: '30', name: 'Shopping Cart' },
+                { type: 'i', class: 'material-icons icon', content: 'email', width: '30', height: '30', name: 'Email' },
+                { type: 'i', class: 'material-icons icon', content: 'phone', width: '30', height: '30', name: 'Phone' },
+                { type: 'i', class: 'material-icons icon', content: 'chat', width: '30', height: '30', name: 'Chat' },
+                { type: 'i', class: 'material-icons icon', content: 'menu', width: '30', height: '30', name: 'Menu' },
+                { type: 'i', class: 'material-icons icon', content: 'close', width: '30', height: '30', name: 'Close' },
+                { type: 'i', class: 'material-icons icon', content: 'check', width: '30', height: '30', name: 'Check' },
+                { type: 'i', class: 'material-icons icon', content: 'arrow_back', width: '30', height: '30', name: 'Arrow Back' },
+                { type: 'i', class: 'material-icons icon', content: 'arrow_forward', width: '30', height: '30', name: 'Arrow Forward' },
+                { type: 'i', class: 'material-icons icon', content: 'arrow_upward', width: '30', height: '30', name: 'Arrow Upward' },
+                { type: 'i', class: 'material-icons icon', content: 'arrow_downward', width: '30', height: '30', name: 'Arrow Downward' },
+                { type: 'i', class: 'material-icons icon', content: 'add', width: '30', height: '30', name: 'Add' },
+                { type: 'i', class: 'material-icons icon', content: 'remove', width: '30', height: '30', name: 'Remove' },
+                { type: 'i', class: 'material-icons icon', content: 'delete', width: '30', height: '30', name: 'Delete' },
+                { type: 'i', class: 'material-icons icon', content: 'edit', width: '30', height: '30', name: 'Edit' },
+                { type: 'i', class: 'material-icons icon', content: 'save', width: '30', height: '30', name: 'Save' },
+                { type: 'i', class: 'material-icons icon', content: 'refresh', width: '30', height: '30', name: 'Refresh' },
+                { type: 'i', class: 'material-icons icon', content: 'lock', width: '30', height: '30', name: 'Lock' },
+                { type: 'i', class: 'material-icons icon', content: 'visibility', width: '30', height: '30', name: 'Visibility' },
+                { type: 'i', class: 'material-icons icon', content: 'visibility_off', width: '30', height: '30', name: 'Visibility Off' },
+                { type: 'i', class: 'material-icons icon', content: 'info', width: '30', height: '30', name: 'Info' },
+                { type: 'i', class: 'material-icons icon', content: 'warning', width: '30', height: '30', name: 'Warning' },
+                { type: 'i', class: 'material-icons icon', content: 'error', width: '30', height: '30', name: 'Error' },
+                { type: 'i', class: 'material-icons icon', content: 'help', width: '30', height: '30', name: 'Help' },
+                { type: 'i', class: 'material-icons icon', content: 'calendar_today', width: '30', height: '30', name: 'Calendar' },
+                { type: 'i', class: 'material-icons icon', content: 'location_on', width: '30', height: '30', name: 'Location' },
+                { type: 'i', class: 'material-icons icon', content: 'map', width: '30', height: '30', name: 'Map' },
+                { type: 'i', class: 'material-icons icon', content: 'directions', width: '30', height: '30', name: 'Directions' },
+                { type: 'i', class: 'material-icons icon', content: 'navigation', width: '30', height: '30', name: 'Navigation' },
+                { type: 'i', class: 'material-icons icon', content: 'my_location', width: '30', height: '30', name: 'My Location' },
+                { type: 'i', class: 'material-icons icon', content: 'local_offer', width: '30', height: '30', name: 'Local Offer' },
+                { type: 'i', class: 'material-icons icon', content: 'bookmark', width: '30', height: '30', name: 'Bookmark' },
+                { type: 'i', class: 'material-icons icon', content: 'book', width: '30', height: '30', name: 'Book' },
+                { type: 'i', class: 'material-icons icon', content: 'school', width: '30', height: '30', name: 'School' },
+                { type: 'i', class: 'material-icons icon', content: 'work', width: '30', height: '30', name: 'Work' },
+                { type: 'i', class: 'material-icons icon', content: 'build', width: '30', height: '30', name: 'Build' },
+                { type: 'i', class: 'material-icons icon', content: 'favorite_border', width: '30', height: '30', name: 'Favorite Border' },
+                { type: 'i', class: 'material-icons icon', content: 'share', width: '30', height: '30', name: 'Share' },
+                { type: 'i', class: 'material-icons icon', content: 'thumb_up', width: '30', height: '30', name: 'Thumb Up' },
+                { type: 'i', class: 'material-icons icon', content: 'thumb_down', width: '30', height: '30', name: 'Thumb Down' }
+            ],
+            'navigations': [
+                { type: 'div', class: 'top-nav', content: '<a href="#">Home</a><a href="#">About</a><a href="#">Services</a><a href="#">Contact</a>', width: '100%', height: '50px', name: 'Top Navigation' },
+                { type: 'div', class: 'sidebar', content: '<a href="#">Dashboard</a><a href="#">Profile</a><a href="#">Messages</a><a href="#">Settings</a>', width: '200px', height: '100%', name: 'Sidebar' },
+                { type: 'div', class: 'bottom-nav', content: '<a href="#"><i class="fas fa-home"></i></a><a href="#"><i class="fas fa-search"></i></a><a href="#"><i class="fas fa-user"></i></a>', width: '100%', height: '60px', name: 'Bottom Navigation' },
+                { type: 'div', class: 'breadcrumbs', content: '<a href="#">Home</a> > <a href="#">Category</a> > Current', width: '100%', height: '30px', name: 'Breadcrumbs' },
+                { type: 'div', class: 'pagination', content: '<a href="#">&laquo;</a><a href="#">1</a><a href="#">2</a><a href="#">3</a><a href="#">&raquo;</a>', width: '100%', height: '40px', name: 'Pagination' },
+                { type: 'div', class: 'tab-bar', content: '<button class="tab-btn active">Tab 1</button><button class="tab-btn">Tab 2</button><button class="tab-btn">Tab 3</button>', width: '100%', height: '40px', name: 'Tab Bar' },
+                { type: 'button', class: 'fab', content: '+', width: '56px', height: '56px', name: 'Floating Action Button' },
+                { type: 'div', class: 'step-indicator', content: '<div class="step active">1</div><div class="step">2</div><div class="step">3</div>', width: '100%', height: '50px', name: 'Step Indicator' },
+                { type: 'button', class: 'back-to-top', content: '↑', width: '40px', height: '40px', name: 'Back to Top Button' }
+            ],
+            'menus': [
+                { type: 'div', class: 'dropdown-menu', content: '<button class="dropdown-btn">Menu</button><div class="dropdown-content"><a href="#">Option 1</a><a href="#">Option 2</a><a href="#">Option 3</a></div>', width: '150px', height: 'auto', name: 'Dropdown Menu' },
+                { type: 'div', class: 'accordion-menu', content: '<div class="accordion-item"><button class="accordion-btn">Section 1</button><div class="accordion-content">Content 1</div></div><div class="accordion-item"><button class="accordion-btn">Section 2</button><div class="accordion-content">Content 2</div></div>', width: '250px', height: 'auto', name: 'Accordion Menu' },
+                { type: 'div', class: 'mega-menu', content: '<div class="mega-menu-column"><h3>Category 1</h3><a href="#">Link 1</a><a href="#">Link 2</a></div><div class="mega-menu-column"><h3>Category 2</h3><a href="#">Link 3</a><a href="#">Link 4</a></div>', width: '500px', height: '200px', name: 'Mega Menu' },
+                { type: 'div', class: 'context-menu', content: '<div class="context-menu-item">Copy</div><div class="context-menu-item">Paste</div><div class="context-menu-item">Cut</div>', width: '120px', height: 'auto', name: 'Context Menu' }
+            ],
+            'media': [
+                { type: 'img', src: 'https://via.placeholder.com/300x200', width: '300', height: '200', name: 'Image Placeholder' },
+                { type: 'div', class: 'image-gallery', content: '<img src="https://via.placeholder.com/150"><img src="https://via.placeholder.com/150"><img src="https://via.placeholder.com/150">', width: '100%', height: 'auto', name: 'Image Gallery' },
+                { type: 'div', class: 'video-player', content: '<video controls><source src="#" type="video/mp4"></video>', width: '320', height: '240', name: 'Video Player' },
+                { type: 'div', class: 'audio-player', content: '<audio controls><source src="#" type="audio/mpeg"></audio>', width: '300', height: '50', name: 'Audio Player' },
+                { type: 'div', class: 'carousel', content: '<div class="carousel-slide"><img src="https://via.placeholder.com/400x300"></div><button class="carousel-prev">❮</button><button class="carousel-next">❯</button>', width: '400', height: '300', name: 'Image Carousel' },
+                { type: 'div', class: 'lightbox', content: '<a href="#"><img src="https://via.placeholder.com/150"></a>', width: '150', height: '150', name: 'Lightbox' },
+                { type: 'div', class: 'youtube-embed', content: '<iframe width="560" height="315" src="https://www.youtube.com/embed/dQw4w9WgXcQ" frameborder="0" allowfullscreen></iframe>', width: '560', height: '315', name: 'YouTube Embed' }
+            ],
+            'forms': [
+                { type: 'input', class: 'text-input', placeholder: 'Enter text here...', width: '200', height: '30', name: 'Text Input' },
+                { type: 'textarea', class: 'textarea', placeholder: 'Enter longer text here...', width: '300', height: '100', name: 'Textarea' },
+                { type: 'select', class: 'dropdown-select', content: '<option value="1">Option 1</option><option value="2">Option 2</option>', width: '200', height: '30', name: 'Dropdown Select' },
+                { type: 'div', class: 'checkbox-group', content: '<label><input type="checkbox"> Option 1</label><label><input type="checkbox"> Option 2</label>', width: '150', height: 'auto', name: 'Checkbox Group' },
+                { type: 'div', class: 'radio-group', content: '<label><input type="radio" name="radio"> Option 1</label><label><input type="radio" name="radio"> Option 2</label>', width: '150', height: 'auto', name: 'Radio Group' },
+                { type: 'input', class: 'file-upload', type: 'file', width: '200', height: '30', name: 'File Upload' },
+                { type: 'div', class: 'search-bar', content: '<input type="text" placeholder="Search..."><button>🔍</button>', width: '250', height: '35', name: 'Search Bar' },
+                { type: 'input', class: 'range-slider', type: 'range', min: '0', max: '100', width: '200', height: '20', name: 'Range Slider' },
+                { type: 'button', class: 'submit-btn', content: 'Submit', width: '100', height: '40', name: 'Submit Button' },
+                { type: 'form', class: 'contact-form', content: '<input type="text" placeholder="Name"><input type="email" placeholder="Email"><textarea placeholder="Message"></textarea><button type="submit">Send</button>', width: '300', height: 'auto', name: 'Contact Form' }
+            ],
+            'utilities': [
+                { type: 'div', class: 'spinner', content: '', width: '40', height: '40', name: 'Loading Spinner' },
+                { type: 'div', class: 'progress-bar', content: '<div class="progress"></div>', width: '200', height: '20', name: 'Progress Bar' },
+                { type: 'div', class: 'tooltip', content: 'Hover me<span class="tooltip-text">Tooltip text</span>', width: '100', height: '30', name: 'Tooltip' },
+                { type: 'div', class: 'toast', content: 'This is a toast message', width: '250', height: '50', name: 'Toast Notification' },
+                { type: 'div', class: 'alert success', content: 'Success message', width: '300', height: '50', name: 'Success Alert' },
+                { type: 'div', class: 'alert warning', content: 'Warning message', width: '300', height: '50', name: 'Warning Alert' },
+                { type: 'div', class: 'alert error', content: 'Error message', width: '300', height: '50', name: 'Error Alert' },
+                { type: 'div', class: 'badge', content: 'New', width: '40', height: '20', name: 'Badge' },
+                { type: 'div', class: 'tag', content: 'Tag', width: '50', height: '25', name: 'Tag' },
+                { type: 'div', class: 'avatar', content: 'A', width: '50', height: '50', name: 'Avatar' },
+                { type: 'div', class: 'skeleton', content: '', width: '200', height: '100', name: 'Skeleton Loader' },
+                { type: 'div', class: 'divider', content: '', width: '100%', height: '1', name: 'Divider' }
+            ],
+            'creatives': [
+                { type: 'div', class: 'hero-header', content: '<h1>Welcome to our website</h1><p>This is a hero section</p><button>Get Started</button>', width: '100%', height: '400', name: 'Hero Header' },
+                { type: 'div', class: 'pricing-table', content: '<div class="pricing-plan"><h3>Basic</h3><p class="price">$9.99/mo</p><ul><li>Feature 1</li><li>Feature 2</li></ul><button>Select</button></div>', width: '250', height: '350', name: 'Pricing Table' },
+                { type: 'div', class: 'testimonial', content: '<p>"This product changed my life!"</p><p>- Happy Customer</p>', width: '300', height: '150', name: 'Testimonial' },
+                { type: 'div', class: 'countdown', content: '<div class="countdown-item"><span class="countdown-number">10</span><span class="countdown-label">Days</span></div>', width: '300', height: '100', name: 'Countdown Timer' },
+                { type: 'div', class: 'counter', content: '<span class="counter-number">0</span>', width: '100', height: '50', name: 'Counter' },
+                { type: 'div', class: 'timeline', content: '<div class="timeline-item"><div class="timeline-content">Event 1</div></div><div class="timeline-item"><div class="timeline-content">Event 2</div></div>', width: '100%', height: '200', name: 'Timeline' },
+                { type: 'div', class: 'parallax', content: '<div class="parallax-content">Parallax Section</div>', width: '100%', height: '300', name: 'Parallax' },
+                { type: 'div', class: 'particles', content: '', width: '100%', height: '200', name: 'Particles Background' },
+                { type: 'div', class: 'gradient-bg', content: 'Gradient Background', width: '100%', height: '200', name: 'Gradient Background' },
+                { type: 'div', class: 'animated-bg', content: 'Animated Background', width: '100%', height: '200', name: 'Animated Background' }
+            ],
+            'modals': [
+                { type: 'div', class: 'modal', content: '<h3>Modal Title</h3><p>Modal content goes here.</p><button class="close-modal">Close</button>', width: '400', height: '200', name: 'Basic Modal' },
+                { type: 'div', class: 'login-modal', content: '<h3>Login</h3><input type="text" placeholder="Username"><input type="password" placeholder="Password"><button>Login</button>', width: '300', height: '250', name: 'Login Modal' },
+                { type: 'div', class: 'signup-modal', content: '<h3>Sign Up</h3><input type="text" placeholder="Name"><input type="email" placeholder="Email"><input type="password" placeholder="Password"><button>Sign Up</button>', width: '300', height: '300', name: 'Signup Modal' },
+                { type: 'div', class: 'confirmation-modal', content: '<h3>Are you sure?</h3><p>This action cannot be undone.</p><button class="confirm-btn">Confirm</button><button class="cancel-btn">Cancel</button>', width: '350', height: '150', name: 'Confirmation Modal' }
+            ],
+            'buttons': [
+                { type: 'button', class: 'primary-btn', content: 'Primary Button', width: '150', height: '40', name: 'Primary Button' },
+                { type: 'button', class: 'secondary-btn', content: 'Secondary Button', width: '150', height: '40', name: 'Secondary Button' },
+                { type: 'button', class: 'outline-btn', content: 'Outline Button', width: '150', height: '40', name: 'Outline Button' },
+                { type: 'button', class: 'ghost-btn', content: 'Ghost Button', width: '150', height: '40', name: 'Ghost Button' },
+                { type: 'button', class: 'icon-btn', content: '<i class="fas fa-heart"></i>', width: '40', height: '40', name: 'Icon Button' },
+                { type: 'button', class: 'toggle-btn', content: 'Toggle', width: '80', height: '30', name: 'Toggle Button' },
+                { type: 'div', class: 'button-group', content: '<button>Left</button><button>Middle</button><button>Right</button>', width: 'auto', height: '40', name: 'Button Group' },
+                { type: 'button', class: 'loading-btn', content: 'Loading...', width: '150', height: '40', name: 'Loading Button' },
+                { type: 'button', class: 'animated-btn', content: 'Hover Me', width: '120', height: '40', name: 'Animated Button' }
+            ],
+            'cards': [
+                { type: 'div', class: 'card', content: '<h3>Card Title</h3><p>This is a basic card with some content.</p>', width: '250', height: '200', name: 'Basic Card' },
+                { type: 'div', class: 'profile-card', content: '<img src="https://via.placeholder.com/100"><h3>John Doe</h3><p>Web Developer</p>', width: '200', height: '250', name: 'Profile Card' },
+                { type: 'div', class: 'product-card', content: '<img src="https://via.placeholder.com/150"><h3>Product Name</h3><p>$19.99</p><button>Add to Cart</button>', width: '200', height: '300', name: 'Product Card' },
+                { type: 'div', class: 'blog-card', content: '<img src="https://via.placeholder.com/250x150"><h3>Blog Post Title</h3><p>Short excerpt from the blog post...</p><a href="#">Read More</a>', width: '250', height: '350', name: 'Blog Card' },
+                { type: 'div', class: 'stats-card', content: '<h3>Statistics</h3><p class="stat-number">1,234</p><p class="stat-label">Total Users</p>', width: '200', height: '150', name: 'Stats Card' },
+                { type: 'div', class: 'testimonial-card', content: '<p>"This product is amazing!"</p><h3>Jane Smith</h3><p>Customer</p>', width: '250', height: '200', name: 'Testimonial Card' },
+                { type: 'div', class: 'pricing-card', content: '<h3>Premium Plan</h3><p class="price">$29.99/mo</p><ul><li>Feature 1</li><li>Feature 2</li><li>Feature 3</li></ul><button>Select Plan</button>', width: '250', height: '350', name: 'Pricing Card' }
+            ],
+            'sliders': [
+                { type: 'div', class: 'image-slider', content: '<div class="slide"><img src="https://via.placeholder.com/400x300"></div><button class="prev">❮</button><button class="next">❯</button>', width: '400', height: '300', name: 'Image Slider' },
+                { type: 'div', class: 'content-slider', content: '<div class="slide"><h3>Slide 1</h3><p>Content for slide 1</p></div><div class="slide"><h3>Slide 2</h3><p>Content for slide 2</p></div>', width: '400', height: '250', name: 'Content Slider' },
+                { type: 'div', class: 'testimonial-slider', content: '<div class="slide"><p>"Testimonial 1"</p><p>- Person 1</p></div><div class="slide"><p>"Testimonial 2"</p><p>- Person 2</p></div>', width: '500', height: '200', name: 'Testimonial Slider' },
+                { type: 'div', class: 'logo-slider', content: '<div class="slide"><img src="https://via.placeholder.com/150x80"></div><div class="slide"><img src="https://via.placeholder.com/150x80"></div>', width: '500', height: '100', name: 'Logo Slider' },
+                { type: 'div', class: 'thumbnail-slider', content: '<div class="main-slide"><img src="https://via.placeholder.com/400x300"></div><div class="thumbnails"><img src="https://via.placeholder.com/80x60"><img src="https://via.placeholder.com/80x60"></div>', width: '400', height: '400', name: 'Thumbnail Slider' }
+            ],
+            'fonts': [
+                { type: 'h1', class: 'roboto', content: 'Roboto Font', width: 'auto', height: 'auto', name: 'Roboto' },
+                { type: 'h1', class: 'open-sans', content: 'Open Sans Font', width: 'auto', height: 'auto', name: 'Open Sans' },
+                { type: 'h1', class: 'montserrat', content: 'Montserrat Font', width: 'auto', height: 'auto', name: 'Montserrat' },
+                { type: 'h1', class: 'lato', content: 'Lato Font', width: 'auto', height: 'auto', name: 'Lato' },
+                { type: 'h1', class: 'poppins', content: 'Poppins Font', width: 'auto', height: 'auto', name: 'Poppins' },
+                { type: 'h1', class: 'nunito', content: 'Nunito Font', width: 'auto', height: 'auto', name: 'Nunito' },
+                { type: 'h1', class: 'playfair', content: 'Playfair Display', width: 'auto', height: 'auto', name: 'Playfair Display' },
+                { type: 'h1', class: 'merriweather', content: 'Merriweather', width: 'auto', height: 'auto', name: 'Merriweather' },
+                { type: 'h1', class: 'source-code', content: 'Source Code Pro', width: 'auto', height: 'auto', name: 'Source Code Pro' },
+                { type: 'h1', class: 'bebas', content: 'Bebas Neue', width: 'auto', height: 'auto', name: 'Bebas Neue' },
+                { type: 'h1', class: 'raleway', content: 'Raleway', width: 'auto', height: 'auto', name: 'Raleway' },
+                { type: 'h1', class: 'oswald', content: 'Oswald', width: 'auto', height: 'auto', name: 'Oswald' }
+            ],
+            'gamification': [
+                { type: 'div', class: 'progress-ring', content: '<svg viewBox="0 0 100 100"><circle class="progress-ring-circle" stroke="#007bff" stroke-width="8" fill="transparent" r="40" cx="50" cy="50"/></svg><div class="progress-text">75%</div>', width: '100', height: '100', name: 'Progress Ring' },
+                { type: 'div', class: 'achievement-badge', content: '<i class="fas fa-trophy"></i><span>Achievement</span>', width: '100', height: '100', name: 'Achievement Badge' },
+                { type: 'div', class: 'xp-bar', content: '<div class="xp-progress"></div><div class="xp-text">XP: 250/500</div>', width: '200', height: '20', name: 'XP Bar' },
+                { type: 'div', class: 'leaderboard', content: '<h3>Leaderboard</h3><ol><li>Player 1: 1000 pts</li><li>Player 2: 900 pts</li></ol>', width: '250', height: '200', name: 'Leaderboard' },
+                { type: 'div', class: 'reward-popup', content: '<h3>Level Up!</h3><p>You reached level 5!</p><button>Claim Reward</button>', width: '200', height: '150', name: 'Reward Popup' },
+                { type: 'div', class: 'quest-log', content: '<h3>Quests</h3><ul><li>Complete profile: 50 XP</li><li>First purchase: 100 XP</li></ul>', width: '250', height: '200', name: 'Quest Log' }
+            ],
+            'ar': [
+                { type: 'div', class: 'ar-marker', content: '<i class="fas fa-cube"></i><p>AR Object</p>', width: '100', height: '100', name: 'AR Marker' },
+                { type: 'div', class: 'ar-preview', content: '<img src="https://via.placeholder.com/200x200"><p>AR Preview</p>', width: '200', height: '250', name: 'AR Preview' },
+                { type: 'div', class: 'ar-button', content: '<i class="fas fa-vr-cardboard"></i><p>View in AR</p>', width: '120', height: '120', name: 'AR Button' }
+            ],
+            '3d': [
+                { type: 'div', class: '3d-object', content: '<i class="fas fa-cube"></i><p>3D Object</p>', width: '100', height: '100', name: '3D Object' },
+                { type: 'div', class: '3d-button', content: '<i class="fas fa-cube"></i><p>3D View</p>', width: '100', height: '100', name: '3D Button' },
+                { type: 'div', class: '3d-rotate', content: '<img src="https://via.placeholder.com/150x150"><p>Rotate me</p>', width: '150', height: '200', name: '3D Rotate' }
+            ],
+            'voice': [
+                { type: 'div', class: 'voice-button', content: '<i class="fas fa-microphone"></i><p>Voice Command</p>', width: '120', height: '120', name: 'Voice Button' },
+                { type: 'div', class: 'voice-wave', content: '<div class="wave"></div><p>Listening...</p>', width: '200', height: '100', name: 'Voice Wave' },
+                { type: 'div', class: 'voice-response', content: '<i class="fas fa-robot"></i><p>"How can I help?"</p>', width: '150', height: '150', name: 'Voice Response' }
+            ],
+            'ai': [
+                { type: 'div', class: 'ai-suggestion', content: '<h3>AI Suggestions</h3><p>Based on your preferences...</p>', width: '250', height: '150', name: 'AI Suggestion' },
+                { type: 'div', class: 'ai-chat', content: '<div class="chat-message ai">Hello, how can I help?</div><div class="chat-message user">I need assistance.</div>', width: '300', height: '200', name: 'AI Chat' },
+                { type: 'div', class: 'ai-loading', content: '<div class="ai-thinking">Thinking...</div>', width: '150', height: '50', name: 'AI Loading' }
+            ]
+        };
+
+        // Initialize the workspace
+        function initWorkspace() {
+            updateRulers();
+            addToHistory();
         }
 
-        function setDevice(device) {
-            currentDevice = device;
-            const canvas = document.getElementById('canvas');
-            if (device === 'phone') {
-                canvas.style.width = '375px';
-                canvas.style.height = '667px';
-            } else if (device === 'tablet') {
-                canvas.style.width = '768px';
-                canvas.style.height = '1024px';
-            } else {
-                canvas.style.width = '100%';
-                canvas.style.height = '100%';
-            }
-        }
-
-        function createPage() {
-            alert('Page created');
-        }
-
-        function newPage() {
-            document.getElementById('canvas').innerHTML = '';
-            elements = [];
-            history = [];
-            redoStack = [];
-            updateLayerPanel();
-        }
-
-        function applyCode() {
-            alert('Code applied');
-        }
-
-        function allowDrop(event) {
-            event.preventDefault();
-        }
-
-        function drop(event) {
-            event.preventDefault();
-            if (currentMode === 'edit') {
-                const elementType = event.dataTransfer.getData('text');
-                addElement(elementType);
-            }
-        }
-
-        function addElement(type) {
-            const canvas = document.getElementById('canvas');
-            const element = document.createElement('div');
-            element.className = 'absolute bg-gray-200 p-2 border';
+        // Add element to page
+        function addElement(elementData) {
+            const element = document.createElement(elementData.type);
+            element.className = elementData.class;
+            element.style.position = 'absolute';
             element.style.left = '50px';
             element.style.top = '50px';
-            element.draggable = true;
-            element.ondragstart = (e) => e.dataTransfer.setData('text', type);
-            element.onclick = () => selectElement(element, type);
-            element.innerHTML = type;
-            canvas.appendChild(element);
-            elements.push({ type, element });
-            history.push({ action: 'add', element, type });
-            redoStack = [];
-            updateLayerPanel();
+            element.style.width = elementData.width + (typeof elementData.width === 'number' ? 'px' : '');
+            element.style.height = elementData.height + (typeof elementData.height === 'number' ? 'px' : '');
+            element.setAttribute('data-name', elementData.name);
+            
+            if (elementData.content) {
+                element.innerHTML = elementData.content;
+            } else if (elementData.type === 'input' || elementData.type === 'textarea') {
+                if (elementData.placeholder) element.placeholder = elementData.placeholder;
+                if (elementData.type) element.type = elementData.type;
+            }
+            
+            pageContainer.appendChild(element);
+            
+            // Add element to pages data
+            pages[currentPage].elements.push({
+                type: elementData.type,
+                class: elementData.class,
+                content: elementData.content || '',
+                width: elementData.width,
+                height: elementData.height,
+                name: elementData.name,
+                left: '50px',
+                top: '50px'
+            });
+            
+            // Make element draggable and resizable
+            makeElementInteractive(element);
+            
+            // Update code and layers
+            updateCode();
+            updateLayers();
+            addToHistory();
         }
 
-        function addFont(font) {
-            document.body.style.fontFamily = font;
-            history.push({ action: 'font', font });
-            redoStack = [];
+        // Make element draggable and resizable
+        function makeElementInteractive(element) {
+            // Add resize observer
+            resizeObserver.observe(element);
+            
+            // Make draggable
+            element.addEventListener('mousedown', startDrag);
+            
+            // Make selectable
+            element.addEventListener('click', (e) => {
+                e.stopPropagation();
+                selectElement(element);
+            });
         }
 
-        function applyDesignSystem(system) {
-            alert(`Applied ${system} design system`);
-            history.push({ action: 'design-system', system });
-            redoStack = [];
+        // Start dragging element
+        function startDrag(e) {
+            if (mode !== 'edit') return;
+            
+            dragging = e.target;
+            offsetX = e.clientX - dragging.getBoundingClientRect().left;
+            offsetY = e.clientY - dragging.getBoundingClientRect().top;
+            
+            document.addEventListener('mousemove', dragElement);
+            document.addEventListener('mouseup', stopDrag);
+            
+            e.preventDefault();
         }
 
-        function applyTrend(trend) {
-            alert(`Applied ${trend} trend`);
-            history.push({ action: 'trend', trend });
-            redoStack = [];
+        // Drag element
+        function dragElement(e) {
+            if (!dragging) return;
+            
+            const workspaceRect = workspace.getBoundingClientRect();
+            const x = e.clientX - workspaceRect.left - offsetX;
+            const y = e.clientY - workspaceRect.top - offsetY;
+            
+            dragging.style.left = `${x / zoom}px`;
+            dragging.style.top = `${y / zoom}px`;
+            
+            // Update element data in pages
+            updateElementData(dragging);
         }
 
-        function selectElement(element, type) {
-            selectedElement = element;
-            const propertiesPanel = document.getElementById('properties-panel');
-            propertiesPanel.innerHTML = `<p>Properties for ${type}</p>
-                <input type="text" placeholder="Width" oninput="updateProperty('width', this.value)">
-                <input type="text" placeholder="Height" oninput="updateProperty('height', this.value)">
-                <input type="text" placeholder="Color" oninput="updateProperty('backgroundColor', this.value)">`;
+        // Stop dragging element
+        function stopDrag() {
+            dragging = null;
+            document.removeEventListener('mousemove', dragElement);
+            document.removeEventListener('mouseup', stopDrag);
+            addToHistory();
         }
 
-        function updateProperty(property, value) {
-            if (selectedElement) {
-                selectedElement.style[property] = value;
-                history.push({ action: 'update', element: selectedElement, property, value });
-                redoStack = [];
+        // Select element
+        function selectElement(element) {
+            if (selected) {
+                selected.classList.remove('selected');
+            }
+            
+            selected = element;
+            selected.classList.add('selected');
+            
+            // Show properties
+            showProperties(element);
+            
+            // Show delete button
+            deleteBtn.style.display = 'block';
+            deleteBtn.onclick = () => {
+                element.remove();
+                selected = null;
+                propContent.innerHTML = '';
+                deleteBtn.style.display = 'none';
+                updateCode();
+                updateLayers();
+                addToHistory();
+            };
+        }
+
+        // Show properties for selected element
+        function showProperties(element) {
+            propContent.innerHTML = `
+                <h4>${element.getAttribute('data-name')}</h4>
+                <label>Width: <input type="number" value="${parseInt(element.style.width)}" onchange="updateElementStyle('width', this.value)"></label>
+                <label>Height: <input type="number" value="${parseInt(element.style.height)}" onchange="updateElementStyle('height', this.value)"></label>
+                <label>Left: <input type="number" value="${parseInt(element.style.left)}" onchange="updateElementStyle('left', this.value)"></label>
+                <label>Top: <input type="number" value="${parseInt(element.style.top)}" onchange="updateElementStyle('top', this.value)"></label>
+                <label>Background Color: <input type="color" value="${element.style.backgroundColor || '#007bff'}" onchange="updateElementStyle('backgroundColor', this.value)"></label>
+                <label>Color: <input type="color" value="${element.style.color || '#000000'}" onchange="updateElementStyle('color', this.value)"></label>
+                <label>Border Radius: <input type="number" value="${parseInt(element.style.borderRadius) || 0}" onchange="updateElementStyle('borderRadius', this.value + 'px')"></label>
+                <label>Font Size: <input type="number" value="${parseInt(element.style.fontSize) || 16}" onchange="updateElementStyle('fontSize', this.value + 'px')"></label>
+            `;
+        }
+
+        // Update element style
+        function updateElementStyle(property, value) {
+            if (!selected) return;
+            
+            selected.style[property] = value;
+            updateElementData(selected);
+            updateCode();
+            addToHistory();
+        }
+
+        // Update element data in pages
+        function updateElementData(element) {
+            const index = Array.from(pageContainer.children).indexOf(element);
+            if (index !== -1) {
+                pages[currentPage].elements[index].left = element.style.left;
+                pages[currentPage].elements[index].top = element.style.top;
+                pages[currentPage].elements[index].width = element.style.width;
+                pages[currentPage].elements[index].height = element.style.height;
             }
         }
 
-        function deleteSelected() {
-            if (selectedElement) {
-                selectedElement.remove();
-                elements = elements.filter(e => e.element !== selectedElement);
-                history.push({ action: 'delete', element: selectedElement });
-                redoStack = [];
-                selectedElement = null;
-                updateLayerPanel();
+        // Update generated code
+        function updateCode() {
+            let html = `<div id="page">\n`;
+            let css = `#page {\n  position: relative;\n  background-color: #fff;\n  width: ${pageContainer.offsetWidth}px;\n  min-height: ${pageContainer.offsetHeight}px;\n}\n\n`;
+            
+            for (const child of pageContainer.children) {
+                const name = child.getAttribute('data-name');
+                const left = child.style.left;
+                const top = child.style.top;
+                const width = child.style.width;
+                const height = child.style.height;
+                const bgColor = child.style.backgroundColor;
+                const color = child.style.color;
+                const borderRadius = child.style.borderRadius;
+                const fontSize = child.style.fontSize;
+                
+                html += `  <div class="${child.className}" data-name="${name}" style="position: absolute; left: ${left}; top: ${top}; width: ${width}; height: ${height}; background-color: ${bgColor}; color: ${color}; border-radius: ${borderRadius}; font-size: ${fontSize}">${child.innerHTML}</div>\n`;
+                
+                css += `.${child.className} {\n  position: absolute;\n  left: ${left};\n  top: ${top};\n  width: ${width};\n  height: ${height};\n  background-color: ${bgColor};\n  color: ${color};\n  border-radius: ${borderRadius};\n  font-size: ${fontSize};\n}\n\n`;
+            }
+            
+            html += `</div>`;
+            
+            htmlArea.value = html;
+            cssArea.value = css;
+        }
+
+        // Apply code changes
+        function applyCode() {
+            // This would parse the code and update the page
+            // For now, just show a message
+            alert('Code applied successfully!');
+        }
+
+        // Set mode (edit or view)
+        function setMode(newMode) {
+            mode = newMode;
+            
+            if (mode === 'edit') {
+                pageContainer.className = 'edit-mode';
+                editModeBtn.classList.add('active');
+                viewModeBtn.classList.remove('active');
+                phoneBtn.style.display = 'none';
+                tabletBtn.style.display = 'none';
+                laptopBtn.style.display = 'none';
+            } else {
+                pageContainer.className = 'view-mode ' + (pageContainer.className.includes('phone') ? 'phone' : 
+                                                    pageContainer.className.includes('tablet') ? 'tablet' : 'laptop');
+                viewModeBtn.classList.add('active');
+                editModeBtn.classList.remove('active');
+                phoneBtn.style.display = 'inline-block';
+                tabletBtn.style.display = 'inline-block';
+                laptopBtn.style.display = 'inline-block';
             }
         }
 
-        function paste() {
-            alert('Pasted element');
-        }
-
-        function clear() {
-            document.getElementById('canvas').innerHTML = '';
-            elements = [];
-            history.push({ action: 'clear' });
-            redoStack = [];
-            updateLayerPanel();
-        }
-
-        function copy() {
-            if (selectedElement) {
-                alert('Copied element');
+        // Set preview device
+        function setPreview(device) {
+            if (mode === 'view') {
+                pageContainer.className = 'view-mode ' + device;
             }
         }
 
-        function toggleZoomControls() {
-            const zoomControls = document.getElementById('zoom-controls');
-            zoomControls.classList.toggle('hidden');
-            history.push({ action: 'toggle-zoom' });
-            redoStack = [];
+        // Open category dropdown
+        function openCategory(category, button) {
+            // Close any open dropdown
+            if (activeDropdown) {
+                activeDropdown.style.display = 'none';
+            }
+            
+            // Create dropdown if it doesn't exist
+            let dropdown = document.getElementById(category + '-dropdown');
+            if (!dropdown) {
+                dropdown = document.createElement('div');
+                dropdown.id = category + '-dropdown';
+                dropdown.className = 'dropdown';
+                
+                const ul = document.createElement('ul');
+                
+                for (const item of elementCategories[category]) {
+                    const li = document.createElement('li');
+                    li.textContent = item.name;
+                    li.setAttribute('draggable', 'true');
+                    li.addEventListener('dragstart', (e) => {
+                        e.dataTransfer.setData('elementData', JSON.stringify(item));
+                    });
+                    li.addEventListener('click', () => {
+                        addElement(item);
+                        dropdown.style.display = 'none';
+                        activeDropdown = null;
+                    });
+                    ul.appendChild(li);
+                }
+                
+                dropdown.appendChild(ul);
+                document.body.appendChild(dropdown);
+            }
+            
+            // Position and show dropdown
+            const rect = button.getBoundingClientRect();
+            dropdown.style.left = rect.left + 'px';
+            dropdown.style.top = rect.bottom + 'px';
+            dropdown.style.display = 'block';
+            
+            activeDropdown = dropdown;
+            
+            // Close dropdown when clicking elsewhere
+            document.addEventListener('click', function closeDropdown(e) {
+                if (!dropdown.contains(e.target) && e.target !== button) {
+                    dropdown.style.display = 'none';
+                    document.removeEventListener('click', closeDropdown);
+                    activeDropdown = null;
+                }
+            });
         }
 
-        function zoomIn() {
-            zoomLevel += 0.1;
-            document.getElementById('canvas').style.transform = `scale(${zoomLevel})`;
-            document.getElementById('zoom-level').innerText = `${Math.round(zoomLevel * 100)}%`;
-            history.push({ action: 'zoom', level: zoomLevel });
-            redoStack = [];
+        // Create new page
+        function newPage() {
+            pageCount++;
+            const pageId = 'page' + pageCount;
+            const pageName = prompt('Enter page name:', 'page' + pageCount + '.html');
+            
+            if (pageName) {
+                pages[pageId] = {
+                    name: pageName,
+                    html: '<div id="page"></div>',
+                    css: '#page {\n  position: relative;\n  background-color: #fff;\n  width: 1024px;\n  min-height: 768px;\n}\n',
+                    js: '// No JS generated yet',
+                    elements: []
+                };
+                
+                const option = document.createElement('option');
+                option.value = pageId;
+                option.textContent = pageName;
+                option.setAttribute('data-name', pageName);
+                pageSelector.appendChild(option);
+                
+                switchPage(pageId);
+                pageNameInput.value = pageName;
+            }
         }
 
-        function zoomOut() {
-            zoomLevel = Math.max(0.1, zoomLevel - 0.1);
-            document.getElementById('canvas').style.transform = `scale(${zoomLevel})`;
-            document.getElementById('zoom-level').innerText = `${Math.round(zoomLevel * 100)}%`;
-            history.push({ action: 'zoom', level: zoomLevel });
-            redoStack = [];
+        // Switch between pages
+        function switchPage(pageId) {
+            currentPage = pageId;
+            const page = pages[pageId];
+            
+            // Clear current page
+            while (pageContainer.firstChild) {
+                pageContainer.removeChild(pageContainer.firstChild);
+            }
+            
+            // Load page content
+            pageNameInput.value = page.name;
+            
+            // Add elements to page
+            for (const elementData of page.elements) {
+                const element = document.createElement(elementData.type);
+                element.className = elementData.class;
+                element.style.position = 'absolute';
+                element.style.left = elementData.left;
+                element.style.top = elementData.top;
+                element.style.width = elementData.width;
+                element.style.height = elementData.height;
+                element.setAttribute('data-name', elementData.name);
+                
+                if (elementData.content) {
+                    element.innerHTML = elementData.content;
+                }
+                
+                pageContainer.appendChild(element);
+                makeElementInteractive(element);
+            }
+            
+            updateCode();
+            updateLayers();
         }
 
+        // Create page from code
+        function createPage() {
+            const pageName = pageNameInput.value;
+            if (!pageName) return;
+            
+            pages[currentPage].name = pageName;
+            pages[currentPage].html = htmlArea.value;
+            pages[currentPage].css = cssArea.value;
+            pages[currentPage].js = jsArea.value;
+            
+            const option = pageSelector.querySelector(`option[value="${currentPage}"]`);
+            option.textContent = pageName;
+            option.setAttribute('data-name', pageName);
+            
+            alert('Page created successfully!');
+        }
+
+        // Copy code to clipboard
+        function copyCode(type) {
+            const textarea = document.getElementById(type);
+            textarea.select();
+            document.execCommand('copy');
+            alert(`${type.toUpperCase()} copied to clipboard!`);
+        }
+
+        // Paste code from clipboard
+        function pasteCode(type) {
+            const textarea = document.getElementById(type);
+            textarea.select();
+            document.execCommand('paste');
+            applyCodeBtn.style.display = 'inline-block';
+        }
+
+        // Clear code
+        function clearCode(type) {
+            document.getElementById(type).value = '';
+            applyCodeBtn.style.display = 'inline-block';
+        }
+
+        // Update layers panel
+        function updateLayers() {
+            layersList.innerHTML = '';
+            
+            for (const child of pageContainer.children) {
+                const li = document.createElement('li');
+                li.textContent = child.getAttribute('data-name');
+                
+                if (child === selected) {
+                    li.classList.add('selected');
+                }
+                
+                li.addEventListener('click', () => {
+                    selectElement(child);
+                });
+                
+                const visibility = document.createElement('span');
+                visibility.className = 'layer-visibility';
+                visibility.innerHTML = '👁';
+                visibility.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    child.style.display = child.style.display === 'none' ? 'block' : 'none';
+                    visibility.innerHTML = child.style.display === 'none' ? '👁‍🗨' : '👁';
+                });
+                
+                li.appendChild(visibility);
+                layersList.appendChild(li);
+            }
+        }
+
+        // Toggle rulers
         function toggleRulers() {
-            const rulerX = document.getElementById('ruler-x');
-            const rulerY = document.getElementById('ruler-y');
-            rulerX.classList.toggle('hidden');
-            rulerY.classList.toggle('hidden');
-            history.push({ action: 'toggle-rulers' });
-            redoStack = [];
+            showRulers = !showRulers;
+            rulerX.style.display = showRulers ? 'block' : 'none';
+            rulerY.style.display = showRulers ? 'block' : 'none';
+            updateRulers();
         }
 
-        function toggleLayerManagement() {
-            const layerPanel = document.getElementById('layer-panel');
-            layerPanel.classList.toggle('hidden');
-            updateLayerPanel();
-            history.push({ action: 'toggle-layers' });
-            redoStack = [];
+        // Update rulers
+        function updateRulers() {
+            if (!showRulers) return;
+            
+            // Clear existing marks
+            rulerX.innerHTML = '';
+            rulerY.innerHTML = '';
+            
+            // Add marks to X ruler
+            for (let i = 0; i < workspaceContainer.offsetWidth; i += 50) {
+                const mark = document.createElement('div');
+                mark.className = 'ruler-mark x';
+                mark.style.left = i + 'px';
+                rulerX.appendChild(mark);
+                
+                if (i % 100 === 0) {
+                    const label = document.createElement('div');
+                    label.className = 'ruler-label';
+                    label.textContent = i;
+                    label.style.left = (i - 10) + 'px';
+                    rulerX.appendChild(label);
+                }
+            }
+            
+            // Add marks to Y ruler
+            for (let i = 0; i < workspaceContainer.offsetHeight; i += 50) {
+                const mark = document.createElement('div');
+                mark.className = 'ruler-mark y';
+                mark.style.top = i + 'px';
+                rulerY.appendChild(mark);
+                
+                if (i % 100 === 0) {
+                    const label = document.createElement('div');
+                    label.className = 'ruler-label';
+                    label.textContent = i;
+                    label.style.top = (i - 5) + 'px';
+                    rulerY.appendChild(label);
+                }
+            }
         }
 
-        function updateLayerPanel() {
-            const layerPanel = document.getElementById('layer-panel');
-            layerPanel.innerHTML = elements.map((e, i) => `<div class="p-2 border-b">${e.type} <button onclick="selectElementFromLayer(${i})">Select</button></div>`).join('');
+        // Toggle guides
+        function toggleGuides() {
+            showGuides = !showGuides;
+            
+            if (showGuides) {
+                createGuides();
+            } else {
+                removeGuides();
+            }
         }
 
-        function selectElementFromLayer(index) {
-            const { element, type } = elements[index];
-            selectElement(element, type);
+        // Create guides
+        function createGuides() {
+            // Center guide
+            const centerX = document.createElement('div');
+            centerX.className = 'guide vertical';
+            centerX.style.left = '50%';
+            centerX.style.top = '0';
+            centerX.style.height = '100%';
+            centerX.id = 'guide-center-x';
+            
+            const centerY = document.createElement('div');
+            centerY.className = 'guide horizontal';
+            centerY.style.top = '50%';
+            centerY.style.left = '0';
+            centerY.style.width = '100%';
+            centerY.id = 'guide-center-y';
+            
+            workspaceContainer.appendChild(centerX);
+            workspaceContainer.appendChild(centerY);
+            
+            guides.push(centerX, centerY);
         }
 
+        // Remove guides
+        function removeGuides() {
+            for (const guide of guides) {
+                if (guide.parentNode) {
+                    guide.parentNode.removeChild(guide);
+                }
+            }
+            guides = [];
+        }
+
+        // Toggle layers panel
+        function toggleLayers() {
+            showLayers = !showLayers;
+            layersPanel.style.display = showLayers ? 'block' : 'none';
+            updateLayers();
+        }
+
+        // Zoom in
+        function zoomIn() {
+            if (zoom < 2) {
+                zoom += 0.1;
+                updateZoom();
+            }
+        }
+
+        // Zoom out
+        function zoomOut() {
+            if (zoom > 0.3) {
+                zoom -= 0.1;
+                updateZoom();
+            }
+        }
+
+        // Reset zoom
+        function resetZoom() {
+            zoom = 1;
+            updateZoom();
+        }
+
+        // Update zoom level
+        function updateZoom() {
+            workspace.style.transform = `scale(${zoom})`;
+            zoomLevel.textContent = Math.round(zoom * 100) + '%';
+        }
+
+        // Add to history for undo/redo
+        function addToHistory() {
+            // Remove future history if we're not at the end
+            if (historyIndex < history.length - 1) {
+                history.splice(historyIndex + 1);
+            }
+            
+            // Save current state
+            const state = {
+                html: pageContainer.innerHTML,
+                elements: Array.from(pageContainer.children).map(child => ({
+                    type: child.tagName.toLowerCase(),
+                    class: child.className,
+                    content: child.innerHTML,
+                    width: child.style.width,
+                    height: child.style.height,
+                    left: child.style.left,
+                    top: child.style.top,
+                    name: child.getAttribute('data-name')
+                }))
+            };
+            
+            history.push(state);
+            historyIndex = history.length - 1;
+        }
+
+        // Undo action
         function undo() {
-            if (history.length === 0) return;
-            const action = history.pop();
-            redoStack.push(action);
-            if (action.action === 'add') {
-                action.element.remove();
-                elements = elements.filter(e => e.element !== action.element);
-            } else if (action.action === 'delete') {
-                document.getElementById('canvas').appendChild(action.element);
-                elements.push({ element: action.element, type: action.element.innerHTML });
-            } else if (action.action === 'clear') {
-                elements.forEach(e => document.getElementById('canvas').appendChild(e.element));
-            } else if (action.action === 'update') {
-                action.element.style[action.property] = '';
-            } else if (action.action === 'font') {
-                document.body.style.fontFamily = '';
-            } else if (action.action === 'toggle-zoom') {
-                document.getElementById('zoom-controls').classList.toggle('hidden');
-            } else if (action.action === 'toggle-rulers') {
-                document.getElementById('ruler-x').classList.toggle('hidden');
-                document.getElementById('ruler-y').classList.toggle('hidden');
-            } else if (action.action === 'toggle-layers') {
-                document.getElementById('layer-panel').classList.toggle('hidden');
-            } else if (action.action === 'zoom') {
-                zoomLevel = action.level - 0.1;
-                document.getElementById('canvas').style.transform = `scale(${zoomLevel})`;
-                document.getElementById('zoom-level').innerText = `${Math.round(zoomLevel * 100)}%`;
+            if (historyIndex > 0) {
+                historyIndex--;
+                restoreState(history[historyIndex]);
             }
-            updateLayerPanel();
         }
 
+        // Redo action
         function redo() {
-            if (redoStack.length === 0) return;
-            const action = redoStack.pop();
-            history.push(action);
-            if (action.action === 'add') {
-                document.getElementById('canvas').appendChild(action.element);
-                elements.push({ element: action.element, type: action.type });
-            } else if (action.action === 'delete') {
-                action.element.remove();
-                elements = elements.filter(e => e.element !== action.element);
-            } else if (action.action === 'clear') {
-                document.getElementById('canvas').innerHTML = '';
-                elements = [];
-            } else if (action.action === 'update') {
-                action.element.style[action.property] = action.value;
-            } else if (action.action === 'font') {
-                document.body.style.fontFamily = action.font;
-            } else if (action.action === 'toggle-zoom') {
-                document.getElementById('zoom-controls').classList.toggle('hidden');
-            } else if (action.action === 'toggle-rulers') {
-                document.getElementById('ruler-x').classList.toggle('hidden');
-                document.getElementById('ruler-y').classList.toggle('hidden');
-            } else if (action.action === 'toggle-layers') {
-                document.getElementById('layer-panel').classList.toggle('hidden');
-            } else if (action.action === 'zoom') {
-                zoomLevel = action.level;
-                document.getElementById('canvas').style.transform = `scale(${zoomLevel})`;
-                document.getElementById('zoom-level').innerText = `${Math.round(zoomLevel * 100)}%`;
+            if (historyIndex < history.length - 1) {
+                historyIndex++;
+                restoreState(history[historyIndex]);
             }
-            updateLayerPanel();
         }
+
+        // Restore state from history
+        function restoreState(state) {
+            // Clear current page
+            while (pageContainer.firstChild) {
+                pageContainer.removeChild(pageContainer.firstChild);
+            }
+            
+            // Restore elements
+            for (const elementData of state.elements) {
+                const element = document.createElement(elementData.type);
+                element.className = elementData.class;
+                element.style.position = 'absolute';
+                element.style.left = elementData.left;
+                element.style.top = elementData.top;
+                element.style.width = elementData.width;
+                element.style.height = elementData.height;
+                element.setAttribute('data-name', elementData.name);
+                element.innerHTML = elementData.content;
+                
+                pageContainer.appendChild(element);
+                makeElementInteractive(element);
+            }
+            
+            updateCode();
+            updateLayers();
+        }
+
+        // Initialize
+        initWorkspace();
+        window.addEventListener('resize', updateRulers);
     </script>
 </body>
 </html>
