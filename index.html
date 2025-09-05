@@ -14,6 +14,30 @@
         }
         #container {
             display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        #top-menu {
+            background-color: #2d2d2d;
+            padding: 10px;
+            border-radius: 4px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        #top-menu button {
+            background-color: #3c3c3c;
+            border: none;
+            color: #fff;
+            padding: 8px 16px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        #top-menu button:hover {
+            background-color: #4a4a4a;
+        }
+        #main-content {
+            display: flex;
             flex-direction: row;
         }
         #menu {
@@ -81,10 +105,12 @@
             display: block;
             margin-bottom: 10px;
         }
-        #properties input, #properties select {
+        #properties input, #properties select, #properties textarea {
             background-color: #2d2d2d;
             color: #fff;
             border: 1px solid #444;
+            width: 100%;
+            padding: 5px;
         }
         .shape.rectangle, .shape.square {
             background-color: #007bff;
@@ -101,7 +127,7 @@
             border-bottom: 100px solid #28a745;
             background-color: transparent;
         }
-        .icon {
+        .icon, .social-icon {
             font-size: 24px;
             display: inline-block;
         }
@@ -113,99 +139,137 @@
 </head>
 <body>
     <div id="container">
-        <div id="menu">
-            <details>
-                <summary>Shapes</summary>
-                <ul>
-                    <li draggable="true" data-type="div" data-class="shape rectangle" data-width="100" data-height="50">Rectangle</li>
-                    <li draggable="true" data-type="div" data-class="shape square" data-width="100" data-height="100">Square</li>
-                    <li draggable="true" data-type="div" data-class="shape circle" data-width="50" data-height="50">Circle</li>
-                    <li draggable="true" data-type="div" data-class="shape oval" data-width="100" data-height="50">Oval</li>
-                    <li draggable="true" data-type="div" data-class="shape triangle" data-width="100" data-height="100">Triangle</li>
-                    <li draggable="true" data-type="div" data-class="shape pentagon" data-width="100" data-height="100">Pentagon</li>
-                    <li draggable="true" data-type="div" data-class="shape hexagon" data-width="100" data-height="100">Hexagon</li>
-                    <li draggable="true" data-type="div" data-class="shape star" data-width="100" data-height="100">Star</li>
-                </ul>
-            </details>
-            <details>
-                <summary>Icons</summary>
-                <ul>
-                    <li draggable="true" data-type="span" data-class="icon smiley" data-content="😊" data-width="30" data-height="30">Smiley</li>
-                    <li draggable="true" data-type="span" data-class="icon heart" data-content="❤️" data-width="30" data-height="30">Heart</li>
-                    <li draggable="true" data-type="span" data-class="icon star" data-content="⭐" data-width="30" data-height="30">Star</li>
-                    <li draggable="true" data-type="span" data-class="icon check" data-content="✅" data-width="30" data-height="30">Check</li>
-                    <li draggable="true" data-type="span" data-class="icon thumbsup" data-content="👍" data-width="30" data-height="30">Thumbs Up</li>
-                    <li draggable="true" data-type="span" data-class="icon fire" data-content="🔥" data-width="30" data-height="30">Fire</li>
-                    <li draggable="true" data-type="span" data-class="icon globe" data-content="🌍" data-width="30" data-height="30">Globe</li>
-                    <li draggable="true" data-type="span" data-class="icon clock" data-content="⏰" data-width="30" data-height="30">Clock</li>
-                    <li draggable="true" data-type="span" data-class="icon email" data-content="✉️" data-width="30" data-height="30">Email</li>
-                    <li draggable="true" data-type="span" data-class="icon phone" data-content="📞" data-width="30" data-height="30">Phone</li>
-                </ul>
-            </details>
-            <details>
-                <summary>Navigations</summary>
-                <ul>
-                    <li draggable="true" data-type="nav" data-class="navigation bar" data-content='<ul><li><a href="#">Home</a></li><li><a href="#">About</a></li><li><a href="#">Contact</a></li></ul>' data-width="400" data-height="40">Horizontal Nav Bar</li>
-                    <li draggable="true" data-type="nav" data-class="navigation sidebar" data-content='<ul><li><a href="#">Home</a></li><li><a href="#">About</a></li><li><a href="#">Contact</a></li></ul>' data-width="150" data-height="200">Vertical Sidebar</li>
-                    <li draggable="true" data-type="footer" data-class="navigation footer" data-content='<p>Footer Content</p>' data-width="400" data-height="50">Footer Nav</li>
-                    <li draggable="true" data-type="header" data-class="navigation header" data-content='<h1>Header</h1>' data-width="400" data-height="50">Header Nav</li>
-                </ul>
-            </details>
-            <details>
-                <summary>Menus</summary>
-                <ul>
-                    <li draggable="true" data-type="select" data-class="menu dropdown" data-content='<option>Option 1</option><option>Option 2</option><option>Option 3</option>' data-width="150" data-height="30">Dropdown Menu</li>
-                    <li draggable="true" data-type="ul" data-class="menu list" data-content='<li>Item 1</li><li>Item 2</li><li>Item 3</li>' data-width="150" data-height="100">List Menu</li>
-                    <li draggable="true" data-type="input" data-class="menu radio" data-input-type="radio" data-name="group1" data-width="30" data-height="30">Radio Button</li>
-                    <li draggable="true" data-type="input" data-class="menu checkbox" data-input-type="checkbox" data-width="30" data-height="30">Checkbox</li>
-                </ul>
-            </details>
-            <details>
-                <summary>Media</summary>
-                <ul>
-                    <li draggable="true" data-type="img" data-class="media image" data-width="150" data-height="150">Image</li>
-                    <li draggable="true" data-type="video" data-class="media video" data-width="320" data-height="240">Video</li>
-                    <li draggable="true" data-type="audio" data-class="media audio" data-width="200" data-height="30">Audio</li>
-                    <li draggable="true" data-type="iframe" data-class="media iframe" data-width="300" data-height="200">Iframe</li>
-                </ul>
-            </details>
-            <details>
-                <summary>Forms</summary>
-                <ul>
-                    <li draggable="true" data-type="form" data-class="form container" data-content='<input type="text" placeholder="Name"><input type="email" placeholder="Email"><button>Submit</button>' data-width="300" data-height="150">Basic Form</li>
-                    <li draggable="true" data-type="input" data-class="form text" data-input-type="text" data-placeholder="Enter text" data-width="200" data-height="30">Text Input</li>
-                    <li draggable="true" data-type="input" data-class="form email" data-input-type="email" data-placeholder="Enter email" data-width="200" data-height="30">Email Input</li>
-                    <li draggable="true" data-type="input" data-class="form password" data-input-type="password" data-placeholder="Enter password" data-width="200" data-height="30">Password Input</li>
-                    <li draggable="true" data-type="textarea" data-class="form textarea" data-placeholder="Enter message" data-width="200" data-height="100">Textarea</li>
-                    <li draggable="true" data-type="button" data-class="form button" data-content="Submit" data-width="100" data-height="30">Button</li>
-                    <li draggable="true" data-type="input" data-class="form file" data-input-type="file" data-width="200" data-height="30">File Upload</li>
-                </ul>
-            </details>
-            <details>
-                <summary>Utilities</summary>
-                <ul>
-                    <li draggable="true" data-type="div" data-class="utility container" data-width="200" data-height="100">Container Div</li>
-                    <li draggable="true" data-type="section" data-class="utility section" data-width="300" data-height="150">Section</li>
-                    <li draggable="true" data-type="article" data-class="utility article" data-width="300" data-height="150">Article</li>
-                    <li draggable="true" data-type="aside" data-class="utility aside" data-width="150" data-height="200">Aside</li>
-                    <li draggable="true" data-type="p" data-class="utility paragraph" data-content="Paragraph text" data-width="200" data-height="50">Paragraph</li>
-                </ul>
-            </details>
-            <details>
-                <summary>Creatives</summary>
-                <ul>
-                    <li draggable="true" data-type="canvas" data-class="creative canvas" data-width="200" data-height="200">Canvas</li>
-                    <li draggable="true" data-type="svg" data-class="creative svg" data-content='<rect width="100" height="50" fill="blue"/>' data-width="200" data-height="200">SVG</li>
-                    <li draggable="true" data-type="div" data-class="creative animation" data-width="100" data-height="100">Animation Box</li>
-                </ul>
-            </details>
-            <div id="properties">
-                <h3>Properties</h3>
-                <div id="prop-content"></div>
-                <button id="delete-btn" style="display: none; background-color: #dc3545; border: none; color: white; padding: 10px; cursor: pointer;">Delete Selected</button>
-            </div>
+        <div id="top-menu">
+            <button onclick="openCategory('shapes')">Add Shape</button>
+            <button onclick="openCategory('icons')">Add Icon</button>
+            <button onclick="openCategory('social-icons')">Add Social Icon</button>
+            <button onclick="openCategory('navigations')">Add Navigation</button>
+            <button onclick="openCategory('menus')">Add Menu</button>
+            <button onclick="openCategory('media')">Add Media</button>
+            <button onclick="openCategory('forms')">Add Form</button>
+            <button onclick="openCategory('utilities')">Add Utility</button>
+            <button onclick="openCategory('creatives')">Add Creative</button>
         </div>
-        <div id="workspace"></div>
+        <div id="main-content">
+            <div id="menu">
+                <details id="shapes">
+                    <summary>Shapes</summary>
+                    <ul>
+                        <li draggable="true" data-type="div" data-class="shape rectangle" data-width="100" data-height="50">Rectangle</li>
+                        <li draggable="true" data-type="div" data-class="shape square" data-width="100" data-height="100">Square</li>
+                        <li draggable="true" data-type="div" data-class="shape circle" data-width="50" data-height="50">Circle</li>
+                        <li draggable="true" data-type="div" data-class="shape oval" data-width="100" data-height="50">Oval</li>
+                        <li draggable="true" data-type="div" data-class="shape triangle" data-width="100" data-height="100">Triangle</li>
+                        <li draggable="true" data-type="div" data-class="shape pentagon" data-width="100" data-height="100">Pentagon</li>
+                        <li draggable="true" data-type="div" data-class="shape hexagon" data-width="100" data-height="100">Hexagon</li>
+                        <li draggable="true" data-type="div" data-class="shape star" data-width="100" data-height="100">Star</li>
+                        <li draggable="true" data-type="div" data-class="shape trapezoid" data-width="100" data-height="50">Trapezoid</li>
+                        <li draggable="true" data-type="div" data-class="shape diamond" data-width="100" data-height="100">Diamond</li>
+                    </ul>
+                </details>
+                <details id="icons">
+                    <summary>Icons</summary>
+                    <ul>
+                        <li draggable="true" data-type="span" data-class="icon smiley" data-content="😊" data-width="30" data-height="30">Smiley</li>
+                        <li draggable="true" data-type="span" data-class="icon heart" data-content="❤️" data-width="30" data-height="30">Heart</li>
+                        <li draggable="true" data-type="span" data-class="icon star" data-content="⭐" data-width="30" data-height="30">Star</li>
+                        <li draggable="true" data-type="span" data-class="icon check" data-content="✅" data-width="30" data-height="30">Check</li>
+                        <li draggable="true" data-type="span" data-class="icon thumbsup" data-content="👍" data-width="30" data-height="30">Thumbs Up</li>
+                        <li draggable="true" data-type="span" data-class="icon fire" data-content="🔥" data-width="30" data-height="30">Fire</li>
+                        <li draggable="true" data-type="span" data-class="icon globe" data-content="🌍" data-width="30" data-height="30">Globe</li>
+                        <li draggable="true" data-type="span" data-class="icon clock" data-content="⏰" data-width="30" data-height="30">Clock</li>
+                        <li draggable="true" data-type="span" data-class="icon email" data-content="✉️" data-width="30" data-height="30">Email</li>
+                        <li draggable="true" data-type="span" data-class="icon phone" data-content="📞" data-width="30" data-height="30">Phone</li>
+                        <li draggable="true" data-type="span" data-class="icon user" data-content="👤" data-width="30" data-height="30">User</li>
+                        <li draggable="true" data-type="span" data-class="icon home" data-content="🏠" data-width="30" data-height="30">Home</li>
+                    </ul>
+                </details>
+                <details id="social-icons">
+                    <summary>Social Icons</summary>
+                    <ul>
+                        <li draggable="true" data-type="a" data-class="social-icon facebook" data-content="📘" data-width="30" data-height="30">Facebook</li>
+                        <li draggable="true" data-type="a" data-class="social-icon twitter" data-content="🐦" data-width="30" data-height="30">Twitter</li>
+                        <li draggable="true" data-type="a" data-class="social-icon instagram" data-content="📸" data-width="30" data-height="30">Instagram</li>
+                        <li draggable="true" data-type="a" data-class="social-icon linkedin" data-content="💼" data-width="30" data-height="30">LinkedIn</li>
+                        <li draggable="true" data-type="a" data-class="social-icon github" data-content="🐙" data-width="30" data-height="30">GitHub</li>
+                        <li draggable="true" data-type="a" data-class="social-icon youtube" data-content="▶️" data-width="30" data-height="30">YouTube</li>
+                        <li draggable="true" data-type="a" data-class="social-icon tiktok" data-content="🎵" data-width="30" data-height="30">TikTok</li>
+                        <li draggable="true" data-type="a" data-class="social-icon discord" data-content="🎮" data-width="30" data-height="30">Discord</li>
+                    </ul>
+                </details>
+                <details id="navigations">
+                    <summary>Navigations</summary>
+                    <ul>
+                        <li draggable="true" data-type="nav" data-class="navigation bar" data-content='<ul><li><a href="#">Home</a></li><li><a href="#">About</a></li><li><a href="#">Contact</a></li></ul>' data-width="400" data-height="40">Horizontal Nav Bar</li>
+                        <li draggable="true" data-type="nav" data-class="navigation sidebar" data-content='<ul><li><a href="#">Home</a></li><li><a href="#">About</a></li><li><a href="#">Contact</a></li></ul>' data-width="150" data-height="200">Vertical Sidebar</li>
+                        <li draggable="true" data-type="footer" data-class="navigation footer" data-content='<p>Footer Content</p>' data-width="400" data-height="50">Footer Nav</li>
+                        <li draggable="true" data-type="header" data-class="navigation header" data-content='<h1>Header</h1>' data-width="400" data-height="50">Header Nav</li>
+                        <li draggable="true" data-type="nav" data-class="navigation breadcrumb" data-content='<ul><li><a href="#">Home</a></li><li><a href="#">Category</a></li><li><a href="#">Page</a></li></ul>' data-width="400" data-height="30">Breadcrumb</li>
+                    </ul>
+                </details>
+                <details id="menus">
+                    <summary>Menus</summary>
+                    <ul>
+                        <li draggable="true" data-type="select" data-class="menu dropdown" data-content='<option>Option 1</option><option>Option 2</option><option>Option 3</option>' data-width="150" data-height="30">Dropdown Menu</li>
+                        <li draggable="true" data-type="ul" data-class="menu list" data-content='<li>Item 1</li><li>Item 2</li><li>Item 3</li>' data-width="150" data-height="100">List Menu</li>
+                        <li draggable="true" data-type="input" data-class="menu radio" data-input-type="radio" data-name="group1" data-width="30" data-height="30">Radio Button</li>
+                        <li draggable="true" data-type="input" data-class="menu checkbox" data-input-type="checkbox" data-width="30" data-height="30">Checkbox</li>
+                        <li draggable="true" data-type="select" data-class="menu multiselect" data-content='<option>Option 1</option><option>Option 2</option><option>Option 3</option>' data-width="150" data-height="100">Multi-Select</li>
+                    </ul>
+                </details>
+                <details id="media">
+                    <summary>Media</summary>
+                    <ul>
+                        <li draggable="true" data-type="img" data-class="media image" data-width="150" data-height="150">Image</li>
+                        <li draggable="true" data-type="video" data-class="media video" data-width="320" data-height="240">Video</li>
+                        <li draggable="true" data-type="audio" data-class="media audio" data-width="200" data-height="30">Audio</li>
+                        <li draggable="true" data-type="iframe" data-class="media iframe" data-width="300" data-height="200">Iframe</li>
+                        <li draggable="true" data-type="picture" data-class="media picture" data-width="150" data-height="150">Picture</li>
+                    </ul>
+                </details>
+                <details id="forms">
+                    <summary>Forms</summary>
+                    <ul>
+                        <li draggable="true" data-type="form" data-class="form container" data-content='<input type="text" placeholder="Name"><input type="email" placeholder="Email"><button>Submit</button>' data-width="300" data-height="150">Basic Form</li>
+                        <li draggable="true" data-type="input" data-class="form text" data-input-type="text" data-placeholder="Enter text" data-width="200" data-height="30">Text Input</li>
+                        <li draggable="true" data-type="input" data-class="form email" data-input-type="email" data-placeholder="Enter email" data-width="200" data-height="30">Email Input</li>
+                        <li draggable="true" data-type="input" data-class="form password" data-input-type="password" data-placeholder="Enter password" data-width="200" data-height="30">Password Input</li>
+                        <li draggable="true" data-type="textarea" data-class="form textarea" data-placeholder="Enter message" data-width="200" data-height="100">Textarea</li>
+                        <li draggable="true" data-type="button" data-class="form button" data-content="Submit" data-width="100" data-height="30">Button</li>
+                        <li draggable="true" data-type="input" data-class="form file" data-input-type="file" data-width="200" data-height="30">File Upload</li>
+                        <li draggable="true" data-type="input" data-class="form number" data-input-type="number" data-placeholder="Enter number" data-width="200" data-height="30">Number Input</li>
+                        <li draggable="true" data-type="input" data-class="form date" data-input-type="date" data-width="200" data-height="30">Date Input</li>
+                    </ul>
+                </details>
+                <details id="utilities">
+                    <summary>Utilities</summary>
+                    <ul>
+                        <li draggable="true" data-type="div" data-class="utility container" data-width="200" data-height="100">Container Div</li>
+                        <li draggable="true" data-type="section" data-class="utility section" data-width="300" data-height="150">Section</li>
+                        <li draggable="true" data-type="article" data-class="utility article" data-width="300" data-height="150">Article</li>
+                        <li draggable="true" data-type="aside" data-class="utility aside" data-width="150" data-height="200">Aside</li>
+                        <li draggable="true" data-type="p" data-class="utility paragraph" data-content="Paragraph text" data-width="200" data-height="50">Paragraph</li>
+                        <li draggable="true" data-type="div" data-class="utility card" data-width="200" data-height="150">Card</li>
+                        <li draggable="true" data-type="hr" data-class="utility divider" data-width="200" data-height="2">Divider</li>
+                    </ul>
+                </details>
+                <details id="creatives">
+                    <summary>Creatives</summary>
+                    <ul>
+                        <li draggable="true" data-type="canvas" data-class="creative canvas" data-width="200" data-height="200">Canvas</li>
+                        <li draggable="true" data-type="svg" data-class="creative svg" data-content='<rect width="100" height="50" fill="blue"/>' data-width="200" data-height="200">SVG</li>
+                        <li draggable="true" data-type="div" data-class="creative animation" data-width="100" data-height="100">Animation Box</li>
+                        <li draggable="true" data-type="div" data-class="creative carousel" data-width="300" data-height="200">Carousel</li>
+                    </ul>
+                </details>
+                <div id="properties">
+                    <h3>Properties</h3>
+                    <div id="prop-content"></div>
+                    <button id="delete-btn" style="display: none; background-color: #dc3545; border: none; color: white; padding: 10px; cursor: pointer;">Delete Selected</button>
+                </div>
+            </div>
+            <div id="workspace"></div>
+        </div>
     </div>
     <div id="code">
         <textarea id="html" placeholder="Generated HTML"></textarea>
@@ -226,6 +290,14 @@
         let offsetY = 0;
         let selected = null;
         const resizeObserver = new ResizeObserver(() => updateCode());
+
+        // Open specific category
+        function openCategory(categoryId) {
+            document.querySelectorAll('#menu details').forEach(detail => {
+                detail.removeAttribute('open');
+            });
+            document.getElementById(categoryId).setAttribute('open', '');
+        }
 
         // Drag from menu to workspace
         workspace.addEventListener('dragover', (e) => e.preventDefault());
@@ -257,7 +329,7 @@
             if (className.includes('circle') || className.includes('oval')) {
                 elem.style.borderRadius = '50%';
             }
-            if (className.includes('rectangle') || className.includes('square') || className.includes('container')) {
+            if (className.includes('rectangle') || className.includes('square') || className.includes('container') || className.includes('card')) {
                 elem.style.backgroundColor = '#444';
                 elem.style.border = '1px solid #666';
             }
@@ -270,7 +342,7 @@
                 elem.style.backgroundColor = 'transparent';
                 elem.style.resize = 'none';
             }
-            if (className.includes('icon')) {
+            if (className.includes('icon') || className.includes('social-icon')) {
                 elem.style.display = 'inline-block';
             }
             if (type === 'button') {
@@ -278,10 +350,10 @@
             }
             if (type === 'video' || type === 'audio') {
                 elem.controls = true;
-                elem.src = ''; // Placeholder for user input
+                elem.src = '';
             }
-            if (type === 'img' || type === 'iframe') {
-                elem.src = ''; // Placeholder for user input
+            if (type === 'img' || type === 'iframe' || type === 'picture') {
+                elem.src = '';
             }
             if (type === 'form') {
                 elem.addEventListener('submit', (ev) => {
@@ -290,24 +362,30 @@
                     alert('Form submitted! Check console for data.');
                 });
             }
-
-            // Make buttons clickable
             if (type === 'button' || className.includes('button')) {
                 elem.addEventListener('click', () => {
                     console.log('Button clicked!');
                     alert('Button clicked!');
                 });
             }
-
-            // Make links clickable (for nav)
-            if (elem.querySelectorAll('a').length > 0) {
-                elem.querySelectorAll('a').forEach(a => {
-                    a.addEventListener('click', (ev) => {
+            if (elem.querySelectorAll('a').length > 0 || type === 'a') {
+                if (type === 'a') {
+                    elem.href = '';
+                    elem.addEventListener('click', (ev) => {
                         ev.preventDefault();
-                        console.log('Link clicked:', a.href);
-                        alert(`Link clicked: ${a.href}`);
+                        console.log('Link clicked:', elem.href);
+                        alert(`Link clicked: ${elem.href}`);
                     });
-                });
+                } else {
+                    elem.querySelectorAll('a').forEach(a => {
+                        a.href = a.href || '';
+                        a.addEventListener('click', (ev) => {
+                            ev.preventDefault();
+                            console.log('Link clicked:', a.href);
+                            alert(`Link clicked: ${a.href}`);
+                        });
+                    });
+                }
             }
 
             workspace.appendChild(elem);
@@ -412,7 +490,7 @@
             const borderColor = rgbToHex(compStyle.borderColor);
             const borderStyle = compStyle.borderStyle || 'none';
             const contentEditable = selected.tagName === 'P' || selected.tagName === 'SPAN' || selected.tagName === 'BUTTON' || selected.className.includes('paragraph');
-            const isMedia = selected.tagName === 'IMG' || selected.tagName === 'VIDEO' || selected.tagName === 'AUDIO' || selected.tagName === 'IFRAME';
+            const isMedia = selected.tagName === 'IMG' || selected.tagName === 'VIDEO' || selected.tagName === 'AUDIO' || selected.tagName === 'IFRAME' || selected.tagName === 'PICTURE';
             const isLink = selected.tagName === 'A';
             const isInput = selected.tagName === 'INPUT' || selected.tagName === 'TEXTAREA';
             const isNav = selected.className.includes('navigation');
@@ -449,7 +527,7 @@
                 content += `<label>Placeholder: <input type="text" id="prop-placeholder" value="${selected.placeholder || ''}"></label>`;
             }
             if (isNav) {
-                const items = selected28Array.from(selected.querySelectorAll('li')).map(li => li.innerHTML).join('\n');
+                const items = Array.from(selected.querySelectorAll('li')).map(li => li.innerHTML).join('\n');
                 content += `<label>Nav Items: <textarea id="prop-navitems">${items}</textarea></label>`;
             }
 
@@ -567,11 +645,14 @@
                 if (clone.tagName === 'BUTTON') {
                     clone.textContent = el.textContent;
                 }
-                if (clone.tagName === 'IMG' || clone.tagName === 'VIDEO' || clone.tagName === 'AUDIO' || clone.tagName === 'IFRAME') {
+                if (clone.tagName === 'IMG' || clone.tagName === 'VIDEO' || clone.tagName === 'AUDIO' || clone.tagName === 'IFRAME' || clone.tagName === 'PICTURE') {
                     clone.src = el.src || '';
                 }
                 if (clone.tagName === 'INPUT' || clone.tagName === 'TEXTAREA') {
                     clone.placeholder = el.placeholder || '';
+                }
+                if (clone.tagName === 'A') {
+                    clone.href = el.href || '';
                 }
                 html += `  ${clone.outerHTML}\n`;
 
@@ -594,7 +675,7 @@
                 // Check for interactions
                 if (el.tagName === 'FORM') hasForm = true;
                 if (el.tagName === 'BUTTON' || el.className.includes('button')) hasButton = true;
-                if (el.querySelectorAll('a').length > 0) hasLink = true;
+                if (el.querySelectorAll('a').length > 0 || el.tagName === 'A') hasLink = true;
             });
             html += '</div>';
 
