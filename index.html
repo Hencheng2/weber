@@ -1,1475 +1,189 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Visual Web Designer Tool</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Open+Sans:wght@400;600&family=Montserrat:wght@400;700&family=Lato:wght@400;700&family=Poppins:wght@400;600&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Merriweather:wght@400;700&family=Times+New+Roman&family=Georgia&family=Inter:wght@400;700&family=Helvetica&family=Arial&family=Fira+Code&family=JetBrains+Mono&family=Courier+New&family=Source+Code+Pro&family=Bebas+Neue&family=Raleway:wght@400;700&family=Oswald:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-        body {
-            background-color: #1e1e1e;
-            color: #ffffff;
-            font-family: 'Roboto', sans-serif;
-            margin: 0;
-            padding: 20px;
-            box-sizing: border-box; /* Ensures padding doesn't affect total width */
-        }
-        #container {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-        #top-menu {
-            background-color: #2d2d2d;
-            padding: 10px;
-            border-radius: 4px;
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            position: relative;
-        }
-        #top-menu button {
-            background-color: #3c3c3c;
-            border: none;
-            color: #fff;
-            padding: 8px 16px;
-            cursor: pointer;
-            border-radius: 4px;
-        }
-        #top-menu button:hover {
-            background-color: #4a4a4a;
-        }
-        #top-menu button.active {
-            background-color: #007bff;
-        }
-        .dropdown {
-            position: absolute;
-            top: 100%;
-            background-color: #2d2d2d;
-            border: 1px solid #444;
-            border-radius: 4px;
-            z-index: 1000;
-            max-height: 300px;
-            overflow-y: auto;
-            display: none;
-            min-width: 200px;
-        }
-        .dropdown ul {
-            list-style: none;
-            padding: 10px;
-            margin: 0;
-        }
-        .dropdown li {
-            padding: 10px;
-            background-color: #3c3c3c;
-            margin-bottom: 5px;
-            cursor: grab;
-            border-radius: 4px;
-            user-select: none;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .dropdown li:hover {
-            background-color: #4a4a4a;
-        }
-        #main-content {
-            display: flex;
-            flex-direction: row; /* Default to row for larger screens */
-            gap: 20px;
-        }
-        #workspace-wrapper {
-            flex: 1;
-            height: 600px;
-            background-color: #333;
-            border: 1px solid #444;
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-        }
-        #rulers {
-            display: none;
-        }
-        #ruler-x, #ruler-y {
-            position: absolute;
-            background-color: #4a4a4a;
-            color: #bbb;
-            font-size: 10px;
-            line-height: 12px;
-            z-index: 999;
-        }
-        #ruler-x {
-            top: 0;
-            left: 20px;
-            width: calc(100% - 20px);
-            height: 20px;
-            display: flex;
-            align-items: center;
-        }
-        #ruler-y {
-            top: 20px;
-            left: 0;
-            width: 20px;
-            height: calc(100% - 20px);
-            writing-mode: vertical-rl;
-            text-orientation: mixed;
-            display: flex;
-            align-items: center;
-        }
-        .ruler-mark {
-            position: absolute;
-            color: #bbb;
-        }
-        .ruler-mark.x {
-            border-left: 1px solid #555;
-            height: 5px;
-            top: 15px;
-            font-size: 10px;
-        }
-        .ruler-mark.y {
-            border-top: 1px solid #555;
-            width: 5px;
-            left: 15px;
-            font-size: 10px;
-        }
-        #workspace {
-            flex: 1;
-            position: relative;
-            overflow: auto;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            transition: all 0.3s;
-            padding: 20px;
-        }
-        #page {
-            background-color: #fff;
-            color: #000;
-            position: relative;
-            min-height: 100px;
-            transition: all 0.3s;
-            box-sizing: border-box;
-            transform-origin: top left;
-        }
-        #page.edit-mode {
-            width: 1024px;
-            min-height: 768px;
-            border: 2px solid #007bff;
-        }
-        #page.view-mode.phone {
-            width: 375px;
-            height: 667px;
-            border: 2px solid #555;
-            box-shadow: 0 0 10px rgba(0,0,0,0.5);
-            margin: 20px auto;
-        }
-        #page.view-mode.tablet {
-            width: 768px;
-            height: 1024px;
-            border: 2px solid #555;
-            box-shadow: 0 0 10px rgba(0,0,0,0.5);
-            margin: 20px auto;
-        }
-        #page.view-mode.laptop {
-            width: 1024px;
-            height: 768px;
-            border: 2px solid #555;
-            box-shadow: 0 0 10px rgba(0,0,0,0.5);
-            margin: 20px auto;
-        }
-        #properties, #layers {
-            width: 300px;
-            background-color: #2d2d2d;
-            padding: 20px;
-            border-left: 1px solid #444;
-            max-height: 600px;
-            overflow-y: auto;
-        }
-        #properties label {
-            display: block;
-            margin-bottom: 10px;
-        }
-        #properties input, #properties select, #properties textarea {
-            background-color: #2d2d2d;
-            color: #fff;
-            border: 1px solid #444;
-            width: 100%;
-            padding: 5px;
-            box-sizing: border-box;
-        }
-        #code {
-            margin-top: 20px;
-            display: flex;
-            justify-content: space-between;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-        #code div {
-            width: 32%;
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-        #code textarea {
-            width: 100%;
-            height: 300px;
-            background-color: #2d2d2d;
-            color: #ffffff;
-            border: 1px solid #444;
-            padding: 10px;
-            font-family: monospace;
-            resize: vertical;
-        }
-        #code button {
-            background-color: #3c3c3c;
-            border: none;
-            color: #fff;
-            padding: 5px 10px;
-            cursor: pointer;
-            border-radius: 4px;
-        }
-        #code button:hover {
-            background-color: #4a4a4a;
-        }
-        .shape.rectangle, .shape.square, .shape.rounded-rectangle {
-            background-color: #007bff;
-        }
-        .shape.circle, .shape.oval {
-            background-color: #dc3545;
-            border-radius: 50%;
-        }
-        .shape.triangle {
-            width: 0;
-            height: 0;
-            border-left: 50px solid transparent;
-            border-right: 50px solid transparent;
-            border-bottom: 100px solid #28a745;
-            background-color: transparent;
-        }
-        .shape.pentagon, .shape.hexagon, .shape.octagon {
-            background-color: #6610f2;
-        }
-        .icon, .social-icon, .material-icons {
-            font-size: 24px;
-            display: inline-block;
-        }
-        .modal {
-            background-color: #fff;
-            color: #000;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.5);
-        }
-        .card {
-            background-color: #444;
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-        }
-        .slider {
-            background-color: #555;
-            padding: 10px;
-            border-radius: 4px;
-        }
-        #page > * {
-            resize: both;
-            overflow: auto;
-            position: absolute;
-            box-sizing: border-box;
-            border: 1px dashed transparent;
-        }
-        #page > *.selected {
-            border: 1px dashed white;
-        }
-        #page.view-mode > * {
-            resize: none;
-            cursor: default;
-        }
-        #page.view-mode > *.selected {
-            border: none;
-        }
-        #page-nav {
-            margin-top: 10px;
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-        #page-nav input, #page-nav select, #page-nav button {
-            background-color: #3c3c3c;
-            border: none;
-            color: #fff;
-            padding: 8px 16px;
-            cursor: pointer;
-            border-radius: 4px;
-        }
-        #page-nav input:hover, #page-nav select:hover, #page-nav button:hover {
-            background-color: #4a4a4a;
-        }
-        #apply-code-btn {
-            background-color: #28a745;
-            padding: 8px 16px;
-            border-radius: 4px;
-            cursor: pointer;
-            display: none;
-        }
-        #apply-code-btn:hover {
-            background-color: #218838;
-        }
-        #create-page-btn {
-            background-color: #17a2b8;
-            padding: 8px 16px;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        #create-page-btn:hover {
-            background-color: #138496;
-        }
-        #zoom-controls {
-            background-color: #2d2d2d;
-            padding: 10px;
-            border-radius: 4px;
-            display: flex;
-            gap: 10px;
-            position: absolute;
-            bottom: 20px;
-            left: 20px;
-            z-index: 100;
-        }
-        #zoom-controls button {
-            background-color: #3c3c3c;
-            border: none;
-            color: #fff;
-            padding: 5px 10px;
-            cursor: pointer;
-            border-radius: 4px;
-        }
-        #zoom-controls button:hover {
-            background-color: #4a4a4a;
-        }
-        #layers ul {
-            list-style: none;
-            padding: 0;
-        }
-        #layers li {
-            padding: 8px;
-            background-color: #3c3c3c;
-            border: 1px solid #444;
-            margin-bottom: 5px;
-            cursor: pointer;
-            border-radius: 4px;
-            user-select: none;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        #layers li.selected {
-            background-color: #007bff;
-        }
-        .layer-item-name {
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .layer-controls {
-            display: flex;
-            gap: 5px;
-        }
-        .layer-control-btn {
-            background: none;
-            border: none;
-            color: #fff;
-            cursor: pointer;
-        }
-        .layer-control-btn:hover {
-            color: #007bff;
-        }
-        .layer-move-btn {
-            cursor: move;
-        }
-        /* Media Queries for responsiveness */
-
-        /* Tablet view (screens smaller than 768px) */
-        @media (max-width: 768px) {
-            #main-content {
-                flex-direction: column;
-            }
-            #properties {
-                width: 100%;
-                border-left: none;
-                border-top: 1px solid #444;
-            }
-        }
-
-        /* Mobile view (screens smaller than 480px) */
-        @media (max-width: 480px) {
-            body {
-                padding: 10px;
-            }
-            #top-menu button {
-                padding: 6px 12px;
-            }
-            #page-nav {
-                flex-direction: column;
-            }
-            #page-nav input, #page-nav select, #page-nav button {
-                width: 100%;
-                box-sizing: border-box;
-            }
-            #code div {
-                width: 100%;
-            }
-        }
-    </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>CodeRunner - Multi-Language Code Editor</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: 'Inter', sans-serif; background-color: #1e1e1e; color: #ffffff; }
+    .btn-hover:hover { background-color: rgba(0,122,204,0.8); }
+    .output-panel { font-family: monospace; white-space: pre-wrap; }
+    .loading-spinner { border:3px solid #f3f3f3; border-top:3px solid #007acc; border-radius:50%; width:20px; height:20px; animation:spin 1s linear infinite; display:inline-block; margin-left:8px; }
+    @keyframes spin { 0%{transform:rotate(0)} 100%{transform:rotate(360deg)} }
+    .html-output { width:100%; height:100%; border:none; background:white; color:black; }
+    .file-item { transition: background-color 0.2s; display:flex; justify-content:space-between; align-items:center; padding:6px 8px; border-radius:6px;}
+    .file-item:hover { background-color:#2d2d30; }
+    .delete-btn { opacity:0; transition:opacity .2s; color: #f87171; cursor:pointer; padding:2px 6px; border-radius:4px; }
+    .file-item:hover .delete-btn { opacity:1; }
+    .delete-btn:hover { background-color:#7f1d1d; }
+    #editor { width:100%; height: calc(100vh - 120px); }
+    .active-file { background-color: #374151; }
+  </style>
+  <!-- Pyodide -->
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.26.1/full/pyodide.js"></script>
 </head>
-<body>
-    <div id="container">
-        <div id="top-menu">
-            <button id="edit-mode-btn" class="active" onclick="setMode('edit')">Edit Mode</button>
-            <button id="view-mode-btn" onclick="setMode('view')">View Mode</button>
-            <button id="phone-btn" onclick="setPreview('phone')" style="display: none;">Phone</button>
-            <button id="tablet-btn" onclick="setPreview('tablet')" style="display: none;">Tablet</button>
-            <button id="laptop-btn" onclick="setPreview('laptop')" style="display: none;">Laptop</button>
-            <button id="add-shape-btn" onclick="openCategory('shapes', this)">Add Shape</button>
-            <button id="add-icon-btn" onclick="openCategory('icons', this)">Add Icon</button>
-            <button id="add-navigation-btn" onclick="openCategory('navigations', this)">Add Navigation</button>
-            <button id="add-fonts-btn" onclick="openCategory('fonts', this)">Add Fonts</button>
-            <button id="add-buttons-btn" onclick="openCategory('buttons', this)">Add Buttons</button>
-            <button id="add-forms-btn" onclick="openCategory('forms', this)">Add Forms</button>
-            <button id="add-cards-btn" onclick="openCategory('cards', this)">Add Cards</button>
-            <button id="add-modals-btn" onclick="openCategory('modals', this)">Add Modals</button>
-            <button id="add-loaders-btn" onclick="openCategory('loaders', this)">Add Loaders</button>
-            <button id="add-media-btn" onclick="openCategory('media', this)">Add Media</button>
-            <button id="add-typography-btn" onclick="openCategory('typography', this)">Add Typography</button>
-            <button id="add-alerts-btn" onclick="openCategory('alerts', this)">Add Alerts</button>
-            <button id="undo-btn" onclick="undo()" disabled><i class="fas fa-undo"></i> Undo</button>
-            <button id="redo-btn" onclick="redo()" disabled><i class="fas fa-redo"></i> Redo</button>
-        </div>
-        <div id="page-nav">
-            <button id="create-page-btn" onclick="createPage()">Create Page</button>
-            <button onclick="newPage()">New Page</button>
-            <input id="page-name" type="text" placeholder="Enter page name" value="index.html">
-            <select id="page-selector" onchange="switchPage(this.value)">
-                <option value="page1" data-name="index.html">index.html</option>
-            </select>
-            <button id="apply-code-btn" onclick="applyCode()">Apply Code</button>
-        </div>
-        <div id="main-content">
-            <div id="workspace-wrapper">
-                <div id="rulers">
-                    <div id="ruler-x"></div>
-                    <div id="ruler-y"></div>
-                </div>
-                <div id="workspace">
-                    <div id="page" class="edit-mode"></div>
-                    <div id="zoom-controls">
-                        <button onclick="zoomIn()">+</button>
-                        <button onclick="zoomOut()">-</button>
-                        <button onclick="zoomReset()">100%</button>
-                    </div>
-                </div>
-            </div>
-            <div id="properties">
-                <h3>Properties</h3>
-                <div id="prop-content"></div>
-                <button id="delete-btn" style="display: none; background-color: #dc3545; border: none; color: white; padding: 10px; cursor: pointer; margin-top: 10px;">Delete Selected</button>
-            </div>
-            <div id="layers">
-                <h3>Layers</h3>
-                <ul id="layer-list"></ul>
-            </div>
-        </div>
-    </div>
-    <div id="code">
-        <div>
-            <div>
-                <button onclick="pasteCode('html')">Paste</button>
-                <button onclick="clearCode('html')">Clear</button>
-                <button onclick="copyCode('html')">Copy</button>
-            </div>
-            <textarea id="html" placeholder="Generated HTML"></textarea>
-        </div>
-        <div>
-            <div>
-                <button onclick="pasteCode('css')">Paste</button>
-                <button onclick="clearCode('css')">Clear</button>
-                <button onclick="copyCode('css')">Copy</button>
-            </div>
-            <textarea id="css" placeholder="Generated CSS"></textarea>
-        </div>
-        <div>
-            <div>
-                <button onclick="pasteCode('js')">Paste</button>
-                <button onclick="clearCode('js')">Clear</button>
-                <button onclick="copyCode('js')">Copy</button>
-            </div>
-            <textarea id="js" placeholder="Generated JS">// No JS generated yet</textarea>
-        </div>
+<body class="h-screen flex flex-col">
+  <!-- Header -->
+  <header class="bg-gray-800 p-4 flex items-center justify-between">
+    <div class="flex items-center space-x-4">
+      <h1 class="text-xl font-bold">CodeRunner</h1>
+      <div>
+        <select id="language-select" class="bg-gray-700 text-white p-2 rounded">
+          <option value="python">Python</option>
+          <option value="javascript">JavaScript</option>
+          <option value="html">HTML</option>
+          <option value="css">CSS</option>
+          <option value="cpp">C++</option>
+          <option value="java">Java</option>
+          <option value="php">PHP</option>
+          <option value="ruby">Ruby</option>
+          <option value="go">Go</option>
+          <option value="rust">Rust</option>
+          <option value="sql">SQL</option>
+          <option value="swift">Swift</option>
+          <option value="typescript">TypeScript</option>
+        </select>
+      </div>
+      <input id="project-name" type="text" placeholder="Project Name" class="bg-gray-700 text-white p-2 rounded w-40" value="Untitled Project">
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
-    <script>
-        const workspace = document.getElementById('workspace');
-        const pageContainer = document.getElementById('page');
-        const htmlArea = document.getElementById('html');
-        const cssArea = document.getElementById('css');
-        const jsArea = document.getElementById('js');
-        const propContent = document.getElementById('prop-content');
-        const deleteBtn = document.getElementById('delete-btn');
-        const editModeBtn = document.getElementById('edit-mode-btn');
-        const viewModeBtn = document.getElementById('view-mode-btn');
-        const phoneBtn = document.getElementById('phone-btn');
-        const tabletBtn = document.getElementById('tablet-btn');
-        const laptopBtn = document.getElementById('laptop-btn');
-        const pageSelector = document.getElementById('page-selector');
-        const pageNameInput = document.getElementById('page-name');
-        const applyCodeBtn = document.getElementById('apply-code-btn');
-        const layerList = document.getElementById('layer-list');
-        const undoBtn = document.getElementById('undo-btn');
-        const redoBtn = document.getElementById('redo-btn');
-        const rulerX = document.getElementById('ruler-x');
-        const rulerY = document.getElementById('ruler-y');
+    <div class="flex space-x-2">
+      <button id="run-btn" class="bg-blue-600 text-white px-4 py-2 rounded btn-hover flex items-center">
+        <span id="run-text">Run</span>
+        <span id="run-spinner" class="loading-spinner hidden" aria-hidden="true"></span>
+      </button>
+      <button id="refresh-btn" class="bg-yellow-600 text-white px-4 py-2 rounded btn-hover">Refresh</button>
+      <button id="save-btn" class="bg-gray-700 text-white px-4 py-2 rounded btn-hover">Save</button>
+      <button id="download-btn" class="bg-gray-700 text-white px-4 py-2 rounded btn-hover">Download</button>
 
-        let dragging = null;
-        let offsetX = 0;
-        let offsetY = 0;
-        let selected = null;
-        let mode = 'edit';
-        let currentPage = 'page1';
-        let pages = { 'page1': { name: 'index.html', html: '<div id="page"></div>', css: '#page {\n  position: relative;\n  background-color: #fff;\n  width: 1024px;\n  min-height: 768px;\n}\n', js: '// No JS generated yet', elements: [] } };
-        let pageCount = 1;
-        let activeDropdown = null;
-        const resizeObserver = new ResizeObserver(() => updateCode());
-        let undoStack = [];
-        let redoStack = [];
-        let zoomLevel = 1;
+      <input type="file" id="upload-file" class="hidden" accept=".py,.js,.html,.txt,.json,.css,.cpp,.java,.php,.rb,.go,.rs,.sql,.swift,.ts">
+      <label for="upload-file" class="bg-gray-700 text-white px-4 py-2 rounded btn-hover cursor-pointer">Upload File</label>
 
-        const elementCategories = {
-            'shapes': [
-                { type: 'div', class: 'shape rectangle', width: '100', height: '50', name: 'Rectangle' },
-                { type: 'div', class: 'shape square', width: '100', height: '100', name: 'Square' },
-                { type: 'div', class: 'shape rounded-rectangle', width: '100', height: '50', name: 'Rounded Rectangle' },
-                { type: 'div', class: 'shape circle', width: '50', height: '50', name: 'Circle' },
-                { type: 'div', class: 'shape oval', width: '100', height: '50', name: 'Oval' },
-                { type: 'div', class: 'shape triangle', width: '100', height: '100', name: 'Triangle' },
-                { type: 'div', class: 'shape pentagon', width: '100', height: '100', name: 'Pentagon' },
-                { type: 'div', class: 'shape hexagon', width: '100', height: '100', name: 'Hexagon' },
-                { type: 'div', class: 'shape octagon', width: '100', height: '100', name: 'Octagon' },
-                { type: 'div', class: 'shape trapezoid', width: '100', height: '50', name: 'Trapezoid' },
-                { type: 'div', class: 'shape diamond', width: '100', height: '100', name: 'Diamond' },
-                { type: 'div', class: 'shape star', width: '100', height: '100', name: 'Star' }
-            ],
-            'icons': [
-                { type: 'i', class: 'fas fa-home icon', width: '30', height: '30', name: 'Home Icon' },
-                { type: 'i', class: 'fas fa-user icon', width: '30', height: '30', name: 'User Icon' },
-                { type: 'i', class: 'fas fa-cog icon', width: '30', height: '30', name: 'Settings Icon' },
-                { type: 'i', class: 'fas fa-search icon', width: '30', height: '30', name: 'Search Icon' },
-                { type: 'i', class: 'fas fa-heart icon', width: '30', height: '30', name: 'Heart Icon' },
-                { type: 'i', class: 'fas fa-star icon', width: '30', height: '30', name: 'Star Icon' },
-                { type: 'i', class: 'fas fa-bell icon', width: '30', height: '30', name: 'Bell Icon' },
-                { type: 'i', class: 'fas fa-camera icon', width: '30', height: '30', name: 'Camera Icon' },
-                { type: 'i', class: 'fas fa-envelope icon', width: '30', height: '30', name: 'Email Icon' },
-                { type: 'i', class: 'fas fa-shopping-cart icon', width: '30', height: '30', name: 'Cart Icon' },
-                { type: 'i', class: 'fas fa-cloud icon', width: '30', height: '30', name: 'Cloud Icon' },
-                { type: 'i', class: 'fas fa-lock icon', width: '30', height: '30', name: 'Lock Icon' },
-                { type: 'i', class: 'fab fa-facebook-f social-icon', width: '30', height: '30', name: 'Facebook' },
-                { type: 'i', class: 'fab fa-twitter social-icon', width: '30', height: '30', name: 'Twitter' },
-                { type: 'i', class: 'fab fa-instagram social-icon', width: '30', height: '30', name: 'Instagram' },
-                { type: 'i', class: 'fab fa-linkedin-in social-icon', width: '30', height: '30', name: 'LinkedIn' },
-                { type: 'i', class: 'fab fa-github social-icon', width: '30', height: '30', name: 'GitHub' },
-                { type: 'i', class: 'fab fa-youtube social-icon', width: '30', height: '30', name: 'YouTube' },
-                { type: 'i', class: 'fab fa-tiktok social-icon', width: '30', height: '30', name: 'TikTok' },
-                { type: 'i', class: 'fab fa-discord social-icon', width: '30', height: '30', name: 'Discord' },
-                { type: 'i', class: 'fab fa-pinterest social-icon', width: '30', height: '30', name: 'Pinterest' },
-                { type: 'i', class: 'fab fa-whatsapp social-icon', width: '30', height: '30', name: 'WhatsApp' },
-                { type: 'i', class: 'material-icons icon', content: 'home', width: '30', height: '30', name: 'Material Home' },
-                { type: 'i', class: 'material-icons icon', content: 'person', width: '30', height: '30', name: 'Material Person' },
-                { type: 'i', class: 'material-icons icon', content: 'settings', width: '30', height: '30', name: 'Material Settings' },
-                { type: 'i', class: 'material-icons icon', content: 'search', width: '30', height: '30', name: 'Material Search' },
-                { type: 'i', class: 'material-icons icon', content: 'favorite', width: '30', height: '30', name: 'Material Favorite' },
-                { type: 'i', class: 'material-icons icon', content: 'star', width: '30', height: '30', name: 'Material Star' },
-                { type: 'i', class: 'material-icons icon', content: 'notifications', width: '30', height: '30', name: 'Material Notifications' },
-                { type: 'i', class: 'material-icons icon', content: 'camera_alt', width: '30', height: '30', name: 'Material Camera' }
-            ],
-            'navigations': [
-                { type: 'nav', class: 'navigation top-nav', content: '<ul><li><a href="#">Home</a></li><li><a href="#">About</a></li><li><a href="#">Contact</a></li></ul>', width: '400', height: '40', name: 'Top Nav Bar' },
-                { type: 'nav', class: 'navigation hamburger-menu', content: '<i class="fas fa-bars"></i>', width: '50', height: '50', name: 'Hamburger Menu' },
-                { type: 'nav', class: 'navigation sidebar', content: '<ul><li><a href="#">Dashboard</a></li><li><a href="#">Reports</a></li><li><a href="#">Settings</a></li></ul>', width: '150', height: '200', name: 'Vertical Sidebar' },
-                { type: 'nav', class: 'navigation bottom-nav', content: '<ul><li><a href="#"><i class="fas fa-home"></i></a></li><li><a href="#"><i class="fas fa-search"></i></a></li><li><a href="#"><i class="fas fa-user"></i></a></li></ul>', width: '300', height: '50', name: 'Bottom Nav Bar' },
-                { type: 'nav', class: 'navigation tab-bar', content: '<ul><li><a href="#">Tab 1</a></li><li><a href="#">Tab 2</a></li><li><a href="#">Tab 3</a></li></ul>', width: '300', height: '40', name: 'Tab Bar' },
-                { type: 'nav', class: 'navigation breadcrumb', content: '<span><a href="#">Home</a> / <a href="#">Category</a> / Page</span>', width: '400', height: '30', name: 'Breadcrumb' },
-                { type: 'div', class: 'navigation mega-menu', content: '<h3>Mega Menu Title</h3><p>Content goes here.</p>', width: '600', height: '300', name: 'Mega Menu' },
-                { type: 'a', class: 'navigation fab-button', content: '<i class="fas fa-plus"></i>', width: '60', height: '60', name: 'FAB Button' },
-                { type: 'nav', class: 'navigation sticky-nav', content: '<ul><li><a href="#">Home</a></li><li><a href="#">Services</a></li></ul>', width: '400', height: '40', name: 'Sticky Nav' },
-                { type: 'nav', class: 'navigation pagination', content: '<ul><li><a href="#">1</a></li><li><a href="#">2</a></li><li><a href="#">3</a></li></ul>', width: '150', height: '30', name: 'Pagination' },
-                { type: 'div', class: 'navigation back-to-top', content: '<i class="fas fa-arrow-up"></i>', width: '40', height: '40', name: 'Back-to-Top Button' }
-            ],
-            'fonts': [
-                { type: 'p', class: 'font sans-serif-roboto', content: 'Roboto Sans-Serif Text', width: '200', height: '50', name: 'Roboto' },
-                { type: 'p', class: 'font sans-serif-open-sans', content: 'Open Sans Text', width: '200', height: '50', name: 'Open Sans' },
-                { type: 'p', class: 'font sans-serif-inter', content: 'Inter Sans-Serif Text', width: '200', height: '50', name: 'Inter' },
-                { type: 'p', class: 'font sans-serif-montserrat', content: 'Montserrat Text', width: '200', height: '50', name: 'Montserrat' },
-                { type: 'p', class: 'font sans-serif-lato', content: 'Lato Text', width: '200', height: '50', name: 'Lato' },
-                { type: 'p', class: 'font sans-serif-poppins', content: 'Poppins Text', width: '200', height: '50', name: 'Poppins' },
-                { type: 'p', class: 'font serif-georgia', content: 'Georgia Serif Text', width: '200', height: '50', name: 'Georgia' },
-                { type: 'p', class: 'font serif-playfair', content: 'Playfair Display Serif', width: '200', height: '50', name: 'Playfair Display' },
-                { type: 'p', class: 'font monospace-fira-code', content: 'Fira Code Monospace', width: '200', height: '50', name: 'Fira Code' },
-                { type: 'p', class: 'font display-bebas', content: 'Bebas Neue Display Font', width: '200', height: '50', name: 'Bebas Neue' },
-            ],
-            'buttons': [
-                { type: 'button', class: 'button primary', content: 'Primary Button', width: '150', height: '40', name: 'Primary Button' },
-                { type: 'button', class: 'button secondary', content: 'Secondary Button', width: '150', height: '40', name: 'Secondary Button' },
-                { type: 'button', class: 'button icon-button', content: '<i class="fas fa-play"></i>', width: '40', height: '40', name: 'Icon Button' },
-                { type: 'button', class: 'button toggle-button', content: 'Toggle On', width: '100', height: '40', name: 'Toggle Button' },
-                { type: 'button', class: 'button ghost', content: 'Ghost Button', width: '150', height: '40', name: 'Ghost Button' },
-                { type: 'div', class: 'button split-button', content: '<button>Action</button><button><i class="fas fa-caret-down"></i></button>', width: '150', height: '40', name: 'Split Button' }
-            ],
-            'forms': [
-                { type: 'form', class: 'form container', content: '<input type="text" placeholder="Name"><input type="email" placeholder="Email"><button>Submit</button>', width: '300', height: '150', name: 'Basic Form' },
-                { type: 'input', class: 'form text', 'input-type': 'text', placeholder: 'Text Input', width: '200', height: '30', name: 'Text Input' },
-                { type: 'input', class: 'form search', 'input-type': 'search', placeholder: 'Search...', width: '200', height: '30', name: 'Search Bar' },
-                { type: 'textarea', class: 'form textarea', placeholder: 'Enter message', width: '200', height: '100', name: 'Textarea' },
-                { type: 'select', class: 'form dropdown', content: '<option>Option 1</option><option>Option 2</option>', width: '150', height: '30', name: 'Dropdown' },
-                { type: 'div', class: 'form checkbox', content: '<input type="checkbox"> Checkbox', width: '150', height: '30', name: 'Checkbox' },
-                { type: 'div', class: 'form radio', content: '<input type="radio" name="radio-group"> Option A', width: '150', height: '30', name: 'Radio Button' },
-                { type: 'input', class: 'form slider', 'input-type': 'range', width: '200', height: '30', name: 'Range Slider' }
-            ],
-            'cards': [
-                { type: 'div', class: 'card basic', content: '<h3>Card Title</h3><p>Card content goes here.</p>', width: '200', height: '150', name: 'Basic Card' },
-                { type: 'div', class: 'card profile', content: '<img src="https://via.placeholder.com/50" alt="Avatar"><h3>User Name</h3><p>Profile info.</p>', width: '200', height: '200', name: 'Profile Card' },
-                { type: 'div', class: 'card feature', content: '<i class="fas fa-star"></i><h3>Feature</h3><p>A key feature of the product.</p>', width: '200', height: '150', name: 'Feature Card' }
-            ],
-            'modals': [
-                { type: 'div', class: 'modal alert', content: '<h2>Alert</h2><p>Are you sure you want to proceed?</p><button>OK</button><button>Cancel</button>', width: '300', height: '200', name: 'Alert Modal' },
-                { type: 'div', class: 'modal form-modal', content: '<h2>Login</h2><input type="text" placeholder="Username"><input type="password" placeholder="Password"><button>Login</button>', width: '300', height: '250', name: 'Form Modal' }
-            ],
-            'loaders': [
-                { type: 'div', class: 'loader spinner', content: '', width: '50', height: '50', name: 'Spinner' },
-                { type: 'div', class: 'loader progress-bar', content: '<div class="progress"></div>', width: '200', height: '20', name: 'Progress Bar' },
-                { type: 'div', class: 'loader skeleton', content: '<div style="background:#eee; height:10px; margin-bottom:5px;"></div><div style="background:#eee; height:10px;"></div>', width: '200', height: '50', name: 'Skeleton Loader' }
-            ],
-            'media': [
-                { type: 'img', class: 'media image', width: '150', height: '150', name: 'Image' },
-                { type: 'video', class: 'media video', width: '320', height: '240', name: 'Video' },
-                { type: 'audio', class: 'media audio', width: '200', height: '30', name: 'Audio' },
-                { type: 'iframe', class: 'media iframe', width: '300', height: '200', name: 'Iframe' },
-                { type: 'div', class: 'media carousel', content: '<div>Slide 1</div><div>Slide 2</div><div>Slide 3</div>', width: '300', height: '200', name: 'Carousel' }
-            ],
-            'typography': [
-                { type: 'h1', class: 'typography heading', content: 'Heading 1', width: '300', height: '50', name: 'Heading 1' },
-                { type: 'h2', class: 'typography heading', content: 'Heading 2', width: '250', height: '40', name: 'Heading 2' },
-                { type: 'p', class: 'typography paragraph', content: 'Paragraph Text', width: '200', height: '50', name: 'Paragraph' },
-                { type: 'blockquote', class: 'typography blockquote', content: 'This is a blockquote.', width: '300', height: '100', name: 'Blockquote' },
-                { type: 'div', class: 'typography list', content: '<ul><li>List Item 1</li><li>List Item 2</li></ul>', width: '200', height: '80', name: 'List' }
-            ],
-            'alerts': [
-                { type: 'div', class: 'alert success', content: '<i class="fas fa-check-circle"></i> Success! Your action was successful.', width: '300', height: '50', name: 'Success Alert' },
-                { type: 'div', class: 'alert warning', content: '<i class="fas fa-exclamation-triangle"></i> Warning! Something went wrong.', width: '300', height: '50', name: 'Warning Alert' },
-                { type: 'div', class: 'alert error', content: '<i class="fas fa-times-circle"></i> Error! Please try again.', width: '300', height: '50', name: 'Error Alert' }
-            ]
-        };
+      <button id="new-file-btn" class="bg-gray-700 text-white px-4 py-2 rounded btn-hover">+ New File</button>
+      <button id="new-project-btn" class="bg-red-600 text-white px-4 py-2 rounded btn-hover">New Project</button>
+    </div>
+  </header>
 
-        // --- Core Functions ---
+  <!-- Main Content -->
+  <main class="flex flex-1 overflow-hidden">
+    <!-- File Explorer -->
+    <div class="bg-gray-900 w-64 overflow-y-auto p-4">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="font-semibold">Files</h2>
+      </div>
+      <div id="file-tree" class="mb-4"></div>
+      <div class="mt-2">
+        <h3 class="font-semibold mb-2">Dependency Files</h3>
+        <div id="dependency-files"></div>
+      </div>
+    </div>
 
-        function setMode(newMode) {
-            if (newMode === mode) return;
-            mode = newMode;
-            pageContainer.classList.remove('edit-mode', 'view-mode', 'phone', 'tablet', 'laptop');
-            pageContainer.classList.add(`${mode}-mode`);
-            editModeBtn.classList.toggle('active', mode === 'edit');
-            viewModeBtn.classList.toggle('active', mode === 'view');
-            
-            const isEditMode = mode === 'edit';
-            
-            document.querySelectorAll('#top-menu button:not(#edit-mode-btn):not(#view-mode-btn)').forEach(btn => {
-                const isPreviewBtn = ['phone-btn', 'tablet-btn', 'laptop-btn'].includes(btn.id);
-                btn.style.display = (isEditMode && !isPreviewBtn) || (mode === 'view' && isPreviewBtn) ? 'inline-block' : 'none';
-            });
-            
-            document.getElementById('properties').style.display = isEditMode ? 'block' : 'none';
-            document.getElementById('layers').style.display = isEditMode ? 'block' : 'none';
-            document.getElementById('rulers').style.display = isEditMode ? 'block' : 'none';
-            document.getElementById('zoom-controls').style.display = isEditMode ? 'flex' : 'none';
-            applyCodeBtn.style.display = mode === 'view' ? 'inline-block' : 'none';
+    <!-- Code Editor -->
+    <div class="flex-1 relative flex flex-col">
+      <div class="bg-gray-800 p-2 text-sm flex justify-between">
+        <span id="current-file">main.py</span>
+        <div class="text-xs text-gray-300" id="file-language">python</div>
+      </div>
+      <div id="editor"></div>
+    </div>
 
-            if (mode === 'view') {
-                if (selected) {
-                    selected.style.border = '';
-                    selected.classList.remove('selected');
-                }
-                selected = null;
-                propContent.innerHTML = '';
-                deleteBtn.style.display = 'none';
-                closeDropdown();
-                setPreview('laptop');
-            } else {
-                pageContainer.classList.remove('phone', 'tablet', 'laptop');
-                pageContainer.style.width = '1024px';
-                pageContainer.style.minHeight = '768px';
-                pageContainer.style.margin = '0';
-                applyCode();
-            }
+    <!-- Output Panel -->
+    <div class="bg-gray-900 w-1/3 overflow-y-auto p-4 output-panel flex flex-col">
+      <h2 class="font-semibold mb-4">Output</h2>
+      <div id="output-tabs" class="flex border-b border-gray-700 mb-2">
+        <button class="tab-btn px-4 py-2 border-b-2 border-blue-500 text-blue-300" data-tab="output">Console</button>
+        <button class="tab-btn px-4 py-2 text-gray-400" data-tab="html-output">HTML Output</button>
+      </div>
+      <div id="output-content" class="whitespace-pre-wrap flex-1 overflow-auto"></div>
+      <div id="html-output-content" class="hidden flex-1 overflow-auto">
+        <iframe id="html-output-frame" class="html-output"></iframe>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-gray-800 p-2 flex justify-between items-center text-sm">
+    <div id="status">Idle</div>
+    <div>CodeRunner v1.0</div>
+  </footer>
+
+  <!-- Monaco -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.43.0/min/vs/loader.min.js"></script>
+
+  <script>
+    let pyodideReadyPromise = loadPyodide();
+
+    function bundleProject() {
+      let html = "", css = "", js = "", python = "";
+      for (const [name, file] of Object.entries(state.files)) {
+        if (name.endsWith(".html")) html += "\\n" + file.content;
+        else if (name.endsWith(".css")) css += "\\n" + file.content;
+        else if (name.endsWith(".js")) js += "\\n" + file.content;
+        else if (name.endsWith(".py")) python += "\\n" + file.content;
+      }
+      return { html, css, js, python };
+    }
+
+    async function runCode() {
+      if (state.currentFile && monacoEditor) {
+        state.files[state.currentFile].content = monacoEditor.getValue();
+      }
+      const { html, css, js, python } = bundleProject();
+      const output = document.getElementById("output-content");
+      const frame = document.getElementById("html-output-frame");
+      output.textContent = "";
+      frame.srcdoc = "";
+
+      try {
+        let ranSomething = false;
+
+        // HTML/CSS/JS
+        if (html || css || js) {
+          let scaffold = html || "<!DOCTYPE html><html><head></head><body></body></html>";
+          let combined = scaffold
+            .replace("</head>", `<style>${css}</style></head>`)
+            .replace("</body>", `<script>${js}<\/script></body>`);
+          frame.srcdoc = combined;
+          ranSomething = true;
         }
 
-        function setPreview(device) {
-            if (mode !== 'view') return;
-            pageContainer.classList.remove('phone', 'tablet', 'laptop');
-            pageContainer.classList.add(device);
-            phoneBtn.classList.toggle('active', device === 'phone');
-            tabletBtn.classList.toggle('active', device === 'tablet');
-            laptopBtn.classList.toggle('active', device === 'laptop');
-            
-            const sizes = {
-                phone: { width: '375px', height: '667px' },
-                tablet: { width: '768px', height: '1024px' },
-                laptop: { width: '1024px', height: '768px' }
-            };
-            pageContainer.style.width = sizes[device].width;
-            pageContainer.style.height = sizes[device].height;
-        }
-
-        function saveState() {
-            const state = JSON.stringify(pages[currentPage].elements.map(el => ({
-                attributes: el.attributes,
-                style: el.style,
-                innerHTML: el.innerHTML,
-                textContent: el.textContent,
-                classList: el.classList
-            })));
-            undoStack.push(state);
-            redoStack = [];
-            updateUndoRedoButtons();
-            savePageState(currentPage);
-        }
-
-        function undo() {
-            if (undoStack.length > 1) {
-                redoStack.push(undoStack.pop());
-                const prevState = undoStack[undoStack.length - 1];
-                loadState(prevState);
-                updateUndoRedoButtons();
-            }
-        }
-
-        function redo() {
-            if (redoStack.length > 0) {
-                const nextState = redoStack.pop();
-                undoStack.push(nextState);
-                loadState(nextState);
-                updateUndoRedoButtons();
-            }
-        }
-
-        function loadState(state) {
-            pageContainer.innerHTML = '';
-            const elements = JSON.parse(state).map(({ attributes, style, innerHTML, textContent, classList }) => {
-                const newEl = document.createElement(attributes.type);
-                newEl.innerHTML = innerHTML;
-                newEl.textContent = textContent;
-                newEl.className = classList.join(' ');
-                Object.assign(newEl.style, style);
-                Object.entries(attributes).forEach(([name, value]) => {
-                    newEl.setAttribute(name, value);
-                });
-                return newEl;
-            });
-            elements.forEach(el => pageContainer.appendChild(el));
-            attachEventListenersToAll();
-            updateLayers();
-            updateCode();
-        }
-
-        function updateUndoRedoButtons() {
-            undoBtn.disabled = undoStack.length <= 1;
-            redoBtn.disabled = redoStack.length === 0;
-        }
-
-        function savePageState(pageId) {
-            pages[pageId].elements = Array.from(pageContainer.children).map(el => {
-                const attributes = {};
-                Array.from(el.attributes).forEach(attr => {
-                    attributes[attr.name] = attr.value;
-                });
-                const style = {};
-                Object.assign(style, el.style);
-                return {
-                    attributes: attributes,
-                    style: style,
-                    innerHTML: el.innerHTML,
-                    textContent: el.textContent,
-                    classList: Array.from(el.classList)
-                };
-            });
-            pages[pageId].html = htmlArea.value;
-            pages[pageId].css = cssArea.value;
-            pages[pageId].js = jsArea.value;
-            pages[pageId].name = pageNameInput.value;
-        }
-
-        function createPage() {
-            savePageState(currentPage);
-            pageCount++;
-            const newPageId = `page${pageCount}`;
-            const pageName = `page${pageCount}.html`;
-            pages[newPageId] = {
-                name: pageName,
-                html: '<div id="page"></div>',
-                css: '#page {\n  position: relative;\n  background-color: #fff;\n  width: 1024px;\n  min-height: 768px;\n}\n',
-                js: '// No JS generated yet',
-                elements: []
-            };
-            const option = document.createElement('option');
-            option.value = newPageId;
-            option.textContent = pageName;
-            option.dataset.name = pageName;
-            pageSelector.appendChild(option);
-            switchPage(newPageId);
-            pageNameInput.value = pageName;
-            pageContainer.innerHTML = '';
-            pageContainer.style.width = '1024px';
-            pageContainer.style.minHeight = '768px';
-            pageContainer.style.margin = '20px';
-        }
-
-        function newPage() {
-            savePageState(currentPage);
-            pageCount++;
-            const newPageId = `page${pageCount}`;
-            const pageName = `page${pageCount}.html`;
-            pages[newPageId] = {
-                name: pageName,
-                html: '<div id="page"></div>',
-                css: '#page {\n  position: relative;\n  background-color: #fff;\n  width: 1024px;\n  min-height: 768px;\n}\n',
-                js: '// No JS generated yet',
-                elements: []
-            };
-            const option = document.createElement('option');
-            option.value = newPageId;
-            option.textContent = pageName;
-            option.dataset.name = pageName;
-            pageSelector.appendChild(option);
-            switchPage(newPageId);
-            pageNameInput.value = pageName;
-            pageContainer.innerHTML = '';
-            pageContainer.style.width = '1024px';
-            pageContainer.style.minHeight = '768px';
-            pageContainer.style.margin = '20px';
-        }
-
-        function switchPage(pageId) {
-            if (pageId === currentPage) return;
-            savePageState(currentPage);
-            pageSelector.querySelector(`option[value="${currentPage}"]`).textContent = pageNameInput.value;
-            pageSelector.querySelector(`option[value="${currentPage}"]`).dataset.name = pageNameInput.value;
-            
-            currentPage = pageId;
-            pageContainer.innerHTML = '';
-            pages[pageId].elements.forEach(({ attributes, style, innerHTML, classList }) => {
-                const newEl = document.createElement(attributes.type || 'div');
-                newEl.innerHTML = innerHTML;
-                newEl.className = classList.join(' ');
-                Object.assign(newEl.style, style);
-                Object.entries(attributes).forEach(([name, value]) => {
-                    newEl.setAttribute(name, value);
-                });
-                pageContainer.appendChild(newEl);
-            });
-            
-            htmlArea.value = pages[pageId].html || '<div id="page"></div>';
-            cssArea.value = pages[pageId].css || '#page {\n  position: relative;\n  background-color: #fff;\n  width: 1024px;\n  min-height: 768px;\n}\n';
-            jsArea.value = pages[pageId].js || '// No JS generated yet';
-            pageSelector.value = pageId;
-            pageNameInput.value = pages[pageId].name;
-            
-            if (selected) {
-                selected.style.border = '';
-                selected.classList.remove('selected');
-                selected = null;
-                propContent.innerHTML = '';
-                deleteBtn.style.display = 'none';
-            }
-            closeDropdown();
-            setMode(mode);
-            updateLayers();
-            updateCode();
-        }
-
-        pageNameInput.addEventListener('input', () => {
-            pages[currentPage].name = pageNameInput.value;
-            pageSelector.querySelector(`option[value="${currentPage}"]`).textContent = pageNameInput.value;
-            pageSelector.querySelector(`option[value="${currentPage}"]`).dataset.name = pageNameInput.value;
-            savePageState(currentPage);
-        });
-
-        function openCategory(categoryId, button) {
-            if (mode !== 'edit') return;
-            closeDropdown();
-            const dropdown = document.createElement('div');
-            dropdown.className = 'dropdown';
-            const ul = document.createElement('ul');
-            elementCategories[categoryId].forEach(item => {
-                const li = document.createElement('li');
-                li.textContent = item.name;
-                li.setAttribute('draggable', 'true');
-                li.dataset.item = JSON.stringify(item);
-                li.addEventListener('dragstart', (e) => {
-                    e.dataTransfer.setData('text/plain', li.dataset.item);
-                });
-                li.addEventListener('click', () => {
-                    const itemData = JSON.parse(li.dataset.item);
-                    addElementToWorkspace(itemData, { x: 100, y: 100 });
-                    closeDropdown();
-                });
-                ul.appendChild(li);
-            });
-            dropdown.appendChild(ul);
-            document.getElementById('top-menu').appendChild(dropdown);
-            const rect = button.getBoundingClientRect();
-            const menuRect = document.getElementById('top-menu').getBoundingClientRect();
-            dropdown.style.left = `${rect.left - menuRect.left}px`;
-            dropdown.style.display = 'block';
-            activeDropdown = dropdown;
-        }
-
-        function closeDropdown() {
-            if (activeDropdown) {
-                activeDropdown.remove();
-                activeDropdown = null;
-            }
-        }
-
-        function pasteCode(type) {
-            navigator.clipboard.readText().then(text => {
-                document.getElementById(type).value = text;
-                if (mode === 'view' || mode === 'edit') applyCode();
-            });
-        }
-
-        function clearCode(type) {
-            document.getElementById(type).value = '';
-            if (mode === 'view' || mode === 'edit') applyCode();
-        }
-
-        function copyCode(type) {
-            const textarea = document.getElementById(type);
-            textarea.select();
-            navigator.clipboard.writeText(textarea.value);
-            alert(`${type.toUpperCase()} copied to clipboard!`);
-        }
-
-        function attachEventListeners(el) {
-            if (el.tagName === 'FORM') {
-                el.addEventListener('submit', (ev) => {
-                    ev.preventDefault();
-                    console.log('Form submitted:', new FormData(el));
-                    alert('Form submitted! Check console for data.');
-                });
-            }
-            if (el.tagName === 'BUTTON' || el.className.includes('button')) {
-                el.addEventListener('click', () => {
-                    if (mode === 'view' && el.dataset.pageLink) {
-                        switchPage(el.dataset.pageLink);
-                        setMode('view');
-                    } else if (mode === 'view') {
-                        console.log('Button clicked!');
-                        alert('Button clicked!');
-                    }
-                });
-            }
-            if (el.querySelectorAll('a').length > 0 || el.tagName === 'A') {
-                const links = el.tagName === 'A' ? [el] : el.querySelectorAll('a');
-                links.forEach(a => {
-                    a.addEventListener('click', (ev) => {
-                        if (mode === 'view') {
-                            ev.preventDefault();
-                            if (a.dataset.pageLink) {
-                                switchPage(a.dataset.pageLink);
-                                setMode('view');
-                            } else {
-                                console.log('Link clicked:', a.href);
-                                alert(`Link clicked: ${a.href}`);
-                            }
-                        }
-                    });
-                });
-            }
-            if (mode === 'edit') {
-                resizeObserver.observe(el);
-            }
-        }
-
-        function attachEventListenersToAll() {
-            Array.from(pageContainer.children).forEach(el => attachEventListeners(el));
-        }
-
-        function addElementToWorkspace(item, position) {
-            const elem = document.createElement(item.type);
-            elem.className = item.class;
-            elem.style.position = 'absolute';
-            elem.style.left = `${position.x - (parseInt(item.width) / 2)}px`;
-            elem.style.top = `${position.y - (parseInt(item.height) / 2)}px`;
-            elem.style.width = `${item.width}px`;
-            elem.style.height = `${item.height}px`;
-
-            if (item.content) elem.innerHTML = item.content;
-            if (item['input-type']) elem.type = item['input-type'];
-            if (item.placeholder) elem.placeholder = item.placeholder;
-            if (item.nameAttr) elem.name = item.nameAttr;
-            if (item.class.includes('font')) {
-                const fontName = item.name.replace(' Sans-Serif Text', '').replace(' Serif', '').replace(' Monospace', '').replace(' Display Font', '');
-                elem.style.fontFamily = `'${fontName}'`;
-            }
-            
-            const defaultStyles = {
-                'shape': { backgroundColor: '#007bff' },
-                'icon': { color: '#4CAF50' },
-                'social-icon': { color: '#007bff' },
-                'navigation': { backgroundColor: '#333' },
-                'button': { backgroundColor: '#007bff', color: 'white', border: 'none', padding: '10px 15px', borderRadius: '4px' },
-                'form': { backgroundColor: '#444' },
-                'card': { backgroundColor: '#444' },
-                'modal': { backgroundColor: '#333' },
-                'loader': { border: '4px solid #f3f3f3', borderTop: '4px solid #3498db', borderRadius: '50%' },
-                'media': { border: '1px solid #ddd' },
-                'typography': { color: '#333' },
-                'alert': { padding: '15px', borderRadius: '4px' }
-            };
-            for (const key in defaultStyles) {
-                if (item.class.includes(key)) {
-                    Object.assign(elem.style, defaultStyles[key]);
-                }
-            }
-
-            if (item.class.includes('spinner')) {
-                elem.style.animation = 'spin 2s linear infinite';
-            }
-
-            attachEventListeners(elem);
-            pageContainer.appendChild(elem);
-            saveState();
-            selectElement(elem);
-        }
-
-        pageContainer.addEventListener('dragover', (e) => {
-            if (mode === 'edit') e.preventDefault();
-        });
-
-        pageContainer.addEventListener('drop', (e) => {
-            if (mode !== 'edit') return;
-            e.preventDefault();
-            const itemData = JSON.parse(e.dataTransfer.getData('text/plain'));
-            const rect = pageContainer.getBoundingClientRect();
-            addElementToWorkspace(itemData, { x: e.clientX - rect.left, y: e.clientY - rect.top });
-            closeDropdown();
-        });
-
-        pageContainer.addEventListener('mousedown', (e) => {
-            if (mode !== 'edit') return;
-            const target = e.target.closest('#page > *');
-            if (target) {
-                dragging = target;
-                selectElement(dragging);
-                const rect = pageContainer.getBoundingClientRect();
-                offsetX = e.clientX - rect.left - parseFloat(dragging.style.left || 0);
-                offsetY = e.clientY - rect.top - parseFloat(dragging.style.top || 0);
-            } else {
-                selectElement(null);
-            }
-        });
-
-        document.addEventListener('mousemove', (e) => {
-            if (mode !== 'edit' || !dragging) return;
-            const rect = pageContainer.getBoundingClientRect();
-            dragging.style.left = `${e.clientX - rect.left - offsetX}px`;
-            dragging.style.top = `${e.clientY - rect.top - offsetY}px`;
-        });
-
-        document.addEventListener('mouseup', () => {
-            if (dragging) {
-                saveState();
-                dragging = null;
-            }
-        });
-
-        function selectElement(el) {
-            if (selected) {
-                selected.classList.remove('selected');
-            }
-            selected = el;
-            if (selected) {
-                selected.classList.add('selected');
-                showProperties();
-                deleteBtn.style.display = 'block';
-            } else {
-                propContent.innerHTML = '';
-                deleteBtn.style.display = 'none';
-            }
-            updateLayers();
-        }
-
-        deleteBtn.addEventListener('click', () => {
-            if (mode !== 'edit' || !selected) return;
-            resizeObserver.unobserve(selected);
-            selected.remove();
-            selected = null;
-            propContent.innerHTML = '';
-            deleteBtn.style.display = 'none';
-            saveState();
-            updateLayers();
-        });
-
-        document.addEventListener('keydown', (e) => {
-            if (mode !== 'edit' || e.key !== 'Delete' || !selected) return;
-            resizeObserver.unobserve(selected);
-            selected.remove();
-            selected = null;
-            propContent.innerHTML = '';
-            deleteBtn.style.display = 'none';
-            saveState();
-            updateLayers();
-        });
-
-        function showProperties() {
-            if (!selected) return;
-            const compStyle = getComputedStyle(selected);
-            const width = parseInt(selected.style.width) || parseInt(compStyle.width);
-            const height = parseInt(selected.style.height) || parseInt(compStyle.height);
-            const left = parseInt(selected.style.left) || 0;
-            const top = parseInt(selected.style.top) || 0;
-            const bgColor = rgbToHex(compStyle.backgroundColor);
-            const textColor = rgbToHex(compStyle.color);
-            const fontSize = parseInt(compStyle.fontSize) || 16;
-            const fontFamily = compStyle.fontFamily || 'Roboto';
-            const borderRadius = compStyle.borderRadius || '0px';
-            const borderWidth = compStyle.borderWidth || '0px';
-            const borderColor = rgbToHex(compStyle.borderColor);
-            const borderStyle = compStyle.borderStyle || 'none';
-            const contentEditable = selected.tagName === 'P' || selected.tagName === 'SPAN' || selected.tagName === 'BUTTON' || selected.className.includes('paragraph') || selected.className.includes('heading');
-            const isMedia = selected.tagName === 'IMG' || selected.tagName === 'VIDEO' || selected.tagName === 'AUDIO' || selected.tagName === 'IFRAME' || selected.tagName === 'PICTURE';
-            const isLink = selected.tagName === 'A' || selected.tagName === 'BUTTON' || selected.className.includes('button');
-            const isInput = selected.tagName === 'INPUT' || selected.tagName === 'TEXTAREA' || selected.tagName === 'SELECT';
-            const isNav = selected.className.includes('navigation');
-            const isModal = selected.className.includes('modal');
-
-            let content = `
-                <label>Left: <input type="number" id="prop-left" value="${left}"></label>
-                <label>Top: <input type="number" id="prop-top" value="${top}"></label>
-                <label>Width: <input type="number" id="prop-width" value="${width}"></label>
-                <label>Height: <input type="number" id="prop-height" value="${height}"></label>
-                <label>Background Color: <input type="color" id="prop-bgcolor" value="${bgColor}"></label>
-                <label>Text Color: <input type="color" id="prop-color" value="${textColor}"></label>
-                <label>Font Size: <input type="number" id="prop-fontsize" value="${fontSize}"></label>
-                <label>Font Family: <select id="prop-fontfamily">
-                    <option value="Roboto" ${fontFamily.includes('Roboto') ? 'selected' : ''}>Roboto</option>
-                    <option value="Open Sans" ${fontFamily.includes('Open Sans') ? 'selected' : ''}>Open Sans</option>
-                    <option value="Montserrat" ${fontFamily.includes('Montserrat') ? 'selected' : ''}>Montserrat</option>
-                    <option value="Lato" ${fontFamily.includes('Lato') ? 'selected' : ''}>Lato</option>
-                    <option value="Poppins" ${fontFamily.includes('Poppins') ? 'selected' : ''}>Poppins</option>
-                    <option value="Nunito" ${fontFamily.includes('Nunito') ? 'selected' : ''}>Nunito</option>
-                    <option value="Georgia" ${fontFamily.includes('Georgia') ? 'selected' : ''}>Georgia</option>
-                    <option value="Playfair Display" ${fontFamily.includes('Playfair Display') ? 'selected' : ''}>Playfair Display</option>
-                    <option value="Fira Code" ${fontFamily.includes('Fira Code') ? 'selected' : ''}>Fira Code</option>
-                    <option value="Bebas Neue" ${fontFamily.includes('Bebas Neue') ? 'selected' : ''}>Bebas Neue</option>
-                </select></label>
-                <label>Border Radius: <input type="text" id="prop-borderradius" value="${borderRadius}"></label>
-                <label>Border Width: <input type="text" id="prop-borderwidth" value="${borderWidth}"></label>
-                <label>Border Color: <input type="color" id="prop-bordercolor" value="${borderColor}"></label>
-                <label>Border Style: <select id="prop-borderstyle">
-                    <option value="none" ${borderStyle === 'none' ? 'selected' : ''}>None</option>
-                    <option value="solid" ${borderStyle === 'solid' ? 'selected' : ''}>Solid</option>
-                    <option value="dashed" ${borderStyle === 'dashed' ? 'selected' : ''}>Dashed</option>
-                    <option value="dotted" ${borderStyle === 'dotted' ? 'selected' : ''}>Dotted</option>
-                </select></label>
-            `;
-
-            if (contentEditable) {
-                content += `<label>Text: <input type="text" id="prop-text" value="${selected.textContent.trim()}"></label>`;
-            }
-            if (isMedia) {
-                content += `<label>Source URL: <input type="text" id="prop-src" value="${selected.src || ''}"></label>`;
-            }
-            if (isLink) {
-                content += `<label>External Link URL: <input type="text" id="prop-href" value="${selected.href || ''}"></label>`;
-                content += `<label>Link to Page: <select id="prop-page-link"><option value="">None</option>`;
-                Object.keys(pages).forEach(pageId => {
-                    content += `<option value="${pageId}" ${selected.dataset.pageLink === pageId ? 'selected' : ''}>${pages[pageId].name}</option>`;
-                });
-                content += `</select></label>`;
-            }
-            if (isInput) {
-                content += `<label>Placeholder: <input type="text" id="prop-placeholder" value="${selected.placeholder || ''}"></label>`;
-            }
-            if (isNav) {
-                const items = Array.from(selected.querySelectorAll('a')).map(a => a.innerHTML).join('\n');
-                content += `<label>Nav Items: <textarea id="prop-navitems">${items}</textarea></label>`;
-            }
-            if (isModal) {
-                content += `<label>Z-Index: <input type="number" id="prop-zindex" value="${selected.style.zIndex || 1000}"></label>`;
-            }
-
-            propContent.innerHTML = content;
-            
-            // Add listeners for property changes
-            ['left', 'top', 'width', 'height', 'fontSize', 'borderRadius', 'borderWidth', 'zIndex'].forEach(prop => {
-                const input = document.getElementById(`prop-${prop.toLowerCase()}`);
-                if (input) {
-                    input.addEventListener('input', (e) => {
-                        selected.style[prop] = e.target.value + 'px';
-                        saveState();
-                    });
-                }
-            });
-            ['bgcolor', 'color', 'borderColor'].forEach(prop => {
-                const input = document.getElementById(`prop-${prop}`);
-                if (input) {
-                    input.addEventListener('input', (e) => {
-                        selected.style[prop === 'bgcolor' ? 'backgroundColor' : prop === 'color' ? 'color' : 'borderColor'] = e.target.value;
-                        saveState();
-                    });
-                }
-            });
-            ['fontfamily', 'borderstyle'].forEach(prop => {
-                const input = document.getElementById(`prop-${prop}`);
-                if (input) {
-                    input.addEventListener('change', (e) => {
-                        selected.style[prop === 'fontfamily' ? 'fontFamily' : 'borderStyle'] = e.target.value;
-                        saveState();
-                    });
-                }
-            });
-
-            if (contentEditable) {
-                document.getElementById('prop-text').addEventListener('input', (e) => {
-                    selected.textContent = e.target.value;
-                    saveState();
-                });
-            }
-            if (isMedia) {
-                document.getElementById('prop-src').addEventListener('input', (e) => {
-                    selected.src = e.target.value;
-                    saveState();
-                });
-            }
-            if (isLink) {
-                document.getElementById('prop-href').addEventListener('input', (e) => {
-                    selected.href = e.target.value;
-                    saveState();
-                });
-                document.getElementById('prop-page-link').addEventListener('change', (e) => {
-                    if (e.target.value) {
-                        selected.dataset.pageLink = e.target.value;
-                        selected.href = '#';
-                    } else {
-                        delete selected.dataset.pageLink;
-                        selected.href = document.getElementById('prop-href').value || '';
-                    }
-                    saveState();
-                });
-            }
-            if (isInput) {
-                document.getElementById('prop-placeholder').addEventListener('input', (e) => {
-                    selected.placeholder = e.target.value;
-                    saveState();
-                });
-            }
-            if (isNav) {
-                document.getElementById('prop-navitems').addEventListener('input', (e) => {
-                    selected.innerHTML = e.target.value;
-                    attachEventListeners(selected);
-                    saveState();
-                });
-            }
-        }
-
-        function rgbToHex(rgb) {
-            if (!rgb || rgb === 'rgba(0, 0, 0, 0)') return '#000000';
-            const [r, g, b] = rgb.match(/\d+/g).map(Number);
-            return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
-        }
-
-        function applyCode() {
-            pageContainer.innerHTML = '';
-            const html = htmlArea.value;
-            const css = cssArea.value;
-            const js = jsArea.value;
-
-            document.querySelectorAll('style[data-dynamic]').forEach(style => style.remove());
-            document.querySelectorAll('script[data-dynamic]').forEach(script => script.remove());
-
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(html, 'text/html');
-            const page = doc.querySelector('div#page') || doc.body;
-
-            if (page) {
-                Array.from(page.children).forEach((child) => {
-                    pageContainer.appendChild(child);
-                    attachEventListeners(child);
-                });
-            }
-
-            const style = document.createElement('style');
-            style.setAttribute('data-dynamic', 'true');
-            style.textContent = css;
-            document.head.appendChild(style);
-            
+        // Python
+        if (python.trim()) {
+          let pyodide = await pyodideReadyPromise;
+          if (state.files["requirements.txt"]) {
+            let reqs = state.files["requirements.txt"].content.split("\\n").filter(Boolean);
             try {
-                const script = document.createElement('script');
-                script.setAttribute('data-dynamic', 'true');
-                script.textContent = js;
-                document.body.appendChild(script);
-            } catch (e) {
-                console.error('Error executing JS:', e);
+              await pyodide.runPythonAsync(\`
+                import micropip
+                await micropip.install(\${JSON.stringify(reqs)})
+              \`);
+            } catch(e) {
+              output.textContent += "Dependency install failed: " + e + "\\n";
             }
-
-            updateLayers();
-            savePageState(currentPage);
+          }
+          try {
+            let result = await pyodide.runPythonAsync(python);
+            output.textContent += (result !== undefined ? result : "Python executed (no output)") + "\\n";
+          } catch(err) {
+            output.textContent += "Python error: " + err + "\\n";
+          }
+          ranSomething = true;
         }
 
-        function updateCode() {
-            if (mode === 'view') return;
-            let html = '<div id="page">\n';
-            let css = `#page { position: relative; background-color: #fff; width: 1024px; min-height: 768px; }\n`;
-            let js = '// Dynamic JS for interactions\n';
-            const children = Array.from(pageContainer.children);
-            
-            children.forEach((el, i) => {
-                const uniqueId = el.id || `elem-${i + 1}`;
-                el.id = uniqueId;
-
-                const clone = el.cloneNode(true);
-                clone.style.position = '';
-                clone.style.left = '';
-                clone.style.top = '';
-                clone.classList.remove('selected');
-                html += `  ${clone.outerHTML.replace(` id="${uniqueId}"`, '')}\n`;
-
-                const compStyle = getComputedStyle(el);
-                css += `#${uniqueId} {\n`;
-                const props = ['position', 'left', 'top', 'width', 'height', 'background-color', 'border-width', 'border-color', 'border-style', 'border-radius', 'color', 'font-size', 'font-family', 'z-index'];
-                props.forEach(prop => {
-                    const value = compStyle.getPropertyValue(prop);
-                    if (value && value !== 'auto' && value !== '0px' && value !== 'rgba(0, 0, 0, 0)' && value !== '0') {
-                        css += `  ${prop}: ${value};\n`;
-                    }
-                });
-                if (el.className.includes('triangle')) {
-                    css += `  border-left: ${compStyle.borderLeft};\n`;
-                    css += `  border-right: ${compStyle.borderRight};\n`;
-                    css += `  border-bottom: ${compStyle.borderBottom};\n`;
-                }
-                css += '}\n';
-
-                if (el.tagName === 'FORM') {
-                    js += `document.querySelector('#${uniqueId}').addEventListener('submit', (e) => { e.preventDefault(); console.log('Form submitted'); });\n`;
-                }
-                if (el.tagName === 'BUTTON' || el.className.includes('button')) {
-                    js += `document.querySelector('#${uniqueId}').addEventListener('click', () => { console.log('Button clicked'); });\n`;
-                }
-            });
-            html += '</div>';
-
-            htmlArea.value = html;
-            cssArea.value = css;
-            jsArea.value = js || '// No JS generated yet';
-            pages[currentPage].html = html;
-            pages[currentPage].css = css;
-            pages[currentPage].js = js;
+        if (!ranSomething) {
+          output.textContent = "No runnable project files found.";
         }
 
-        function updateLayers() {
-            if (mode !== 'edit') return;
-            layerList.innerHTML = '';
-            Array.from(pageContainer.children).reverse().forEach(el => {
-                const li = document.createElement('li');
-                li.className = 'layer-item';
-                if (el === selected) {
-                    li.classList.add('selected');
-                }
-                const name = el.dataset.name || el.tagName.toLowerCase();
-                li.innerHTML = `
-                    <span class="layer-item-name">${name}</span>
-                    <div class="layer-controls">
-                        <button class="layer-control-btn visibility-btn" title="Toggle Visibility"><i class="fas fa-eye"></i></button>
-                    </div>
-                `;
-                li.dataset.id = el.id;
-                li.addEventListener('click', () => {
-                    selectElement(el);
-                });
-                li.querySelector('.visibility-btn').addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    el.style.display = el.style.display === 'none' ? '' : 'none';
-                    e.target.closest('.visibility-btn').querySelector('i').className = `fas fa-${el.style.display === 'none' ? 'eye-slash' : 'eye'}`;
-                    saveState();
-                });
-                layerList.appendChild(li);
-            });
-            Sortable.create(layerList, {
-                animation: 150,
-                onEnd: (evt) => {
-                    const movedItem = pageContainer.querySelector(`#${evt.item.dataset.id}`);
-                    const referenceItem = pageContainer.children[pageContainer.children.length - 1 - evt.newIndex];
-                    if (evt.newIndex > evt.oldIndex) {
-                        pageContainer.insertBefore(movedItem, referenceItem.nextSibling);
-                    } else {
-                        pageContainer.insertBefore(movedItem, referenceItem);
-                    }
-                    saveState();
-                }
-            });
-        }
-
-        function zoomIn() {
-            zoomLevel += 0.1;
-            pageContainer.style.transform = `scale(${zoomLevel})`;
-            updateRulers();
-        }
-
-        function zoomOut() {
-            if (zoomLevel > 0.2) {
-                zoomLevel -= 0.1;
-                pageContainer.style.transform = `scale(${zoomLevel})`;
-                updateRulers();
-            }
-        }
-
-        function zoomReset() {
-            zoomLevel = 1;
-            pageContainer.style.transform = `scale(${zoomLevel})`;
-            updateRulers();
-        }
-
-        function updateRulers() {
-            if (mode !== 'edit') return;
-            rulerX.innerHTML = '';
-            rulerY.innerHTML = '';
-            for (let i = 0; i < 1024 / 50; i++) {
-                const markX = document.createElement('span');
-                markX.className = 'ruler-mark x';
-                markX.style.left = `${(i * 50) * zoomLevel}px`;
-                markX.textContent = `${i * 50}`;
-                rulerX.appendChild(markX);
-            }
-            for (let i = 0; i < 768 / 50; i++) {
-                const markY = document.createElement('span');
-                markY.className = 'ruler-mark y';
-                markY.style.top = `${(i * 50) * zoomLevel}px`;
-                markY.textContent = `${i * 50}`;
-                rulerY.appendChild(markY);
-            }
-        }
-
-        // --- Initialization ---
-
-        switchPage('page1');
-        setMode('edit');
-        updateLayers();
-        updateRulers();
-        saveState();
-
-    </script>
+        document.getElementById("status").textContent = "Execution completed";
+      } catch (err) {
+        output.textContent = "Error: " + err;
+        document.getElementById("status").textContent = "Error";
+      } finally {
+        document.getElementById("run-spinner").classList.add("hidden");
+        document.getElementById("run-text").textContent = "Run";
+      }
+    }
+  </script>
 </body>
 </html>
